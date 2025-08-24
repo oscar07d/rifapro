@@ -1,9 +1,7 @@
 // js/auth.js
 
 // Referencia a los servicios de Firebase
-const auth = firebase.auth();
-const db = firebase.firestore();
-const googleProvider = new firebase.auth.GoogleAuthProvider();
+import { auth, db, googleProvider } from './firebase-init.js';
 
 /**
  * Registra un nuevo usuario con correo y contraseña.
