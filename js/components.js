@@ -19,7 +19,7 @@ export const getAuthView = () => `
         <p id="auth-toggle-text">¿No tienes cuenta? <a href="#" id="auth-toggle-link">Regístrate</a></p>
     </div>
 `;
-<strong></strong>
+
 // Vista del panel principal (Home)
 export const getHomeView = (userName) => `
     <div class="home-container">
@@ -89,7 +89,6 @@ export const getRaffleCard = (raffle) => `
     </div>
 `;
 
-// Vista para el detalle de una rifa específica
 export const getRaffleDetailView = (raffle) => `
     <div class="raffle-detail-container">
         <div class="raffle-info">
@@ -105,8 +104,11 @@ export const getRaffleDetailView = (raffle) => `
                 </div>
         </div>
     </div>
-`;
+    
+    ${getTicketModal()}
+`; // <-- Aquí termina la primera función
 
+// AHORA, DEFINIMOS LA SEGUNDA FUNCIÓN POR SEPARADO
 export const getTicketModal = () => `
     <div id="ticket-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
@@ -136,5 +138,4 @@ export const getTicketModal = () => `
             </div>
         </div>
     </div>
-`;
 `;
