@@ -148,7 +148,6 @@ export const getTicketModal = () => `
                         <option value="paid">Pagado Total</option>
                     </select>
                 </div>
-
                 <div class="modal-buttons">
                     <button type="submit" class="btn btn-primary">Guardar Cambios</button>
                     <button type="button" id="generate-image-btn" class="btn btn-secondary">Crear Imagen</button>
@@ -157,24 +156,33 @@ export const getTicketModal = () => `
         </div>
     </div>
 
-    <div id="ticket-template" style="position: absolute; left: -9999px; width: 350px; background: white; padding: 20px; font-family: 'Poppins', sans-serif;">
-        <div style="border: 2px solid #6a11cb; padding: 15px; border-radius: 10px; text-align: center;">
-            <h2 style="color: #6a11cb; margin: 0; font-size: 1.8rem;">RifaPro</h2>
-            <p style="margin: 5px 0 20px 0; color: #555;">¡Tu boleto para ganar!</p>
-            <div style="background: linear-gradient(45deg, #6a11cb, #2575fc); color: white; padding: 10px; border-radius: 8px;">
-                <p style="margin: 0; font-size: 1rem;">Número</p>
-                <p id="template-number" style="margin: 5px 0; font-size: 3.5rem; font-weight: 700;">00</p>
+    <div id="ticket-template" style="position: absolute; left: -9999px; width: 850px; height: 460px; background: white; display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; font-family: 'Poppins', sans-serif;">
+        <div style="border: 3px solid #6a11cb; padding: 25px; border-radius: 15px; text-align: center; width: 100%; height: 100%; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between;">
+            
+            <div>
+                 <img src="assets/logo_rifapro_bn.svg" alt="Logo RifaPro" style="height: 60px; margin-bottom: 10px;">
             </div>
-            <div style="text-align: left; margin-top: 20px; color: #333;">
-                <p><strong>Rifa:</strong> <span id="template-raffle-name">Nombre de la Rifa</span></p>
-                <p><strong>Premio:</strong> <span id="template-prize">Gran Premio</span></p>
-                <p><strong>Comprador:</strong> <span id="template-buyer">Nombre del Comprador</span></p>
-                <p><strong>Fecha Sorteo:</strong> <span id="template-draw-date">dd/mm/aaaa</span></p>
+
+            <div style="display: flex; align-items: center; justify-content: space-around; width: 100%; flex-grow: 1;">
+                <div style="text-align: left; color: #333; font-size: 1.1rem; width: 50%;">
+                    <p style="margin: 8px 0;"><strong>Rifa:</strong> <span id="template-raffle-name">Nombre de la Rifa</span></p>
+                    <p style="margin: 8px 0;"><strong>Premio:</strong> <span id="template-prize">Gran Premio</span></p>
+                    <p style="margin: 8px 0;"><strong>Comprador:</strong> <span id="template-buyer">Nombre del Comprador</span></p>
+                    <p style="margin: 8px 0;"><strong>Fecha Sorteo:</strong> <span id="template-draw-date">dd/mm/aaaa</span></p>
+                </div>
+                <div style="background: linear-gradient(45deg, #6a11cb, #2575fc); color: white; padding: 20px; border-radius: 12px; width: 40%;">
+                    <p style="margin: 0; font-size: 1.2rem;">TU NÚMERO</p>
+                    <p id="template-number" style="margin: 5px 0 0 0; font-size: 5rem; font-weight: 700; line-height: 1;">00</p>
+                </div>
             </div>
-            <p style="margin-top: 20px; font-size: 0.8rem; color: #777;">¡Mucha Suerte!</p>
+
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 10px;">
+                 <p style="margin: 0; font-size: 0.9rem; color: #777; font-weight: 600;">¡Mucha Suerte!</p>
+                 <div style="display: flex; align-items: center; gap: 5px; margin-top: 4px;">
+                    <p style="margin: 0; font-size: 0.75rem; color: #999;">Desarrollado por</p>
+                     <img src="assets/logo_oscar07d.svg" alt="Logo OSCAR 07D Studios" style="height: 16px; opacity: 0.6;">
+                 </div>
+            </div>
         </div>
     </div>
 `;
-
-
-
