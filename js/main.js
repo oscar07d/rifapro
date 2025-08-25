@@ -152,6 +152,81 @@ async function handleTicketFormSubmit(e) {
     }
 }
 
+async function generateTicketImage() {
+    // Ponemos el modal en un estado de "cargando" para dar feedback al usuario
+    const generateBtn = document.getElementById('generate-image-btn');
+    generateBtn.textContent = 'Generando...';
+    generateBtn.disabled = true;
+
+    const ticketNumber = document.getElementById('modal-ticket-number').textContent.replace('Boleto #', '');
+    const raffleId = window.location.hash.slice(1).split('/')[2];
+
+    try {
+        const raffleDoc = await db.collection('raffles').doc(raffleId).get();
+        const ticketDoc = await db.collection('raffles').doc(raffleId).collection('tickets').doc(ticketNumber).get();
+
+        if (!raffleDoc.exists || !ticketDoc.exists) {
+            alert("No se encontraron los datos para generar la imagen.");
+            return;
+        }
+        const raffleData = raffleDoc.data();
+        const ticketData = ticketDoc.data();
+
+        // Llenamos la plantilla HTML oculta
+        document.getElementById('template-number').textContent = ticketData.number;
+        document.getElementById('template-raffle-name').textContent = raffleData.name;
+        document.getElementById('template-prize').textContent = raffleData.prize;
+        document.getElementById('template-buyer').textContent = ticketData.buyerName;
+        const drawDate = new Date(raffleData.drawDate).toLocaleDateString('es-CO');
+        document.getElementById('template-draw-date').textContent = drawDate;
+        
+        const templateElement = document.getElementById('ticket-template');
+
+        // Usamos html2canvas para crear el canvas
+        const canvas = await html2canvas(templateElement, { useCORS: true, scale: 2 });
+        
+        // Creamos el nombre del archivo
+        const fileName = `boleto-${ticketData.number}-${raffleData.name.replace(/\s+/g, '-')}.png`;
+
+        // INTENTAMOS COMPARTIR LA IMAGEN
+        if (navigator.share) {
+            // Convertimos el canvas a un "Blob" (un tipo de archivo en memoria)
+            canvas.toBlob(async (blob) => {
+                // Creamos un archivo a partir del Blob
+                const file = new File([blob], fileName, { type: 'image/png' });
+                const shareData = {
+                    title: `Boleto RifaPro: ${raffleData.name}`,
+                    text: `¡Hola ${ticketData.buyerName}! Aquí está tu boleto #${ticketData.number} para la rifa "${raffleData.name}". ¡Mucha suerte!`,
+                    files: [file]
+                };
+
+                try {
+                    await navigator.share(shareData);
+                    console.log('Boleto compartido exitosamente');
+                } catch (err) {
+                    console.error('Error al compartir:', err);
+                }
+            }, 'image/png');
+
+        } else {
+            // FALLBACK: SI NO SE PUEDE COMPARTIR, SE DESCARGA
+            console.log('Web Share API no soportada, descargando imagen.');
+            const link = document.createElement('a');
+            link.download = fileName;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+    } catch (error) {
+        console.error("Error al generar la imagen del boleto:", error);
+        alert("No se pudo generar la imagen del boleto.");
+    } finally {
+        // Restauramos el botón a su estado original
+        generateBtn.textContent = 'Crear Imagen';
+        generateBtn.disabled = false;
+    }
+}
+
 // --- MANEJO DE ESTADO DE AUTENTICACIÓN ---
 
 Auth.onAuthStateChanged(user => {
@@ -337,6 +412,7 @@ async function handleCreateRaffle(e) {
 window.addEventListener('hashchange', router);
 
 window.addEventListener('load', router);
+
 
 
 
