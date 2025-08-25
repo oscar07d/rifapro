@@ -275,7 +275,9 @@ Auth.onAuthStateChanged(user => {
 });
 
 function updateUIForLoggedInUser(user) {
-    mainNav.style.display = 'block';
+    mainNav.style.display = 'block'; // Muestra el contenedor de navegación
+    
+    // ESTA LÍNEA ES LA QUE "RELLENA" EL HEADER
     userInfoContainer.innerHTML = `
         <span>${user.displayName || user.email}</span>
         <button id="logout-btn" class="btn">Cerrar Sesión</button>
@@ -466,6 +468,7 @@ async function handleCreateRaffle(e) {
 window.addEventListener('hashchange', router);
 
 window.addEventListener('load', router);
+
 
 
 
