@@ -297,12 +297,13 @@ function attachEventListeners(path) {
         createRaffleForm.addEventListener('submit', handleCreateRaffle);
         
     } else if (isRaffleDetail) {
-        // --- ESTE ES EL BLOQUE QUE FALTABA ---
         const ticketsGrid = document.getElementById('tickets-grid');
         const modal = document.getElementById('ticket-modal');
         const closeModalBtn = document.querySelector('.close-modal');
         const ticketForm = document.getElementById('ticket-form');
-
+        // --- ESTA ES LA LÍNEA QUE FALTABA ---
+        const generateBtn = document.getElementById('generate-image-btn'); 
+    
         // Evento para abrir el modal al hacer clic en un boleto
         if (ticketsGrid) {
             ticketsGrid.addEventListener('click', (e) => {
@@ -312,7 +313,7 @@ function attachEventListeners(path) {
                 }
             });
         }
-
+    
         // Eventos para cerrar el modal
         if (modal) {
             closeModalBtn.addEventListener('click', () => {
@@ -328,6 +329,11 @@ function attachEventListeners(path) {
         // Evento para guardar los datos del formulario del modal
         if (ticketForm) {
             ticketForm.addEventListener('submit', handleTicketFormSubmit);
+        }
+    
+        // --- Y ESTE ES EL BLOQUE QUE CONECTA EL BOTÓN ---
+        if (generateBtn) {
+            generateBtn.addEventListener('click', generateTicketImage);
         }
     }
 }
@@ -412,6 +418,7 @@ async function handleCreateRaffle(e) {
 window.addEventListener('hashchange', router);
 
 window.addEventListener('load', router);
+
 
 
 
