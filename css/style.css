@@ -472,12 +472,13 @@ input:focus, select:focus {
 
     /* La cuadrícula de boletos ahora tendrá 5 columnas */
     #tickets-grid {
-        grid-template-columns: repeat(5, 1fr);
-        gap: 0.5rem;
+        grid-template-columns: repeat(10, 1fr);
+        gap: 0.25rem; 
     }
     
     .ticket {
-        font-size: 0.9rem;
+        font-size: 0.75rem; 
+        border-radius: 4px; /* Hacemos los bordes un poco más pequeños */
     }
 
     /* Las tarjetas de rifa y botones del home ocuparán una sola columna */
@@ -490,3 +491,4 @@ input:focus, select:focus {
         padding: 0 1rem;
     }
 }
+
