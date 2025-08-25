@@ -157,69 +157,56 @@ async function generateTicketImage() {
     generateBtn.textContent = 'Generando...';
     generateBtn.disabled = true;
 
-    const ticketNumber = document.getElementById('modal-ticket-number').textContent.replace('Boleto #', '');
-    const raffleId = window.location.hash.slice(1).split('/')[2];
-
     try {
+        const ticketNumber = document.getElementById('modal-ticket-number').textContent.replace('Boleto #', '');
+        const raffleId = window.location.hash.slice(1).split('/')[2];
+        
+        // --- 1. Generar la imagen (Canvas y Blob) ---
+        const templateElement = document.getElementById('ticket-template');
+        // Llenar la plantilla con datos (código omitido por brevedad, ya lo tenemos)
         const raffleDoc = await db.collection('raffles').doc(raffleId).get();
         const ticketDoc = await db.collection('raffles').doc(raffleId).collection('tickets').doc(ticketNumber).get();
-        if (!raffleDoc.exists || !ticketDoc.exists) {
-            alert("No se encontraron los datos para generar la imagen."); return;
-        }
+        if (!raffleDoc.exists || !ticketDoc.exists) { throw new Error("Datos no encontrados"); }
         const raffleData = raffleDoc.data();
         const ticketData = ticketDoc.data();
-        
         document.getElementById('template-number').textContent = ticketData.number;
         document.getElementById('template-raffle-name').textContent = raffleData.name;
         document.getElementById('template-prize').textContent = raffleData.prize;
         document.getElementById('template-buyer').textContent = ticketData.buyerName;
-        const drawDate = new Date(raffleData.drawDate).toLocaleDateString('es-CO');
-        document.getElementById('template-draw-date').textContent = drawDate;
-        
-        const templateElement = document.getElementById('ticket-template');
+        document.getElementById('template-draw-date').textContent = new Date(raffleData.drawDate).toLocaleDateString('es-CO');
+
         const canvas = await html2canvas(templateElement, { useCORS: true, scale: 2 });
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
         const fileName = `boleto-${ticketData.number}-${raffleData.name.replace(/\s+/g, '-')}.png`;
 
-        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-        
-        // --- INICIO DE CAMBIOS PARA DEPURACIÓN ---
+        // --- 2. Iniciar la DESCARGA como primera acción (el respaldo) ---
+        const link = document.createElement('a');
+        link.download = fileName;
+        link.href = URL.createObjectURL(blob);
+        link.click();
+        URL.revokeObjectURL(link.href); // Liberamos memoria
+        console.log("Descarga iniciada como respaldo.");
 
-        // 1. Verificamos que el Blob se creó correctamente
-        if (!blob) {
-            throw new Error("El Blob de la imagen es nulo.");
-        }
-        console.log(`Blob creado. Tamaño: ${blob.size} bytes`); // Log para ver el tamaño
-
+        // --- 3. Intentar COMPARTIR inmediatamente después ---
         const file = new File([blob], fileName, { type: 'image/png' });
+        const shareData = { files: [file] };
         
-        // 2. Simplificamos el objeto a compartir
-        const shareData = {
-            files: [file],
-        };
-
-        // 3. Verificamos si se puede compartir
         if (navigator.canShare && navigator.canShare(shareData)) {
-            console.log("El navegador dice que SÍ puede compartir este archivo.");
             try {
+                // Esperamos un instante para que la descarga se procese
+                await new Promise(resolve => setTimeout(resolve, 100)); 
                 await navigator.share(shareData);
-                console.log('Llamada a navigator.share() completada.');
+                console.log('Menú de compartir abierto.');
             } catch (err) {
-                // Si el usuario cancela, también entra aquí.
-                console.error('Error o cancelación al compartir:', err);
+                console.error('Compartir fue cancelado o falló:', err);
             }
         } else {
-            console.log("El navegador dice que NO puede compartir este archivo. Descargando...");
-            const link = document.createElement('a');
-            link.download = fileName;
-            link.href = URL.createObjectURL(blob);
-            link.click();
-            URL.revokeObjectURL(link.href);
+            console.log("El navegador no soporta compartir archivos.");
         }
-        // --- FIN DE CAMBIOS PARA DEPURACIÓN ---
 
     } catch (error) {
-        console.error("Error al generar la imagen del boleto:", error);
-        alert("No se pudo generar la imagen del boleto.");
+        console.error("Error al generar o compartir la imagen:", error);
+        alert("Hubo un error al procesar la imagen.");
     } finally {
         generateBtn.textContent = 'Crear Imagen';
         generateBtn.disabled = false;
@@ -417,6 +404,7 @@ async function handleCreateRaffle(e) {
 window.addEventListener('hashchange', router);
 
 window.addEventListener('load', router);
+
 
 
 
