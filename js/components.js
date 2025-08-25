@@ -1,5 +1,26 @@
 // js/components.js
 
+// LISTA CENTRAL DE MÉTODOS DE PAGO
+const paymentMethods = [
+    { name: 'AV Villas', value: 'av-villas', icon: 'av-villas.svg' },
+    { name: 'Bancolombia', value: 'bancolombia', icon: 'bancolombia.svg' },
+    { name: 'BBVA', value: 'bbva', icon: 'bbva.svg' },
+    { name: 'Bogotá', value: 'bogota', icon: 'bogota.svg' },
+    { name: 'Caja Social', value: 'caja-social', icon: 'caja-social.svg' },
+    { name: 'Daviplata', value: 'daviplata', icon: 'daviplata.svg' },
+    { name: 'Davivienda', value: 'davivienda', icon: 'dvienda.svg' },
+    { name: 'Falabella', value: 'falabella', icon: 'falabella.svg' },
+    { name: 'Finandina', value: 'finandina', icon: 'finandina.svg' },
+    { name: 'Itaú', value: 'itau', icon: 'itau.svg' },
+    { name: 'Lulo Bank', value: 'lulo', icon: 'lulo.svg' },
+    { name: 'Movii', value: 'movii', icon: 'movii.svg' },
+    { name: 'Nequi', value: 'nequi', icon: 'nequi.svg' },
+    { name: 'Nu', value: 'nu', icon: 'nu.svg' },
+    { name: 'Pibank', value: 'pibank', icon: 'pibank.svg' },
+    { name: 'Powwi', value: 'powwi', icon: 'powwi.svg' },
+    { name: 'Ualá', value: 'uala', icon: 'uala.svg' }
+];
+
 // Vista para el inicio de sesión y registro
 export const getAuthView = () => `
     <div class="auth-container">
@@ -35,7 +56,15 @@ export const getHomeView = (userName) => `
 `;
 
 // Vista para crear una nueva rifa
-export const getCreateRaffleView = () => `
+export const getCreateRaffleView = () => {
+    const paymentOptionsHTML = paymentMethods.map(method => `
+        <div class="payment-option" data-value="${method.value}">
+            <img src="assets/${method.icon}" alt="${method.name}">
+            <span>${method.name}</span>
+        </div>
+    `).join('');
+
+    return `
     <div class="form-container">
         <h2>Crear Nueva Rifa</h2>
         <form id="create-raffle-form">
@@ -45,7 +74,7 @@ export const getCreateRaffleView = () => `
             </div>
             <div class="form-group">
                 <label for="raffle-prize">Premio(s)</label>
-                <input type="text" id="raffle-prize" required placeholder="Ej: Smart TV 55 pulgadas">
+                <input type="text" id="raffle-prize" required>
             </div>
             <div class="form-group">
                 <label for="ticket-price">Precio por boleto</label>
@@ -59,14 +88,19 @@ export const getCreateRaffleView = () => `
                 <label for="draw-date">Fecha del sorteo</label>
                 <input type="date" id="draw-date" required>
             </div>
+
             <div class="form-group">
-                <label for="payment-methods">Métodos de pago (separados por coma)</label>
-                <input type="text" id="payment-methods" required placeholder="Ej: Nequi, Daviplata, Bancolombia">
+                <label>Métodos de pago</label>
+                <div class="payment-options-grid">
+                    ${paymentOptionsHTML}
+                </div>
             </div>
+
             <button type="submit" class="btn btn-primary">Crear Rifa</button>
         </form>
     </div>
-`;
+    `;
+};
 
 // Vista para la página de "Explorar Rifas"
 export const getExploreView = (rafflesHTML) => `
@@ -81,6 +115,12 @@ export const getExploreView = (rafflesHTML) => `
 // Genera el HTML para una sola tarjeta de rifa
 export const getRaffleCard = (raffle) => {
     const percentage = raffle.soldPercentage || 0;
+    
+    // Generamos los iconos de métodos de pago
+    const paymentIconsHTML = raffle.paymentMethods.map(methodValue => {
+        const method = paymentMethods.find(p => p.value === methodValue);
+        return method ? `<img src="assets/${method.icon}" alt="${method.name}" title="${method.name}">` : '';
+    }).join('');
 
     return `
     <div class="raffle-card" data-id="${raffle.id}">
@@ -89,41 +129,46 @@ export const getRaffleCard = (raffle) => {
             <p class="info-row"><strong>Premio:</strong> ${raffle.prize}</p>
             
             <div class="progress-bar-container">
-                <div class="progress-bar-label">
-                    <span>${percentage}% vendido</span>
-                    <span>100%</span>
                 </div>
-                <div class="progress-bar">
-                    <div class="progress-bar-fill" style="width: ${percentage}%;"></div>
-                </div>
+
+            <p class="info-row"><strong>Precio:</strong> $${raffle.ticketPrice.toLocaleString('es-CO')} | <strong>Sorteo:</strong> ${new Date(raffle.drawDate).toLocaleDateString('es-CO')}</p>
+            
+            <div class="payment-icons-list">
+                ${paymentIconsHTML}
             </div>
 
-            <p class="info-row"><strong>Precio:</strong> $${raffle.ticketPrice.toLocaleString('es-CO')}</p>
-            <p class="info-row"><strong>Sorteo:</strong> ${new Date(raffle.drawDate).toLocaleDateString('es-CO')}</p>
             <a href="#/raffle/${raffle.id}" class="btn btn-secondary">Participar</a>
         </div>
     </div>
     `;
 };
 
-export const getRaffleDetailView = (raffle) => `
+export const getRaffleDetailView = (raffle) => {
+    // Generamos los iconos de métodos de pago para la vista de detalle
+    const paymentIconsHTML = raffle.paymentMethods.map(methodValue => {
+        const method = paymentMethods.find(p => p.value === methodValue);
+        return method ? `<img src="assets/${method.icon}" alt="${method.name}" title="${method.name}">` : '';
+    }).join('');
+
+    return `
     <div class="raffle-detail-container">
         <div class="raffle-info">
             <h2>${raffle.name}</h2>
             <p><strong>Premio:</strong> ${raffle.prize}</p>
             <p><strong>Precio del boleto:</strong> $${raffle.ticketPrice.toLocaleString('es-CO')}</p>
             <p><strong>Fecha del sorteo:</strong> ${new Date(raffle.drawDate).toLocaleDateString('es-CO')}</p>
-            <p><strong>Métodos de pago:</strong> ${raffle.paymentMethods.join(', ')}</p>
+            <div class="payment-icons-list detail-view">
+                <strong>Métodos de pago:</strong> ${paymentIconsHTML}
+            </div>
         </div>
         <div class="tickets-grid-container">
             <h3>Selecciona tu número</h3>
-            <div id="tickets-grid">
-                </div>
+            <div id="tickets-grid"></div>
         </div>
     </div>
-    
     ${getTicketModal()}
-`; // <-- Aquí termina la primera función
+    `;
+};
 
 // AHORA, DEFINIMOS LA SEGUNDA FUNCIÓN POR SEPARADO
 export const getTicketModal = () => `
@@ -209,3 +254,4 @@ export const getTicketModal = () => `
         </div>
     </div>
 `;
+
