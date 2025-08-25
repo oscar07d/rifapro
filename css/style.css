@@ -179,7 +179,6 @@ input:focus, select:focus {
     margin-top: 2rem;
 }
 
-/* Estilo específico para los botones del Home */
 .home-buttons .btn {
     background: #fff;
     color: var(--primary-color);
@@ -199,7 +198,7 @@ input:focus, select:focus {
     box-shadow: var(--shadow-md);
 }
 
-/* Tarjetas de Rifa */
+/* Tarjetas de Rifa (REDiseñadas) */
 #raffles-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -211,16 +210,72 @@ input:focus, select:focus {
     border-radius: var(--border-radius);
     box-shadow: var(--shadow-sm);
     transition: transform 0.3s, box-shadow 0.3s;
-    overflow: hidden; /* Para que el borde se vea bien */
-    border-top: 4px solid var(--primary-color);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 .raffle-card:hover {
     transform: translateY(-5px);
     box-shadow: var(--shadow-md);
 }
+
 .raffle-card-content {
     padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
 }
+
+.raffle-card-content h3 {
+    margin-top: 0;
+    font-size: 1.25rem;
+}
+
+.raffle-card-content p {
+    color: var(--text-light-color);
+    margin-bottom: 0.5rem;
+    flex-grow: 1;
+}
+
+.raffle-card-content strong {
+    color: var(--text-color);
+}
+
+/* --- ESTILOS PARA LA BARRA DE PROGRESO --- */
+.progress-bar-container {
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.progress-bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: var(--text-light-color);
+    margin-bottom: 0.5rem;
+}
+
+.progress-bar {
+    background-color: #e9ecef;
+    border-radius: 20px;
+    height: 10px;
+    width: 100%;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    border-radius: 20px;
+    transition: width 0.5s ease-in-out;
+}
+/* -------------------------------------- */
+
+.raffle-card .btn-secondary {
+    width: 100%;
+    margin-top: auto; /* Empuja el botón al final */
+}
+
 
 /* Cuadrícula de Boletos */
 #tickets-grid {
@@ -229,28 +284,6 @@ input:focus, select:focus {
     gap: 0.75rem;
     margin-top: 1.5rem;
 }
-
-.ticket {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    aspect-ratio: 1 / 1;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border: 1px solid transparent;
-}
-.ticket:hover {
-    transform: scale(1.1);
-    box-shadow: var(--shadow-md);
-}
-
-/* Colores de estado de los boletos */
-.ticket.available { background-color: #e3f2fd; color: #1e88e5; border-color: #bbdefb; }
-.ticket.pending   { background-color: #fffde7; color: #fbc02d; border-color: #fff9c4; }
-.ticket.partial   { background-color: #fff3e0; color: #fb8c00; border-color: #ffe0b2; }
-.ticket.paid      { background: linear-gradient(45deg, #c8e6c9, #a5d6a7); color: #2e7d32; border-color: #66bb6a; font-size: 1.2rem; }
 
 /* 7. Modal */
 .modal-overlay {
@@ -300,3 +333,4 @@ input:focus, select:focus {
     #app-container, header { padding: 1.5rem 1rem; }
     .auth-container, .form-container, .modal-content { padding: 1.5rem; }
 }
+
