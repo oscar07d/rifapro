@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Capa_2" data-name="Capa 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 236.44 236.44">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #1b2132;
+      }
+
+      .cls-2 {
+        fill: #e6ff00;
+      }
+    </style>
+  </defs>
+  <g id="Capa_1-2" data-name="Capa 1">
+    <g id="lulo">
+      <rect class="cls-1" width="236.44" height="236.44" rx="33.61" ry="33.61"/>
+      <polygon class="cls-2" points="139.82 182.96 96.63 182.96 53.48 182.96 53.48 139.82 53.48 96.63 53.48 53.48 96.63 53.48 139.82 53.48 139.82 96.63 96.63 96.63 96.63 139.82 139.82 139.82 139.82 96.63 182.96 96.63 182.96 139.82 182.96 182.96 139.82 182.96"/>
+    </g>
+  </g>
+</svg>
