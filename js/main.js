@@ -327,7 +327,17 @@ function attachEventListeners(path) {
     } else if (path === '/create') {
         const createRaffleForm = document.getElementById('create-raffle-form');
         createRaffleForm.addEventListener('submit', handleCreateRaffle);
-        
+    
+        // --- AÑADE ESTA LÓGICA NUEVA ---
+        const paymentGrid = document.querySelector('.payment-options-grid');
+        if (paymentGrid) {
+            paymentGrid.addEventListener('click', (e) => {
+                const option = e.target.closest('.payment-option');
+                if (option) {
+                    option.classList.toggle('selected');
+                }
+            });
+        }
     } else if (isRaffleDetail) {
         // Seleccionamos TODOS los elementos que podríamos necesitar
         const ticketsGrid = document.getElementById('tickets-grid');
@@ -431,13 +441,26 @@ async function handleCreateRaffle(e) {
         return;
     }
 
+    // --- ESTA ES LA PARTE QUE CAMBIA ---
+    // Buscamos todos los divs de iconos que tengan la clase 'selected'
+    const selectedOptions = document.querySelectorAll('.payment-option.selected');
+    // Creamos un array con los valores de los iconos seleccionados
+    const paymentMethods = Array.from(selectedOptions).map(option => option.dataset.value);
+
+    // Verificamos que el usuario haya escogido al menos uno
+    if (paymentMethods.length === 0) {
+        alert('Por favor, selecciona al menos un método de pago.');
+        return;
+    }
+    // --- FIN DEL CAMBIO ---
+
     const raffle = {
         name: document.getElementById('raffle-name').value,
         prize: document.getElementById('raffle-prize').value,
         ticketPrice: parseFloat(document.getElementById('ticket-price').value),
         paymentDeadline: document.getElementById('payment-deadline').value,
         drawDate: document.getElementById('draw-date').value,
-        paymentMethods: document.getElementById('payment-methods').value.split(',').map(item => item.trim()),
+        paymentMethods: paymentMethods, // Usamos el nuevo array de iconos
         ownerId: user.uid,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
     };
@@ -468,16 +491,3 @@ async function handleCreateRaffle(e) {
 window.addEventListener('hashchange', router);
 
 window.addEventListener('load', router);
-
-
-
-
-
-
-
-
-
-
-
-
-
