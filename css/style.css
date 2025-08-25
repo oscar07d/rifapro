@@ -278,13 +278,23 @@ input:focus, select:focus {
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 1.5rem;
     margin-bottom: 1.5rem;
+    text-align: center;
+    /* Centramos la info principal */
+}
+
+/* NUEVA REGLA para controlar el tamaño total de la cuadrícula */
+.tickets-grid-container {
+    max-width: 700px;
+    /* Limita el ancho máximo de la cuadrícula */
+    margin: 1.5rem auto 0 auto;
+    /* La centra horizontalmente y añade margen superior */
 }
 
 #tickets-grid {
     display: grid;
-    grid-template-columns: repeat(10, 1fr); /* <-- Este es el cambio */
-    gap: 0.75rem;
-    margin-top: 1.5rem;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 0.5rem;
+    /* Reducimos el espacio entre números */
 }
 
 .ticket {
@@ -298,17 +308,40 @@ input:focus, select:focus {
     transition: all 0.2s ease;
     border: 1px solid transparent;
     user-select: none;
+    font-size: 1rem;
+    /* Ajustamos el tamaño de la fuente si es necesario */
 }
+
 .ticket:hover {
     transform: scale(1.1);
     box-shadow: var(--shadow-md);
 }
 
-/* Colores de estado de los boletos */
-.ticket.available { background-color: #e3f2fd; color: #1e88e5; border-color: #bbdefb; }
-.ticket.pending   { background-color: #fffde7; color: #fbc02d; border-color: #fff9c4; }
-.ticket.partial   { background-color: #fff3e0; color: #fb8c00; border-color: #ffe0b2; }
-.ticket.paid      { background: linear-gradient(45deg, #c8e6c9, #a5d6a7); color: #2e7d32; border-color: #66bb6a; font-size: 1.2rem; }
+/* Colores de estado de los boletos (sin cambios) */
+.ticket.available {
+    background-color: #e3f2fd;
+    color: #1e88e5;
+    border-color: #bbdefb;
+}
+
+.ticket.pending {
+    background-color: #fffde7;
+    color: #fbc02d;
+    border-color: #fff9c4;
+}
+
+.ticket.partial {
+    background-color: #fff3e0;
+    color: #fb8c00;
+    border-color: #ffe0b2;
+}
+
+.ticket.paid {
+    background: linear-gradient(45deg, #c8e6c9, #a5d6a7);
+    color: #2e7d32;
+    border-color: #66bb6a;
+    font-size: 1.2rem;
+}
 
 /* 7. Modal */
 .modal-overlay {
@@ -409,6 +442,7 @@ input:focus, select:focus {
     #app-container, header { padding: 1.5rem 1rem; }
     .auth-container, .form-container, .modal-content { padding: 1.5rem; }
 }
+
 
 
 
