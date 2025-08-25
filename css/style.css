@@ -231,20 +231,23 @@ input:focus, select:focus {
     font-size: 1.25rem;
 }
 
-.raffle-card-content p {
+.raffle-card-content .info-row {
     color: var(--text-light-color);
     margin-bottom: 0.5rem;
-    flex-grow: 1;
 }
 
 .raffle-card-content strong {
     color: var(--text-color);
 }
 
-/* --- ESTILOS PARA LA BARRA DE PROGRESO --- */
+.raffle-card .btn-secondary {
+    width: 100%;
+    margin-top: auto; /* Empuja el botón al final */
+}
+
+/* Barra de Progreso */
 .progress-bar-container {
-    margin-top: 1rem;
-    margin-bottom: 1.5rem;
+    margin: 1rem 0 1.5rem 0;
 }
 
 .progress-bar-label {
@@ -269,21 +272,43 @@ input:focus, select:focus {
     border-radius: 20px;
     transition: width 0.5s ease-in-out;
 }
-/* -------------------------------------- */
 
-.raffle-card .btn-secondary {
-    width: 100%;
-    margin-top: auto; /* Empuja el botón al final */
+/* Detalle de la Rifa y Cuadrícula de Boletos (ESTILOS RESTAURADOS) */
+.raffle-detail-container .raffle-info {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
 }
 
-
-/* Cuadrícula de Boletos */
 #tickets-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
     gap: 0.75rem;
     margin-top: 1.5rem;
 }
+
+.ticket {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    aspect-ratio: 1 / 1;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    user-select: none;
+}
+.ticket:hover {
+    transform: scale(1.1);
+    box-shadow: var(--shadow-md);
+}
+
+/* Colores de estado de los boletos */
+.ticket.available { background-color: #e3f2fd; color: #1e88e5; border-color: #bbdefb; }
+.ticket.pending   { background-color: #fffde7; color: #fbc02d; border-color: #fff9c4; }
+.ticket.partial   { background-color: #fff3e0; color: #fb8c00; border-color: #ffe0b2; }
+.ticket.paid      { background: linear-gradient(45deg, #c8e6c9, #a5d6a7); color: #2e7d32; border-color: #66bb6a; font-size: 1.2rem; }
 
 /* 7. Modal */
 .modal-overlay {
@@ -333,4 +358,5 @@ input:focus, select:focus {
     #app-container, header { padding: 1.5rem 1rem; }
     .auth-container, .form-container, .modal-content { padding: 1.5rem; }
 }
+
 
