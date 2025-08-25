@@ -152,64 +152,72 @@ async function handleTicketFormSubmit(e) {
     }
 }
 
-async function generateTicketImage() {
-    const generateBtn = document.getElementById('generate-image-btn');
-    generateBtn.textContent = 'Generando...';
-    generateBtn.disabled = true;
+async function handleShare(type) {
+    const shareBtn = type === 'whatsapp' ? document.getElementById('whatsapp-share-btn') : document.getElementById('generic-share-btn');
+    const originalText = shareBtn.textContent;
+    shareBtn.textContent = 'Generando...';
+    shareBtn.disabled = true;
 
     try {
-        const ticketNumber = document.getElementById('modal-ticket-number').textContent.replace('Boleto #', '');
+        // 1. Obtener datos y generar la imagen (código que ya conoces)
         const raffleId = window.location.hash.slice(1).split('/')[2];
-        
-        // --- 1. Generar la imagen (Canvas y Blob) ---
-        const templateElement = document.getElementById('ticket-template');
-        // Llenar la plantilla con datos (código omitido por brevedad, ya lo tenemos)
+        const ticketNumber = document.getElementById('modal-ticket-number').textContent.replace('Boleto #', '');
         const raffleDoc = await db.collection('raffles').doc(raffleId).get();
         const ticketDoc = await db.collection('raffles').doc(raffleId).collection('tickets').doc(ticketNumber).get();
-        if (!raffleDoc.exists || !ticketDoc.exists) { throw new Error("Datos no encontrados"); }
+        if (!raffleDoc.exists || !ticketDoc.exists) throw new Error("Datos no encontrados");
         const raffleData = raffleDoc.data();
         const ticketData = ticketDoc.data();
+
+        // Llenar plantilla...
         document.getElementById('template-number').textContent = ticketData.number;
         document.getElementById('template-raffle-name').textContent = raffleData.name;
         document.getElementById('template-prize').textContent = raffleData.prize;
         document.getElementById('template-buyer').textContent = ticketData.buyerName;
         document.getElementById('template-draw-date').textContent = new Date(raffleData.drawDate).toLocaleDateString('es-CO');
 
+        const templateElement = document.getElementById('ticket-template');
         const canvas = await html2canvas(templateElement, { useCORS: true, scale: 2 });
         const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
         const fileName = `boleto-${ticketData.number}-${raffleData.name.replace(/\s+/g, '-')}.png`;
-
-        // --- 2. Iniciar la DESCARGA como primera acción (el respaldo) ---
-        const link = document.createElement('a');
-        link.download = fileName;
-        link.href = URL.createObjectURL(blob);
-        link.click();
-        URL.revokeObjectURL(link.href); // Liberamos memoria
-        console.log("Descarga iniciada como respaldo.");
-
-        // --- 3. Intentar COMPARTIR inmediatamente después ---
         const file = new File([blob], fileName, { type: 'image/png' });
-        const shareData = { files: [file] };
-        
-        if (navigator.canShare && navigator.canShare(shareData)) {
-            try {
-                // Esperamos un instante para que la descarga se procese
-                await new Promise(resolve => setTimeout(resolve, 100)); 
-                await navigator.share(shareData);
-                console.log('Menú de compartir abierto.');
-            } catch (err) {
-                console.error('Compartir fue cancelado o falló:', err);
-            }
+
+        const shareText = `¡Hola ${ticketData.buyerName}! Aquí está tu boleto #${ticketData.number} para la rifa "${raffleData.name}". ¡Mucha suerte!`;
+
+        // 2. Decidir qué acción tomar
+        if (type === 'whatsapp') {
+            // Para WhatsApp, la mejor estrategia es mostrar la imagen y dar la instrucción
+            // ya que compartir archivos directamente a WA es propenso a fallos.
+            const imageUrl = URL.createObjectURL(blob);
+            const previewContainer = document.getElementById('ticket-image-preview');
+            previewContainer.innerHTML = `
+                <h4>¡Boleto listo para WhatsApp!</h4>
+                <p style="font-size: 0.9rem; color: #666;">1. Mantén presionada la imagen y elige "Copiar imagen".</p>
+                <p style="font-size: 0.9rem; color: #666;">2. Haz clic en el botón de abajo para abrir WhatsApp y pega la imagen en el chat.</p>
+                <a href="https://wa.me/?text=${encodeURIComponent(shareText)}" target="_blank" class="btn btn-whatsapp" style="margin-top:1rem; width: auto;">Abrir WhatsApp</a>
+                <img src="${imageUrl}" alt="Boleto de Rifa" style="width: 100%; border-radius: 8px; margin-top: 1rem; border: 1px solid #ddd;">
+            `;
+             previewContainer.scrollIntoView({ behavior: 'smooth' });
         } else {
-            console.log("El navegador no soporta compartir archivos.");
+            // Para el resto, usamos la Web Share API que ya teníamos
+            const shareData = { files: [file], title: `Boleto: ${raffleData.name}`, text: shareText };
+            if (navigator.canShare && navigator.canShare(shareData)) {
+                await navigator.share(shareData);
+            } else {
+                // Fallback de descarga si no se puede compartir
+                const link = document.createElement('a');
+                link.download = fileName;
+                link.href = URL.createObjectURL(blob);
+                link.click();
+                URL.revokeObjectURL(link.href);
+            }
         }
 
     } catch (error) {
-        console.error("Error al generar o compartir la imagen:", error);
+        console.error("Error al generar/compartir imagen:", error);
         alert("Hubo un error al procesar la imagen.");
     } finally {
-        generateBtn.textContent = 'Crear Imagen';
-        generateBtn.disabled = false;
+        shareBtn.textContent = originalText;
+        shareBtn.disabled = false;
     }
 }
 
@@ -287,10 +295,12 @@ function attachEventListeners(path) {
         const modal = document.getElementById('ticket-modal');
         const closeModalBtn = document.querySelector('.close-modal');
         const ticketForm = document.getElementById('ticket-form');
-        // --- ESTA ES LA LÍNEA QUE FALTABA ---
-        const generateBtn = document.getElementById('generate-image-btn'); 
+        
+        // --- CAMBIAMOS A LOS NUEVOS BOTONES ---
+        const whatsappBtn = document.getElementById('whatsapp-share-btn');
+        const genericBtn = document.getElementById('generic-share-btn');
     
-        // Evento para abrir el modal al hacer clic en un boleto
+        // Evento para abrir el modal (esto no cambia)
         if (ticketsGrid) {
             ticketsGrid.addEventListener('click', (e) => {
                 if (e.target.classList.contains('ticket')) {
@@ -300,7 +310,7 @@ function attachEventListeners(path) {
             });
         }
     
-        // Eventos para cerrar el modal
+        // Eventos para cerrar el modal (esto no cambia)
         if (modal) {
             closeModalBtn.addEventListener('click', () => {
                 modal.style.display = 'none';
@@ -312,14 +322,17 @@ function attachEventListeners(path) {
             });
         }
         
-        // Evento para guardar los datos del formulario del modal
+        // Evento para guardar los datos del formulario (esto no cambia)
         if (ticketForm) {
             ticketForm.addEventListener('submit', handleTicketFormSubmit);
         }
     
-        // --- Y ESTE ES EL BLOQUE QUE CONECTA EL BOTÓN ---
-        if (generateBtn) {
-            generateBtn.addEventListener('click', generateTicketImage);
+        // --- CONECTAMOS LOS NUEVOS BOTONES A LA NUEVA FUNCIÓN 'handleShare' ---
+        if (whatsappBtn) {
+            whatsappBtn.addEventListener('click', () => handleShare('whatsapp'));
+        }
+        if (genericBtn) {
+            genericBtn.addEventListener('click', () => handleShare('generic'));
         }
     }
 }
@@ -404,6 +417,7 @@ async function handleCreateRaffle(e) {
 window.addEventListener('hashchange', router);
 
 window.addEventListener('load', router);
+
 
 
 
