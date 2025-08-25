@@ -86,10 +86,23 @@ async function router() {
                 if (rafflesSnapshot.empty) {
                     rafflesHTML = '<p>No hay rifas disponibles en este momento. ¡Crea una!</p>';
                 } else {
-                    rafflesSnapshot.forEach(doc => {
+                    // Usamos Promise.all para esperar a que todos los cálculos de porcentaje terminen
+                    const raffleCardPromises = rafflesSnapshot.docs.map(async (doc) => {
                         const raffleData = { id: doc.id, ...doc.data() };
-                        rafflesHTML += getRaffleCard(raffleData);
+        
+                        // Hacemos una consulta para contar los boletos que NO están "disponibles"
+                        const ticketsSnapshot = await db.collection('raffles').doc(raffleData.id).collection('tickets').where('status', '!=', 'available').get();
+                        
+                        // El número de boletos vendidos es el tamaño de la respuesta
+                        const soldTickets = ticketsSnapshot.size;
+                        raffleData.soldPercentage = soldTickets; // Como son 100 boletos, el número es el porcentaje
+        
+                        return getRaffleCard(raffleData);
                     });
+        
+                    // Esperamos a que todas las promesas se resuelvan y unimos el HTML
+                    const resolvedRaffleCards = await Promise.all(raffleCardPromises);
+                    rafflesHTML = resolvedRaffleCards.join('');
                 }
                 appContainer.innerHTML = view(rafflesHTML);
             } catch (error) {
@@ -324,5 +337,6 @@ async function handleCreateRaffle(e) {
 window.addEventListener('hashchange', router);
 
 window.addEventListener('load', router);
+
 
 
