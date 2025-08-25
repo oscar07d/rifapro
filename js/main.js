@@ -185,19 +185,22 @@ async function handleShare(type) {
 
         // 2. Decidir qué acción tomar
         if (type === 'whatsapp') {
-            // Para WhatsApp, la mejor estrategia es mostrar la imagen y dar la instrucción
-            // ya que compartir archivos directamente a WA es propenso a fallos.
-            const imageUrl = URL.createObjectURL(blob);
-            const previewContainer = document.getElementById('ticket-image-preview');
-            previewContainer.innerHTML = `
-                <h4>¡Boleto listo para WhatsApp!</h4>
-                <p style="font-size: 0.9rem; color: #666;">1. Mantén presionada la imagen y elige "Copiar imagen".</p>
-                <p style="font-size: 0.9rem; color: #666;">2. Haz clic en el botón de abajo para abrir WhatsApp y pega la imagen en el chat.</p>
-                <a href="https://wa.me/?text=${encodeURIComponent(shareText)}" target="_blank" class="btn btn-whatsapp" style="margin-top:1rem; width: auto;">Abrir WhatsApp</a>
-                <img src="${imageUrl}" alt="Boleto de Rifa" style="width: 100%; border-radius: 8px; margin-top: 1rem; border: 1px solid #ddd;">
-            `;
-             previewContainer.scrollIntoView({ behavior: 'smooth' });
-        } else {
+                // Obtenemos el contenedor principal del modal
+                const viewContainer = document.getElementById('modal-view-container');
+                const imageUrl = URL.createObjectURL(blob);
+                
+                // Reemplazamos el formulario por la vista previa
+                viewContainer.innerHTML = `
+                    <div class="ticket-preview-wrapper">
+                        <h4>¡Boleto listo para WhatsApp!</h4>
+                        <p>1. Mantén presionada la imagen y elige "Copiar imagen".</p>
+                        <p>2. Haz clic en el botón para abrir WhatsApp y pega la imagen en el chat.</p>
+                        <a href="https://wa.me/?text=${encodeURIComponent(shareText)}" target="_blank" class="btn btn-whatsapp" style="margin-top:1rem; width: auto;">Abrir WhatsApp</a>
+                        <img src="${imageUrl}" alt="Boleto de Rifa">
+                    </div>
+                `;
+
+            } else {
             // Para el resto, usamos la Web Share API que ya teníamos
             const shareData = { files: [file], title: `Boleto: ${raffleData.name}`, text: shareText };
             if (navigator.canShare && navigator.canShare(shareData)) {
@@ -417,6 +420,7 @@ async function handleCreateRaffle(e) {
 window.addEventListener('hashchange', router);
 
 window.addEventListener('load', router);
+
 
 
 
