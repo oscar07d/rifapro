@@ -335,6 +335,12 @@ input:focus, select:focus {
     animation: zoom-in 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
+.modal-buttons {
+    display: flex;
+    gap: 1rem; /* Espacio entre los botones */
+    margin-top: 1.5rem;
+}
+
 @keyframes zoom-in {
     from { transform: scale(0.9); opacity: 0; }
     to { transform: scale(1); opacity: 1; }
@@ -358,5 +364,6 @@ input:focus, select:focus {
     #app-container, header { padding: 1.5rem 1rem; }
     .auth-container, .form-container, .modal-content { padding: 1.5rem; }
 }
+
 
 
