@@ -53,6 +53,18 @@ header h1 {
     font-weight: 500;
 }
 
+.header-logo svg {
+    display: block; /* Elimina espacios extra debajo del SVG */
+}
+.header-logo svg path,
+.header-logo svg polygon,
+.header-logo svg line {
+    stroke: white !important; /* Forza el borde a ser blanco */
+}
+.header-logo svg .cls-2 { /* clase para la línea interior del ticket */
+    stroke: #1d1d1b !important; /* Mantenemos la línea interior oscura para contraste */
+}
+
 /* 3. Contenedor Principal y Tarjetas */
 #app-container {
     padding: 2.5rem 2rem;
@@ -491,4 +503,5 @@ input:focus, select:focus {
         padding: 0 1rem;
     }
 }
+
 
