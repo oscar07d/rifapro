@@ -152,6 +152,39 @@ async function handleTicketFormSubmit(e) {
     }
 }
 
+async function handleClearTicket() {
+    const ticketNumber = document.getElementById('modal-ticket-number').textContent.replace('Boleto #', '');
+    const raffleId = window.location.hash.slice(1).split('/')[2];
+
+    // Pedimos confirmación al usuario antes de borrar
+    const isConfirmed = confirm(`¿Estás seguro de que quieres limpiar el boleto #${ticketNumber}? Se borrarán los datos del comprador y quedará disponible.`);
+
+    if (!isConfirmed) {
+        return; // Si el usuario cancela, no hacemos nada
+    }
+
+    // Datos para resetear el boleto
+    const dataToClear = {
+        buyerName: null,
+        buyerPhone: null,
+        status: 'available'
+    };
+
+    try {
+        const ticketRef = db.collection('raffles').doc(raffleId).collection('tickets').doc(ticketNumber);
+        await ticketRef.update(dataToClear); // Actualizamos el boleto en Firestore
+
+        console.log(`Boleto #${ticketNumber} limpiado correctamente.`);
+
+        // Cerramos el modal
+        document.getElementById('ticket-modal').style.display = 'none';
+
+    } catch (error) {
+        console.error("Error al limpiar el boleto:", error);
+        alert("Hubo un error al limpiar el boleto.");
+    }
+}
+
 async function handleShare(type) {
     const shareBtn = type === 'whatsapp' ? document.getElementById('whatsapp-share-btn') : document.getElementById('generic-share-btn');
     const originalText = shareBtn.textContent;
@@ -294,16 +327,23 @@ function attachEventListeners(path) {
         createRaffleForm.addEventListener('submit', handleCreateRaffle);
         
     } else if (isRaffleDetail) {
+        // Seleccionamos TODOS los elementos que podríamos necesitar
         const ticketsGrid = document.getElementById('tickets-grid');
         const modal = document.getElementById('ticket-modal');
         const closeModalBtn = document.querySelector('.close-modal');
         const ticketForm = document.getElementById('ticket-form');
         
-        // --- CAMBIAMOS A LOS NUEVOS BOTONES ---
+        // Botones de compartir
         const whatsappBtn = document.getElementById('whatsapp-share-btn');
         const genericBtn = document.getElementById('generic-share-btn');
+        const whatsappBtnInfo = document.getElementById('whatsapp-share-btn-info');
+        const genericBtnInfo = document.getElementById('generic-share-btn-info');
     
-        // Evento para abrir el modal (esto no cambia)
+        // --- AÑADIMOS LOS BOTONES DE LIMPIAR ---
+        const clearBtnForm = document.getElementById('clear-ticket-btn-form');
+        const clearBtnInfo = document.getElementById('clear-ticket-btn-info');
+    
+        // Evento para abrir el modal
         if (ticketsGrid) {
             ticketsGrid.addEventListener('click', (e) => {
                 if (e.target.classList.contains('ticket')) {
@@ -313,7 +353,7 @@ function attachEventListeners(path) {
             });
         }
     
-        // Eventos para cerrar el modal (esto no cambia)
+        // Eventos para cerrar el modal
         if (modal) {
             closeModalBtn.addEventListener('click', () => {
                 modal.style.display = 'none';
@@ -325,17 +365,23 @@ function attachEventListeners(path) {
             });
         }
         
-        // Evento para guardar los datos del formulario (esto no cambia)
+        // Evento para guardar los datos del formulario
         if (ticketForm) {
             ticketForm.addEventListener('submit', handleTicketFormSubmit);
         }
     
-        // --- CONECTAMOS LOS NUEVOS BOTONES A LA NUEVA FUNCIÓN 'handleShare' ---
-        if (whatsappBtn) {
-            whatsappBtn.addEventListener('click', () => handleShare('whatsapp'));
+        // Eventos para los botones de compartir
+        if (whatsappBtn) whatsappBtn.addEventListener('click', () => handleShare('whatsapp'));
+        if (genericBtn) genericBtn.addEventListener('click', () => handleShare('generic'));
+        if (whatsappBtnInfo) whatsappBtnInfo.addEventListener('click', () => handleShare('whatsapp'));
+        if (genericBtnInfo) genericBtnInfo.addEventListener('click', () => handleShare('generic'));
+    
+        // --- LES ASIGNAMOS SU FUNCIÓN A LOS BOTONES DE LIMPIAR ---
+        if (clearBtnForm) {
+            clearBtnForm.addEventListener('click', handleClearTicket);
         }
-        if (genericBtn) {
-            genericBtn.addEventListener('click', () => handleShare('generic'));
+        if (clearBtnInfo) {
+            clearBtnInfo.addEventListener('click', handleClearTicket);
         }
     }
 }
@@ -420,6 +466,7 @@ async function handleCreateRaffle(e) {
 window.addEventListener('hashchange', router);
 
 window.addEventListener('load', router);
+
 
 
 
