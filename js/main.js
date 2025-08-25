@@ -107,6 +107,38 @@ async function router() {
     }
 }
 
+async function handleTicketFormSubmit(e) {
+    e.preventDefault(); // Evita que la página se recargue
+
+    const buyerName = document.getElementById('buyer-name').value;
+    const buyerPhone = document.getElementById('buyer-phone').value;
+    const status = document.getElementById('payment-status').value;
+    const ticketNumber = document.getElementById('modal-ticket-number').textContent.replace('Boleto #', '');
+    const raffleId = window.location.hash.slice(1).split('/')[2];
+    
+    if (!buyerName || !buyerPhone) {
+        alert('El nombre y el celular son obligatorios.');
+        return;
+    }
+
+    const dataToUpdate = {
+        buyerName: buyerName,
+        buyerPhone: buyerPhone,
+        status: status
+    };
+
+    try {
+        const ticketRef = db.collection('raffles').doc(raffleId).collection('tickets').doc(ticketNumber);
+        await ticketRef.update(dataToUpdate);
+        
+        document.getElementById('ticket-modal').style.display = 'none';
+
+    } catch (error) {
+        console.error("Error al actualizar el boleto:", error);
+        alert("Hubo un error al guardar los cambios.");
+    }
+}
+
 // --- MANEJO DE ESTADO DE AUTENTICACIÓN ---
 
 Auth.onAuthStateChanged(user => {
@@ -139,6 +171,78 @@ function updateUIForLoggedOutUser() {
 }
 
 // --- MANEJO DE EVENTOS ---
+
+function attachEventListeners(path) {
+    const isRaffleDetail = path.startsWith('/raffle/');
+
+    if (path === '/login') {
+        const authForm = document.getElementById('auth-form');
+        const googleLoginBtn = document.getElementById('google-login-btn');
+        const toggleLink = document.getElementById('auth-toggle-link');
+        let isLogin = true;
+
+        authForm.addEventListener('submit', e => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            if (isLogin) {
+                Auth.loginUser(email, password).catch(err => alert(err.message));
+            } else {
+                Auth.registerUser(email, password).catch(err => alert(err.message));
+            }
+        });
+
+        googleLoginBtn.addEventListener('click', Auth.loginWithGoogle);
+        
+        const toggleAuthMode = e => {
+            e.preventDefault();
+            isLogin = !isLogin;
+            document.getElementById('auth-title').innerText = isLogin ? 'Iniciar Sesión' : 'Registrarse';
+            document.getElementById('auth-action-btn').innerText = isLogin ? 'Iniciar Sesión' : 'Crear Cuenta';
+            document.getElementById('auth-toggle-text').innerHTML = isLogin ? '¿No tienes cuenta? <a href="#" id="auth-toggle-link">Regístrate</a>' : '¿Ya tienes cuenta? <a href="#" id="auth-toggle-link">Inicia Sesión</a>';
+            document.getElementById('auth-toggle-link').addEventListener('click', toggleAuthMode);
+        };
+        toggleLink.addEventListener('click', toggleAuthMode);
+
+    } else if (path === '/create') {
+        const createRaffleForm = document.getElementById('create-raffle-form');
+        createRaffleForm.addEventListener('submit', handleCreateRaffle);
+        
+    } else if (isRaffleDetail) {
+        // --- ESTE ES EL BLOQUE QUE FALTABA ---
+        const ticketsGrid = document.getElementById('tickets-grid');
+        const modal = document.getElementById('ticket-modal');
+        const closeModalBtn = document.querySelector('.close-modal');
+        const ticketForm = document.getElementById('ticket-form');
+
+        // Evento para abrir el modal al hacer clic en un boleto
+        if (ticketsGrid) {
+            ticketsGrid.addEventListener('click', (e) => {
+                if (e.target.classList.contains('ticket')) {
+                    const ticketNumber = e.target.dataset.id;
+                    openTicketModal(ticketNumber);
+                }
+            });
+        }
+
+        // Eventos para cerrar el modal
+        if (modal) {
+            closeModalBtn.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+            modal.addEventListener('click', (e) => {
+                if (e.target.id === 'ticket-modal') {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+        
+        // Evento para guardar los datos del formulario del modal
+        if (ticketForm) {
+            ticketForm.addEventListener('submit', handleTicketFormSubmit);
+        }
+    }
+}
 
 function attachEventListeners(path) {
     if (path === '/login') {
@@ -219,4 +323,5 @@ async function handleCreateRaffle(e) {
 
 // --- INICIALIZACIÓN ---
 window.addEventListener('hashchange', router);
+
 window.addEventListener('load', router);
