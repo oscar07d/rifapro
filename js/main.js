@@ -161,7 +161,6 @@ async function generateTicketImage() {
     const raffleId = window.location.hash.slice(1).split('/')[2];
 
     try {
-        // --- 1. Obtener datos y llenar la plantilla (esto queda igual) ---
         const raffleDoc = await db.collection('raffles').doc(raffleId).get();
         const ticketDoc = await db.collection('raffles').doc(raffleId).collection('tickets').doc(ticketNumber).get();
         if (!raffleDoc.exists || !ticketDoc.exists) {
@@ -169,54 +168,59 @@ async function generateTicketImage() {
         }
         const raffleData = raffleDoc.data();
         const ticketData = ticketDoc.data();
+        
         document.getElementById('template-number').textContent = ticketData.number;
         document.getElementById('template-raffle-name').textContent = raffleData.name;
         document.getElementById('template-prize').textContent = raffleData.prize;
         document.getElementById('template-buyer').textContent = ticketData.buyerName;
         const drawDate = new Date(raffleData.drawDate).toLocaleDateString('es-CO');
         document.getElementById('template-draw-date').textContent = drawDate;
+        
         const templateElement = document.getElementById('ticket-template');
-
-        // --- 2. Generar el canvas (esto queda igual) ---
         const canvas = await html2canvas(templateElement, { useCORS: true, scale: 2 });
         const fileName = `boleto-${ticketData.number}-${raffleData.name.replace(/\s+/g, '-')}.png`;
 
-        // --- 3. Convertir canvas a Blob (archivo en memoria) usando una Promesa ---
-        // Esto nos asegura que el código no continuará hasta que el archivo esté 100% listo.
         const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
         
-        // --- 4. Crear el archivo y los datos para compartir ---
+        // --- INICIO DE CAMBIOS PARA DEPURACIÓN ---
+
+        // 1. Verificamos que el Blob se creó correctamente
+        if (!blob) {
+            throw new Error("El Blob de la imagen es nulo.");
+        }
+        console.log(`Blob creado. Tamaño: ${blob.size} bytes`); // Log para ver el tamaño
+
         const file = new File([blob], fileName, { type: 'image/png' });
+        
+        // 2. Simplificamos el objeto a compartir
         const shareData = {
-            title: `Boleto RifaPro: ${raffleData.name}`,
-            text: `¡Hola ${ticketData.buyerName}! Aquí está tu boleto #${ticketData.number} para la rifa "${raffleData.name}". ¡Mucha suerte!`,
-            files: [file]
+            files: [file],
         };
 
-        // --- 5. Verificación MEJORADA y acción de compartir/descargar ---
-        // Verificamos si el navegador PUEDE compartir este tipo de datos (archivos).
+        // 3. Verificamos si se puede compartir
         if (navigator.canShare && navigator.canShare(shareData)) {
+            console.log("El navegador dice que SÍ puede compartir este archivo.");
             try {
                 await navigator.share(shareData);
-                console.log('Boleto compartido exitosamente');
+                console.log('Llamada a navigator.share() completada.');
             } catch (err) {
-                console.error('Error al compartir:', err);
+                // Si el usuario cancela, también entra aquí.
+                console.error('Error o cancelación al compartir:', err);
             }
         } else {
-            // Fallback: si no se puede compartir, se descarga.
-            console.log('Web Share API no soporta compartir archivos, descargando imagen.');
+            console.log("El navegador dice que NO puede compartir este archivo. Descargando...");
             const link = document.createElement('a');
             link.download = fileName;
-            link.href = URL.createObjectURL(blob); // Usamos el Blob que ya creamos
+            link.href = URL.createObjectURL(blob);
             link.click();
-            URL.revokeObjectURL(link.href); // Liberamos la memoria
+            URL.revokeObjectURL(link.href);
         }
+        // --- FIN DE CAMBIOS PARA DEPURACIÓN ---
 
     } catch (error) {
         console.error("Error al generar la imagen del boleto:", error);
         alert("No se pudo generar la imagen del boleto.");
     } finally {
-        // Restauramos el botón a su estado original
         generateBtn.textContent = 'Crear Imagen';
         generateBtn.disabled = false;
     }
@@ -413,6 +417,7 @@ async function handleCreateRaffle(e) {
 window.addEventListener('hashchange', router);
 
 window.addEventListener('load', router);
+
 
 
 
