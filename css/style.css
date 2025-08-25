@@ -349,6 +349,16 @@ input:focus, select:focus {
     background-color: #128C7E;
 }
 
+.btn-danger {
+    background-color: transparent;
+    color: var(--danger-color);
+    border: 1px solid var(--danger-color);
+}
+.btn-danger:hover {
+    background-color: var(--danger-color);
+    color: white;
+}
+
 /* Estilos para la vista previa de la imagen en el modal */
 .ticket-preview-wrapper {
     text-align: center;
@@ -399,6 +409,7 @@ input:focus, select:focus {
     #app-container, header { padding: 1.5rem 1rem; }
     .auth-container, .form-container, .modal-content { padding: 1.5rem; }
 }
+
 
 
 
