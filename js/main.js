@@ -214,7 +214,7 @@ async function handleShare(type) {
         const fileName = `boleto-${ticketData.number}-${raffleData.name.replace(/\s+/g, '-')}.png`;
         const file = new File([blob], fileName, { type: 'image/png' });
 
-        const shareText = `¡Hola ${ticketData.buyerName}! Aquí está tu boleto #${ticketData.number} para la rifa "${raffleData.name}". ¡Mucha suerte!`;
+        const shareText = `¡Hola *${ticketData.buyerName}*! Aquí está tu boleto *#${ticketData.number}* para la rifa *"${raffleData.name}"*. ¡Mucha suerte!`;
 
         // 2. Decidir qué acción tomar
         if (type === 'whatsapp') {
@@ -466,6 +466,7 @@ async function handleCreateRaffle(e) {
 window.addEventListener('hashchange', router);
 
 window.addEventListener('load', router);
+
 
 
 
