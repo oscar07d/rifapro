@@ -244,6 +244,41 @@ function attachEventListeners(path) {
     }
 }
 
+async function openTicketModal(ticketNumber) {
+    const modal = document.getElementById('ticket-modal');
+    const modalTitle = document.getElementById('modal-ticket-number');
+    const buyerNameInput = document.getElementById('buyer-name');
+    const buyerPhoneInput = document.getElementById('buyer-phone');
+    const paymentStatusSelect = document.getElementById('payment-status');
+    
+    // Extraemos el ID de la rifa desde la URL actual
+    const raffleId = window.location.hash.slice(1).split('/')[2];
+    if (!raffleId) return;
+
+    try {
+        // Consultamos la información actual del boleto en Firestore
+        const ticketRef = db.collection('raffles').doc(raffleId).collection('tickets').doc(ticketNumber);
+        const doc = await ticketRef.get();
+
+        if (doc.exists) {
+            const data = doc.data();
+            // Llenamos el formulario con los datos existentes
+            modalTitle.textContent = `Boleto #${data.number}`;
+            buyerNameInput.value = data.buyerName || '';
+            buyerPhoneInput.value = data.buyerPhone || '';
+            paymentStatusSelect.value = data.status === 'available' ? 'pending' : data.status;
+
+            // Mostramos el modal
+            modal.style.display = 'flex';
+        } else {
+            console.error("No se encontró el boleto");
+            alert("Error: No se encontró el boleto.");
+        }
+    } catch (error) {
+        console.error("Error al obtener datos del boleto:", error);
+    }
+}
+
 async function handleCreateRaffle(e) {
     e.preventDefault();
     const user = firebase.auth().currentUser;
@@ -289,4 +324,5 @@ async function handleCreateRaffle(e) {
 window.addEventListener('hashchange', router);
 
 window.addEventListener('load', router);
+
 
