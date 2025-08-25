@@ -148,13 +148,33 @@ export const getTicketModal = () => `
                         <option value="paid">Pagado Total</option>
                     </select>
                 </div>
-                <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+
+                <div class="modal-buttons">
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    <button type="button" id="generate-image-btn" class="btn btn-secondary">Crear Imagen</button>
+                </div>
             </form>
-            <div id="modal-actions" style="display: none;">
-                <button id="share-ticket-btn" class="btn btn-secondary">Compartir Boleto</button>
+        </div>
+    </div>
+
+    <div id="ticket-template" style="position: absolute; left: -9999px; width: 350px; background: white; padding: 20px; font-family: 'Poppins', sans-serif;">
+        <div style="border: 2px solid #6a11cb; padding: 15px; border-radius: 10px; text-align: center;">
+            <h2 style="color: #6a11cb; margin: 0; font-size: 1.8rem;">RifaPro</h2>
+            <p style="margin: 5px 0 20px 0; color: #555;">¡Tu boleto para ganar!</p>
+            <div style="background: linear-gradient(45deg, #6a11cb, #2575fc); color: white; padding: 10px; border-radius: 8px;">
+                <p style="margin: 0; font-size: 1rem;">Número</p>
+                <p id="template-number" style="margin: 5px 0; font-size: 3.5rem; font-weight: 700;">00</p>
             </div>
+            <div style="text-align: left; margin-top: 20px; color: #333;">
+                <p><strong>Rifa:</strong> <span id="template-raffle-name">Nombre de la Rifa</span></p>
+                <p><strong>Premio:</strong> <span id="template-prize">Gran Premio</span></p>
+                <p><strong>Comprador:</strong> <span id="template-buyer">Nombre del Comprador</span></p>
+                <p><strong>Fecha Sorteo:</strong> <span id="template-draw-date">dd/mm/aaaa</span></p>
+            </div>
+            <p style="margin-top: 20px; font-size: 0.8rem; color: #777;">¡Mucha Suerte!</p>
         </div>
     </div>
 `;
+
 
 
