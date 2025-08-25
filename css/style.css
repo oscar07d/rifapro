@@ -278,7 +278,7 @@ input:focus, select:focus {
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 1.5rem;
     margin-bottom: 1.5rem;
-    text-align: center;
+    text-align: left;
     /* Centramos la info principal */
 }
 
@@ -442,6 +442,7 @@ input:focus, select:focus {
     #app-container, header { padding: 1.5rem 1rem; }
     .auth-container, .form-container, .modal-content { padding: 1.5rem; }
 }
+
 
 
 
