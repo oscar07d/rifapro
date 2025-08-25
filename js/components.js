@@ -149,10 +149,13 @@ export const getTicketModal = () => `
                     </select>
                 </div>
                 <div class="modal-buttons">
-                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-                    <button type="button" id="generate-image-btn" class="btn btn-secondary">Crear Imagen</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <button type="button" id="whatsapp-share-btn" class="btn btn-whatsapp">WhatsApp</button>
+                    <button type="button" id="generic-share-btn" class="btn btn-secondary">Compartir</button>
                 </div>
             </form>
+            
+            <div id="ticket-image-preview" style="margin-top: 1.5rem;"></div>
         </div>
     </div>
 
@@ -186,3 +189,4 @@ export const getTicketModal = () => `
         </div>
     </div>
 `;
+
