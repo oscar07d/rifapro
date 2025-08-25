@@ -1,65 +1,87 @@
+/* =============================================
+   NUEVO DISEÑO PARA RIFA-PRO (ELEGANTE Y MODERNO)
+   ============================================= */
+
+/* 1. Variables y Estilos Globales */
 :root {
-    --primary-color: #4A90E2;
-    --secondary-color: #50E3C2;
-    --background-color: #f4f6f8;
-    --text-color: #333;
+    --primary-color: #6a11cb;
+    --secondary-color: #2575fc;
+    --background-color: #f0f2f5;
     --card-bg-color: #ffffff;
-    --shadow: 0 4px 8px rgba(0,0,0,0.1);
+    --text-color: #333;
+    --text-light-color: #666;
+    --border-color: #e0e0e0;
+    --success-color: #28a745;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --font-family: 'Poppins', 'Roboto', sans-serif;
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.07);
+    --shadow-md: 0 4px 8px rgba(0,0,0,0.1);
+    --border-radius: 12px;
 }
 
 body {
-    font-family: 'Roboto', sans-serif;
+    font-family: var(--font-family);
     margin: 0;
     background-color: var(--background-color);
     color: var(--text-color);
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
+    line-height: 1.6;
 }
 
+/* 2. Cabecera (Header) */
 header {
-    background-color: var(--primary-color);
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
     color: white;
     padding: 1rem 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow-md);
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
 header h1 {
     margin: 0;
+    font-weight: 600;
+    letter-spacing: 1px;
 }
 
+#user-info span {
+    margin-right: 1rem;
+    font-weight: 500;
+}
+
+/* 3. Contenedor Principal y Tarjetas */
 #app-container {
-    flex-grow: 1;
-    padding: 2rem;
+    padding: 2.5rem 2rem;
     max-width: 1200px;
     margin: 0 auto;
-    width: 100%;
-    box-sizing: border-box;
 }
 
-.auth-container, .form-container, .home-container, .explore-container {
+.auth-container, .form-container, .home-container, .explore-container, .raffle-detail-container {
     background-color: var(--card-bg-color);
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: var(--shadow);
+    padding: 2.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
     width: 100%;
-    max-width: 600px;
+    max-width: 650px;
     margin: 0 auto;
     box-sizing: border-box;
 }
 
-.explore-container, .home-container {
-    max-width: 1200px; /* Ancho completo para estas vistas */
+.explore-container, .home-container, .raffle-detail-container {
+    max-width: 1200px;
 }
 
-h2 {
-    margin-top: 0;
+h2, h3 {
     color: var(--primary-color);
+    font-weight: 600;
+    margin-top: 0;
 }
 
+/* 4. Formularios */
 .form-group {
     margin-bottom: 1.5rem;
 }
@@ -68,168 +90,185 @@ label {
     display: block;
     margin-bottom: 0.5rem;
     font-weight: 500;
+    color: var(--text-light-color);
 }
 
 input[type="text"],
 input[type="email"],
 input[type="password"],
 input[type="number"],
-input[type="date"] {
+input[type="date"],
+input[type="tel"],
+select {
     width: 100%;
-    padding: 0.8rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
     box-sizing: border-box;
+    font-family: var(--font-family);
+    font-size: 1rem;
+    transition: border-color 0.3s, box-shadow 0.3s;
 }
 
+input:focus, select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(106, 17, 203, 0.15);
+}
+
+/* 5. Botones */
 .btn {
     display: inline-block;
     width: 100%;
-    padding: 1rem;
+    padding: 0.9rem 1.5rem;
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     font-size: 1rem;
-    font-weight: 700;
+    font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+    transition: all 0.3s ease;
     text-align: center;
     text-decoration: none;
     box-sizing: border-box;
+    letter-spacing: 0.5px;
 }
 
 .btn:hover {
-    transform: translateY(-2px);
+    transform: translateY(-3px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
 }
 
 .btn-primary {
-    background-color: var(--primary-color);
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
     color: white;
-}
-
-.btn-primary:hover {
-    background-color: #357ABD;
 }
 
 .btn-google {
-    background-color: #DB4437;
-    color: white;
+    background-color: #fff;
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
     margin-top: 1rem;
 }
 
-.btn-google:hover {
-    background-color: #C33D2E;
+#logout-btn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    color: white;
+    padding: 0.5rem 1rem;
+    width: auto;
 }
 
-.home-buttons {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1rem;
-    margin-top: 2rem;
+.btn-secondary {
+    background: transparent;
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+}
+.btn-secondary:hover {
+    background: var(--primary-color);
+    color: white;
 }
 
-/* --- ESTILOS PARA LA LISTA DE RIFAS --- */
 
+/* 6. Vistas Específicas (Explore, Detalle, etc.) */
+
+/* Tarjetas de Rifa */
 #raffles-list {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.5rem;
-    margin-top: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2rem;
 }
 
 .raffle-card {
     background-color: var(--card-bg-color);
-    border-radius: 8px;
-    box-shadow: var(--shadow);
-    padding: 1.5rem;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    display: flex;
-    flex-direction: column;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.3s, box-shadow 0.3s;
+    overflow: hidden; /* Para que el borde se vea bien */
+    border-top: 4px solid var(--primary-color);
 }
-
 .raffle-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+    box-shadow: var(--shadow-md);
+}
+.raffle-card-content {
+    padding: 1.5rem;
 }
 
-.raffle-card h3 {
-    margin-top: 0;
-    color: var(--primary-color);
+/* Cuadrícula de Boletos */
+#tickets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    gap: 0.75rem;
+    margin-top: 1.5rem;
 }
 
-.raffle-card p {
-    margin-bottom: 0.5rem;
-    flex-grow: 1;
+.ticket {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    aspect-ratio: 1 / 1;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+.ticket:hover {
+    transform: scale(1.1);
+    box-shadow: var(--shadow-md);
 }
 
-.btn-secondary {
-    background-color: var(--secondary-color);
-    color: white;
-    margin-top: 1rem;
-}
+/* Colores de estado de los boletos */
+.ticket.available { background-color: #e3f2fd; color: #1e88e5; border-color: #bbdefb; }
+.ticket.pending   { background-color: #fffde7; color: #fbc02d; border-color: #fff9c4; }
+.ticket.partial   { background-color: #fff3e0; color: #fb8c00; border-color: #ffe0b2; }
+.ticket.paid      { background: linear-gradient(45deg, #c8e6c9, #a5d6a7); color: #2e7d32; border-color: #66bb6a; font-size: 1.2rem; }
 
-.btn-secondary:hover {
-    background-color: #48C9A9;
-}
-
-/* --- ESTILOS PARA EL MODAL DE BOLETO --- */
-
+/* 7. Modal */
 .modal-overlay {
-    position: fixed; /* Se queda fijo en la pantalla */
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.6); /* Fondo oscuro semitransparente */
+    background-color: rgba(0, 0, 0, 0.7);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000; /* Se asegura de que esté por encima de todo */
+    z-index: 1000;
 }
 
 .modal-content {
     background-color: white;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    padding: 2.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     width: 90%;
     max-width: 500px;
     position: relative;
-    animation: slide-down 0.3s ease-out;
+    animation: zoom-in 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-@keyframes slide-down {
-    from {
-        transform: translateY(-30px);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
+@keyframes zoom-in {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
 }
 
 .close-modal {
     position: absolute;
-    top: 10px;
-    right: 20px;
-    font-size: 2rem;
-    font-weight: bold;
+    top: 15px;
+    right: 25px;
+    font-size: 2.5rem;
+    font-weight: 300;
     color: #aaa;
     cursor: pointer;
+    transition: color 0.3s;
 }
+.close-modal:hover { color: var(--danger-color); }
 
-.close-modal:hover {
-    color: #333;
-}
-
-/* --- DISEÑO RESPONSIVO --- */
+/* 8. Diseño Responsivo */
 @media (max-width: 768px) {
-    header {
-        flex-direction: column;
-        padding: 1rem;
-        text-align: center;
-    }
-     #app-container {
-        padding: 1rem;
-    }
+    body { font-size: 15px; }
+    #app-container, header { padding: 1.5rem 1rem; }
+    .auth-container, .form-container, .modal-content { padding: 1.5rem; }
 }
