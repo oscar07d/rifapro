@@ -79,15 +79,32 @@ export const getExploreView = (rafflesHTML) => `
 `;
 
 // Genera el HTML para una sola tarjeta de rifa
-export const getRaffleCard = (raffle) => `
+export const getRaffleCard = (raffle) => {
+    // El porcentaje de boletos vendidos se pasa ahora en el objeto 'raffle'
+    const percentage = raffle.soldPercentage || 0;
+
+    return `
     <div class="raffle-card" data-id="${raffle.id}">
-        <h3>${raffle.name}</h3>
-        <p><strong>Premio:</strong> ${raffle.prize}</p>
-        <p><strong>Precio:</strong> $${raffle.ticketPrice.toLocaleString('es-CO')}</p>
-        <p><strong>Sorteo:</strong> ${new Date(raffle.drawDate).toLocaleDateString('es-CO')}</p>
-        <a href="#/raffle/${raffle.id}" class="btn btn-secondary">Participar</a>
+        <div class="raffle-card-content">
+            <h3>${raffle.name}</h3>
+            <p><strong>Premio:</strong> ${raffle.prize}</p>
+            
+            <div class="progress-bar-container">
+                <div class="progress-bar-label">
+                    <span>${percentage}% vendido</span>
+                    <span>100%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-bar-fill" style="width: ${percentage}%;"></div>
+                </div>
+            </div>
+
+            <p><strong>Precio:</strong> $${raffle.ticketPrice.toLocaleString('es-CO')} | <strong>Sorteo:</strong> ${new Date(raffle.drawDate).toLocaleDateString('es-CO')}</p>
+            <a href="#/raffle/${raffle.id}" class="btn btn-secondary">Participar</a>
+        </div>
     </div>
-`;
+    `;
+};
 
 export const getRaffleDetailView = (raffle) => `
     <div class="raffle-detail-container">
@@ -139,3 +156,4 @@ export const getTicketModal = () => `
         </div>
     </div>
 `;
+
