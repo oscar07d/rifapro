@@ -80,14 +80,13 @@ export const getExploreView = (rafflesHTML) => `
 
 // Genera el HTML para una sola tarjeta de rifa
 export const getRaffleCard = (raffle) => {
-    // El porcentaje de boletos vendidos se pasa ahora en el objeto 'raffle'
     const percentage = raffle.soldPercentage || 0;
 
     return `
     <div class="raffle-card" data-id="${raffle.id}">
         <div class="raffle-card-content">
             <h3>${raffle.name}</h3>
-            <p><strong>Premio:</strong> ${raffle.prize}</p>
+            <p class="info-row"><strong>Premio:</strong> ${raffle.prize}</p>
             
             <div class="progress-bar-container">
                 <div class="progress-bar-label">
@@ -99,7 +98,8 @@ export const getRaffleCard = (raffle) => {
                 </div>
             </div>
 
-            <p><strong>Precio:</strong> $${raffle.ticketPrice.toLocaleString('es-CO')} | <strong>Sorteo:</strong> ${new Date(raffle.drawDate).toLocaleDateString('es-CO')}</p>
+            <p class="info-row"><strong>Precio:</strong> $${raffle.ticketPrice.toLocaleString('es-CO')}</p>
+            <p class="info-row"><strong>Sorteo:</strong> ${new Date(raffle.drawDate).toLocaleDateString('es-CO')}</p>
             <a href="#/raffle/${raffle.id}" class="btn btn-secondary">Participar</a>
         </div>
     </div>
@@ -156,4 +156,5 @@ export const getTicketModal = () => `
         </div>
     </div>
 `;
+
 
