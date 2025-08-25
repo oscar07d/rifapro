@@ -244,42 +244,6 @@ function attachEventListeners(path) {
     }
 }
 
-function attachEventListeners(path) {
-    if (path === '/login') {
-        const authForm = document.getElementById('auth-form');
-        const googleLoginBtn = document.getElementById('google-login-btn');
-        const toggleLink = document.getElementById('auth-toggle-link');
-        let isLogin = true;
-
-        authForm.addEventListener('submit', e => {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            if (isLogin) {
-                Auth.loginUser(email, password).catch(err => alert(err.message));
-            } else {
-                Auth.registerUser(email, password).catch(err => alert(err.message));
-            }
-        });
-
-        googleLoginBtn.addEventListener('click', Auth.loginWithGoogle);
-        
-        const toggleAuthMode = e => {
-            e.preventDefault();
-            isLogin = !isLogin;
-            document.getElementById('auth-title').innerText = isLogin ? 'Iniciar Sesión' : 'Registrarse';
-            document.getElementById('auth-action-btn').innerText = isLogin ? 'Iniciar Sesión' : 'Crear Cuenta';
-            document.getElementById('auth-toggle-text').innerHTML = isLogin ? '¿No tienes cuenta? <a href="#" id="auth-toggle-link">Regístrate</a>' : '¿Ya tienes cuenta? <a href="#" id="auth-toggle-link">Inicia Sesión</a>';
-            document.getElementById('auth-toggle-link').addEventListener('click', toggleAuthMode);
-        };
-        toggleLink.addEventListener('click', toggleAuthMode);
-
-    } else if (path === '/create') {
-        const createRaffleForm = document.getElementById('create-raffle-form');
-        createRaffleForm.addEventListener('submit', handleCreateRaffle);
-    }
-}
-
 async function handleCreateRaffle(e) {
     e.preventDefault();
     const user = firebase.auth().currentUser;
@@ -325,3 +289,4 @@ async function handleCreateRaffle(e) {
 window.addEventListener('hashchange', router);
 
 window.addEventListener('load', router);
+
