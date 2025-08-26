@@ -343,26 +343,36 @@ function attachEventListeners(path) {
         const createRaffleForm = document.getElementById('create-raffle-form');
         createRaffleForm.addEventListener('submit', handleCreateRaffle);
     
-        // --- REEMPLAZA LA LÓGICA DEL PAYMENTGRID CON ESTO ---
         const paymentGrid = document.querySelector('.payment-options-grid');
         if (paymentGrid) {
             paymentGrid.addEventListener('click', (e) => {
                 const option = e.target.closest('.payment-option');
                 if (!option) return;
     
-                // 1. Toggle visual de selección
                 option.classList.toggle('selected');
+                
+                // --- LÓGICA DE VISIBILIDAD MEJORADA ---
+                const bankDetailsWrapper = document.getElementById('bank-account-details');
+                const nequiDetails = document.getElementById('nequi-details');
+                const daviplataDetails = document.getElementById('daviplata-details');
+                const brebDetails = document.getElementById('bre-b-details');
     
-                // 2. Lógica para mostrar/ocultar detalles
-                const paymentValue = option.dataset.value;
-                const detailsDiv = document.getElementById(`${paymentValue}-details`);
+                const traditionalBanks = ['av-villas', 'bancolombia', 'bbva', 'bogota', 'caja-social', 'davivienda', 'falabella', 'finandina', 'itau', 'lulo', 'pibank', 'powwi', 'uala'];
+                
+                // Revisa qué está seleccionado y muestra/oculta los campos
+                const selectedOptions = Array.from(document.querySelectorAll('.payment-option.selected')).map(el => el.dataset.value);
     
-                if (detailsDiv) {
-                    if (option.classList.contains('selected')) {
-                        detailsDiv.style.display = 'block'; // Mostrar
-                    } else {
-                        detailsDiv.style.display = 'none';  // Ocultar
-                    }
+                nequiDetails.style.display = selectedOptions.includes('nequi') ? 'block' : 'none';
+                daviplataDetails.style.display = selectedOptions.includes('daviplata') ? 'block' : 'none';
+                brebDetails.style.display = selectedOptions.includes('bre-b') ? 'block' : 'none';
+    
+                const selectedBanks = selectedOptions.filter(val => traditionalBanks.includes(val));
+                if (selectedBanks.length > 0) {
+                    bankDetailsWrapper.style.display = 'block';
+                    // Actualiza la lista de bancos que usan este campo
+                    document.getElementById('bank-list').textContent = selectedBanks.map(b => b.charAt(0).toUpperCase() + b.slice(1)).join(', ');
+                } else {
+                    bankDetailsWrapper.style.display = 'none';
                 }
             });
         }
@@ -461,6 +471,17 @@ async function openTicketModal(ticketNumber) {
     }
 }
 
+¡Entendido! Ese es el código de ejemplo que te di, que solo maneja Nequi y Bancolombia.
+
+Necesitas reemplazarlo con la versión final que es capaz de manejar todos los casos: Nequi, Daviplata, Bre-B y el grupo de bancos tradicionales.
+
+## Código Final para handleCreateRaffle
+Reemplaza por completo tu función handleCreateRaffle en el archivo public/js/main.js con este código definitivo.
+
+JavaScript
+
+// public/js/main.js
+
 async function handleCreateRaffle(e) {
     e.preventDefault();
     const user = firebase.auth().currentUser;
@@ -475,26 +496,35 @@ async function handleCreateRaffle(e) {
         return;
     }
 
-    // --- LÓGICA ACTUALIZADA PARA RECOLECTAR DATOS DETALLADOS ---
-    const paymentMethodsData = Array.from(selectedOptions).map(option => {
+    const paymentMethodsData = [];
+    // Lista de bancos que usan la plantilla genérica de cuenta
+    const traditionalBanks = ['av-villas', 'bancolombia', 'bbva', 'bogota', 'caja-social', 'davivienda', 'falabella', 'finandina', 'itau', 'lulo', 'pibank', 'powwi', 'uala'];
+    
+    // Usamos un bucle para poder hacer validaciones y detener el proceso si algo falla
+    for (const option of selectedOptions) {
         const methodValue = option.dataset.value;
-        const methodInfo = { 
-            method: methodValue // Guardamos el nombre base (ej: "nequi")
-        };
+        const methodInfo = { method: methodValue };
 
-        // Si es Bancolombia, recogemos sus datos específicos
-        if (methodValue === 'bancolombia') {
-            methodInfo.accountType = document.getElementById('bancolombia-account-type').value;
-            methodInfo.accountNumber = document.getElementById('bancolombia-account-number').value;
-        }
-        // Si es Nequi, recogemos su dato específico
         if (methodValue === 'nequi') {
             methodInfo.phoneNumber = document.getElementById('nequi-phone-number').value;
+        } else if (methodValue === 'daviplata') {
+            methodInfo.phoneNumber = document.getElementById('daviplata-phone-number').value;
+        } else if (methodValue === 'bre-b') {
+            const brebKey = document.getElementById('bre-b-key').value;
+            // Validación específica para Bre-B
+            if (!brebKey.startsWith('@')) {
+                alert('La llave de Bre-B debe empezar con "@". Por favor, corrígela.');
+                return; // Detenemos el envío del formulario
+            }
+            methodInfo.key = brebKey;
+        } else if (traditionalBanks.includes(methodValue)) {
+            // Todos los bancos tradicionales comparten los mismos datos del formulario genérico
+            methodInfo.accountType = document.getElementById('bank-account-type').value;
+            methodInfo.accountNumber = document.getElementById('bank-account-number').value;
         }
-        // Puedes agregar más `if` aquí para otros bancos que requieran detalles
         
-        return methodInfo;
-    });
+        paymentMethodsData.push(methodInfo);
+    }
 
     const raffle = {
         name: document.getElementById('raffle-name').value,
@@ -502,7 +532,7 @@ async function handleCreateRaffle(e) {
         ticketPrice: parseFloat(document.getElementById('ticket-price').value),
         paymentDeadline: document.getElementById('payment-deadline').value,
         drawDate: document.getElementById('draw-date').value,
-        paymentMethods: paymentMethodsData, // Guardamos el nuevo array con todos los detalles
+        paymentMethods: paymentMethodsData, // Guardamos el array con todos los detalles
         ownerId: user.uid,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
     };
@@ -533,6 +563,3 @@ async function handleCreateRaffle(e) {
 window.addEventListener('hashchange', router);
 
 window.addEventListener('load', router);
-
-
-
