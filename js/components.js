@@ -92,7 +92,15 @@ export const getCreateRaffleView = () => {
 
             <div class="form-group">
                 <label for="ticket-price">Precio por boleto</label>
-                <input type="number" id="ticket-price" required min="0">
+                <input type="number" id="ticket-price" required min="0" placeholder="Ej: 20000 (sin puntos ni comas)">
+                
+                <div class="predefined-options">
+                    <span>O escoge un valor:</span>
+                    <button type="button" class="price-option-btn" data-price="5000">5.000</button>
+                    <button type="button" class="price-option-btn" data-price="10000">10.000</button>
+                    <button type="button" class="price-option-btn" data-price="20000">20.000</button>
+                    <button type="button" class="price-option-btn" data-price="30000">30.000</button>
+                </div>
             </div>
             <div class="form-group">
                 <label for="payment-deadline">Fecha límite de pago</label>
@@ -314,6 +322,7 @@ export const getTicketModal = () => `
         </div>
     </div>
 `;
+
 
 
 
