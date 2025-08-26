@@ -59,6 +59,7 @@ export const getHomeView = (userName) => `
 
 // Vista para crear una nueva rifa
 export const getCreateRaffleView = () => {
+    // Esta parte que genera los iconos no cambia
     const paymentOptionsHTML = paymentMethods.map(method => `
         <div class="payment-option" data-value="${method.value}">
             <img src="${method.icon}" alt="${method.name}">
@@ -66,6 +67,7 @@ export const getCreateRaffleView = () => {
         </div>
     `).join('');
 
+    // El return ahora incluye los nuevos divs ocultos
     return `
     <div class="form-container">
         <h2>Crear Nueva Rifa</h2>
@@ -94,6 +96,31 @@ export const getCreateRaffleView = () => {
                 <label>Métodos de pago</label>
                 <div class="payment-options-grid">
                     ${paymentOptionsHTML}
+                </div>
+            </div>
+
+            <div id="payment-details-container">
+                <div id="bancolombia-details" class="payment-details-wrapper" style="display: none;">
+                    <h4>Detalles para Bancolombia</h4>
+                    <div class="form-group">
+                        <label for="bancolombia-account-type">Tipo de Cuenta</label>
+                        <select id="bancolombia-account-type">
+                            <option value="ahorros">Ahorros</option>
+                            <option value="corriente">Corriente</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="bancolombia-account-number">Número de Cuenta</label>
+                        <input type="text" id="bancolombia-account-number" placeholder="Ej: 1234567890">
+                    </div>
+                </div>
+                
+                <div id="nequi-details" class="payment-details-wrapper" style="display: none;">
+                    <h4>Detalles para Nequi</h4>
+                    <div class="form-group">
+                        <label for="nequi-phone-number">Número de Celular</label>
+                        <input type="tel" id="nequi-phone-number" placeholder="Ej: 3001234567">
+                    </div>
                 </div>
             </div>
             <button type="submit" class="btn btn-primary">Crear Rifa</button>
@@ -258,6 +285,7 @@ export const getTicketModal = () => `
         </div>
     </div>
 `;
+
 
 
 
