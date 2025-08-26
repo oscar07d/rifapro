@@ -509,6 +509,20 @@ input:focus, select:focus {
     height: 24px;
 }
 
+.payment-details-wrapper {
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+    background-color: #f8f9fa;
+}
+
+.payment-details-wrapper h4 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    color: var(--primary-color);
+}
+
 /* 8. Diseño Responsivo */
 @media (max-width: 768px) {
     /* Ajustes generales para pantallas pequeñas */
@@ -601,6 +615,7 @@ input:focus, select:focus {
         height: 30px;
     }
 }
+
 
 
 
