@@ -116,10 +116,9 @@ export const getExploreView = (rafflesHTML) => `
 export const getRaffleCard = (raffle) => {
     const percentage = raffle.soldPercentage || 0;
     
-    // Generamos los iconos de métodos de pago
     const paymentIconsHTML = raffle.paymentMethods.map(methodValue => {
         const method = paymentMethods.find(p => p.value === methodValue);
-        return method ? `<img src="assets/${method.icon}" alt="${method.name}" title="${method.name}">` : '';
+        return method ? `<img src="${method.icon}" alt="${method.name}" title="${method.name}">` : '';
     }).join('');
 
     return `
@@ -129,7 +128,14 @@ export const getRaffleCard = (raffle) => {
             <p class="info-row"><strong>Premio:</strong> ${raffle.prize}</p>
             
             <div class="progress-bar-container">
+                <div class="progress-bar-label">
+                    <span>${percentage}% vendido</span>
+                    <span>100%</span>
                 </div>
+                <div class="progress-bar">
+                    <div class="progress-bar-fill" style="width: ${percentage}%;"></div>
+                </div>
+            </div>
 
             <p class="info-row"><strong>Precio:</strong> $${raffle.ticketPrice.toLocaleString('es-CO')} | <strong>Sorteo:</strong> ${new Date(raffle.drawDate).toLocaleDateString('es-CO')}</p>
             
@@ -254,6 +260,7 @@ export const getTicketModal = () => `
         </div>
     </div>
 `;
+
 
 
 
