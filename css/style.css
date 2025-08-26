@@ -511,7 +511,6 @@ input:focus, select:focus {
         padding: 1.5rem 1rem;
     }
 
-    /* La cabecera se apila verticalmente */
     header {
         flex-direction: column;
         gap: 1rem;
@@ -525,8 +524,7 @@ input:focus, select:focus {
         align-items: center;
     }
 
-    /* Reducimos el padding de los contenedores principales */
-    .auth-container, .form-container, .home-container, .explore-container, .raffle-detail-container, .modal-content {
+    .auth-container, .form-container, .home-container, .explore-container, .modal-content {
         padding: 1.5rem;
     }
     
@@ -534,27 +532,36 @@ input:focus, select:focus {
         font-size: 1.5rem;
     }
 
-    /* La cuadrícula de boletos ahora tendrá 5 columnas */
-    #tickets-grid {
-        grid-template-columns: repeat(10, 1fr);
-        gap: 0.25rem; 
-    }
-    
-    .ticket {
-        font-size: 0.75rem; 
-        border-radius: 4px; /* Hacemos los bordes un poco más pequeños */
+    /* --- INICIO DE LOS CAMBIOS PARA LA CUADRÍCULA --- */
+
+    /* 1. Reducimos el padding del contenedor para dar más espacio */
+    .raffle-detail-container {
+        padding: 1.5rem 0.5rem;
     }
 
-    /* Las tarjetas de rifa y botones del home ocuparán una sola columna */
+    /* 2. Mantenemos 10 columnas pero con un espacio mínimo */
+    #tickets-grid {
+        grid-template-columns: repeat(10, 1fr);
+        gap: 2px; /* Un espacio muy pequeño entre números */
+    }
+    
+    /* 3. Hacemos los números un poco más pequeños */
+    .ticket {
+        font-size: 0.7rem; 
+        border-radius: 4px;
+    }
+    
+    /* --- FIN DE LOS CAMBIOS --- */
+
     #raffles-list, .home-buttons {
         grid-template-columns: 1fr;
     }
     
-    /* Ajuste en el modal para el texto de WhatsApp */
     .ticket-preview-wrapper p {
         padding: 0 1rem;
     }
 }
+
 
 
 
