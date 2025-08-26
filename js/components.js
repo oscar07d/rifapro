@@ -2,23 +2,23 @@
 
 // LISTA CENTRAL DE MÉTODOS DE PAGO
 const paymentMethods = [
-    { name: 'AV Villas', value: 'av-villas', icon: 'banks/av-villas.svg' },
-    { name: 'Bancolombia', value: 'bancolombia', icon: 'banks/bancolombia.svg' },
-    { name: 'BBVA', value: 'bbva', icon: 'banks/bbva.svg' },
-    { name: 'Bogotá', value: 'bogota', icon: 'banks/bogota.svg' },
-    { name: 'Caja Social', value: 'caja-social', icon: 'banks/caja-social.svg' },
-    { name: 'Daviplata', value: 'daviplata', icon: 'banks/daviplata.svg' },
-    { name: 'Davivienda', value: 'davivienda', icon: 'banks/dvienda.svg' },
-    { name: 'Falabella', value: 'falabella', icon: 'banks/falabella.svg' },
-    { name: 'Finandina', value: 'finandina', icon: 'banks/finandina.svg' },
-    { name: 'Itaú', value: 'itau', icon: 'banks/itau.svg' },
-    { name: 'Lulo Bank', value: 'lulo', icon: 'banks/lulo.svg' },
-    { name: 'Movii', value: 'movii', icon: 'anks/movii.svg' },
-    { name: 'Nequi', value: 'nequi', icon: 'banks/nequi.svg' },
-    { name: 'Nu', value: 'nu', icon: 'banks/nu.svg' },
-    { name: 'Pibank', value: 'pibank', icon: 'banks/pibank.svg' },
-    { name: 'Powwi', value: 'powwi', icon: 'banks/powwi.svg' },
-    { name: 'Ualá', value: 'uala', icon: 'banks/uala.svg' }
+    { name: 'AV Villas', value: 'av-villas', icon: 'assets/banks/av-villas.svg' },
+    { name: 'Bancolombia', value: 'bancolombia', icon: 'assets/banks/bancolombia.svg' },
+    { name: 'BBVA', value: 'bbva', icon: 'assets/banks/bbva.svg' },
+    { name: 'Bogotá', value: 'bogota', icon: 'assets/banks/bogota.svg' },
+    { name: 'Caja Social', value: 'caja-social', icon: 'assets/banks/caja-social.svg' },
+    { name: 'Daviplata', value: 'daviplata', icon: 'assets/banks/daviplata.svg' },
+    { name: 'Davivienda', value: 'davivienda', icon: 'assets/banks/dvienda.svg' },
+    { name: 'Falabella', value: 'falabella', icon: 'assets/banks/falabella.svg' },
+    { name: 'Finandina', value: 'finandina', icon: 'assets/banks/finandina.svg' },
+    { name: 'Itaú', value: 'itau', icon: 'assets/banks/itau.svg' },
+    { name: 'Lulo Bank', value: 'lulo', icon: 'assets/banks/lulo.svg' },
+    { name: 'Movii', value: 'movii', icon: 'assets/banks/movii.svg' },
+    { name: 'Nequi', value: 'nequi', icon: 'assets/banks/nequi.svg' },
+    { name: 'Nu', value: 'nu', icon: 'assets/banks/nu.svg' },
+    { name: 'Pibank', value: 'pibank', icon: 'assets/banks/pibank.svg' },
+    { name: 'Powwi', value: 'powwi', icon: 'assets/banks/powwi.svg' },
+    { name: 'Ualá', value: 'uala', icon: 'assets/banks/uala.svg' }
 ];
 
 // Vista para el inicio de sesión y registro
@@ -257,6 +257,7 @@ export const getTicketModal = () => `
         </div>
     </div>
 `;
+
 
 
 
