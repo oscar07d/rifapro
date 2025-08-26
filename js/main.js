@@ -212,60 +212,90 @@ async function handleClearTicket() {
 }
 
 async function handleShare(type) {
-    const shareBtn = type === 'whatsapp' ? document.getElementById('whatsapp-share-btn') : document.getElementById('generic-share-btn');
+    const shareBtnId = type === 'whatsapp' 
+        ? (document.getElementById('whatsapp-share-btn') ? 'whatsapp-share-btn' : 'whatsapp-share-btn-info')
+        : (document.getElementById('generic-share-btn') ? 'generic-share-btn' : 'generic-share-btn-info');
+    
+    const shareBtn = document.getElementById(shareBtnId);
+    if (!shareBtn) return;
+    
     const originalText = shareBtn.textContent;
     shareBtn.textContent = 'Generando...';
     shareBtn.disabled = true;
 
     try {
-        // 1. Obtener datos y generar la imagen (código que ya conoces)
         const raffleId = window.location.hash.slice(1).split('/')[2];
         const ticketNumber = document.getElementById('modal-ticket-number').textContent.replace('Boleto #', '');
+        
         const raffleDoc = await db.collection('raffles').doc(raffleId).get();
         const ticketDoc = await db.collection('raffles').doc(raffleId).collection('tickets').doc(ticketNumber).get();
         if (!raffleDoc.exists || !ticketDoc.exists) throw new Error("Datos no encontrados");
+        
         const raffleData = raffleDoc.data();
         const ticketData = ticketDoc.data();
 
-        // Llenar plantilla...
-        document.getElementById('template-number').textContent = ticketData.number;
-        document.getElementById('template-raffle-name').textContent = raffleData.name;
+        // --- INICIO DE LA LÓGICA ACTUALIZADA ---
+        // Llenamos TODOS los campos de la plantilla final
         document.getElementById('template-prize').textContent = raffleData.prize;
         document.getElementById('template-buyer').textContent = ticketData.buyerName;
+        document.getElementById('template-manager').textContent = raffleData.manager;
+        document.getElementById('template-lottery').textContent = raffleData.lottery;
         document.getElementById('template-draw-date').textContent = new Date(raffleData.drawDate).toLocaleDateString('es-CO');
+        document.getElementById('template-number').textContent = ticketData.number;
+        
+        // Lógica para llenar los métodos de pago detallados
+        const paymentMethodsContainer = document.getElementById('template-payment-methods');
+        let paymentHTML = '';
+        raffleData.paymentMethods.forEach(pm => {
+            const methodDetails = paymentMethods.find(m => m.value === pm.method);
+            if (methodDetails) {
+                let detailsText = '';
+                if (pm.method === 'nequi' || pm.method === 'daviplata') {
+                    detailsText = `Celular: ${pm.phoneNumber}`;
+                } else if (pm.method === 'bre-b') {
+                    detailsText = `Llave: ${pm.key}`;
+                } else if (pm.accountNumber) { // Para bancos tradicionales
+                    detailsText = `${pm.accountType.charAt(0).toUpperCase() + pm.accountType.slice(1)}: ${pm.accountNumber}`;
+                } else {
+                    // Para métodos sin detalles como 'Efectivo'
+                    detailsText = methodDetails.name;
+                }
+
+                paymentHTML += `
+                    <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                        <img src="${methodDetails.icon}" alt="${methodDetails.name}" style="height: 24px; margin-right: 10px;">
+                        <span style="font-weight: 500;">${detailsText}</span>
+                    </div>
+                `;
+            }
+        });
+        paymentMethodsContainer.innerHTML = paymentHTML;
+        // --- FIN DE LA LÓGICA ACTUALIZADA ---
 
         const templateElement = document.getElementById('ticket-template');
         const canvas = await html2canvas(templateElement, { useCORS: true, scale: 2 });
         const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
         const fileName = `boleto-${ticketData.number}-${raffleData.name.replace(/\s+/g, '-')}.png`;
         const file = new File([blob], fileName, { type: 'image/png' });
+        const shareText = `¡Hola ${ticketData.buyerName}! Aquí está tu boleto #${ticketData.number} para la rifa. ¡Mucha suerte!`;
 
-        const shareText = `¡Hola *${ticketData.buyerName}*! Aquí está tu boleto *#${ticketData.number}* para la rifa *"${raffleData.name}"*. ¡Mucha suerte!`;
-
-        // 2. Decidir qué acción tomar
         if (type === 'whatsapp') {
-                // Obtenemos el contenedor principal del modal
-                const viewContainer = document.getElementById('modal-view-container');
-                const imageUrl = URL.createObjectURL(blob);
-                
-                // Reemplazamos el formulario por la vista previa
-                viewContainer.innerHTML = `
-                    <div class="ticket-preview-wrapper">
-                        <h4>¡Boleto listo para WhatsApp!</h4>
-                        <p>1. Mantén presionada la imagen y elige "Copiar imagen".</p>
-                        <p>2. Haz clic en el botón para abrir WhatsApp y pega la imagen en el chat.</p>
-                        <a href="https://wa.me/?text=${encodeURIComponent(shareText)}" target="_blank" class="btn btn-whatsapp" style="margin-top:1rem; width: auto;">Abrir WhatsApp</a>
-                        <img src="${imageUrl}" alt="Boleto de Rifa">
-                    </div>
-                `;
-
-            } else {
-            // Para el resto, usamos la Web Share API que ya teníamos
+            const viewContainer = document.getElementById('modal-view-container');
+            const imageUrl = URL.createObjectURL(blob);
+            viewContainer.innerHTML = `
+                <div class="ticket-preview-wrapper">
+                    <h4>¡Boleto listo para WhatsApp!</h4>
+                    <p>1. Mantén presionada la imagen y elige "Copiar imagen".</p>
+                    <p>2. Haz clic en el botón para abrir WhatsApp y pega la imagen en el chat.</p>
+                    <a href="https://wa.me/?text=${encodeURIComponent(shareText)}" target="_blank" class="btn btn-whatsapp" style="margin-top:1rem; width: auto;">Abrir WhatsApp</a>
+                    <img src="${imageUrl}" alt="Boleto de Rifa">
+                </div>
+            `;
+        } else {
             const shareData = { files: [file], title: `Boleto: ${raffleData.name}`, text: shareText };
             if (navigator.canShare && navigator.canShare(shareData)) {
                 await navigator.share(shareData);
             } else {
-                // Fallback de descarga si no se puede compartir
                 const link = document.createElement('a');
                 link.download = fileName;
                 link.href = URL.createObjectURL(blob);
@@ -610,4 +640,5 @@ async function handleDeleteRaffle(raffleId, cardElement) {
         alert("Hubo un error al intentar eliminar la rifa.");
     }
 }
+
 
