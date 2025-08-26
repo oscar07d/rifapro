@@ -11,7 +11,7 @@ const paymentMethods = [
     { name: 'BBVA', value: 'bbva', icon: 'assets/banks/bbva.svg' },
     { name: 'Bogotá', value: 'bogota', icon: 'assets/banks/bogota.svg' },
     { name: 'Caja Social', value: 'caja-social', icon: 'assets/banks/caja-social.svg' },
-    { name: 'Davivienda', value: 'davivienda', icon: 'assets/banks/dvienda.svg' },
+    { name: 'Davivienda', value: 'davivienda', icon: 'assets/banks/davivienda.svg' },
     { name: 'Falabella', value: 'falabella', icon: 'assets/banks/falabella.svg' },
     { name: 'Finandina', value: 'finandina', icon: 'assets/banks/finandina.svg' },
     { name: 'Itaú', value: 'itau', icon: 'assets/banks/itau.svg' },
@@ -257,6 +257,7 @@ export const getTicketModal = () => `
         </div>
     </div>
 `;
+
 
 
 
