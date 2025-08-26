@@ -263,8 +263,8 @@ async function handleShare(type) {
                 }
 
                 paymentHTML += `
-                    <div style="display: flex; align-items: center; margin-bottom: 8px;">
-                        <img src="${methodDetails.icon}" alt="${methodDetails.name}" style="height: 24px; margin-right: 10px;">
+                    <div style="display: flex; align-items: center; margin-bottom: 5px;"> // <-- Ajusta margin-bottom aquí
+                        <img src="${methodDetails.icon}" alt="${methodDetails.name}" style="height: 20px; margin-right: 8px;"> // <-- Ajusta height y margin-right aquí
                         <span style="font-weight: 500;">${detailsText}</span>
                     </div>
                 `;
@@ -641,6 +641,7 @@ async function handleDeleteRaffle(raffleId, cardElement) {
         alert("Hubo un error al intentar eliminar la rifa.");
     }
 }
+
 
 
 
