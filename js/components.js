@@ -330,7 +330,11 @@ export const getTicketModal = () => `
                     <div style="margin-top: auto; border-top: 2px solid #f0f2f5; padding-top: 15px;">
                         <h4 style="margin: 0 0 10px 0; color: #6a11cb;">Realiza tu pago a:</h4>
                         <div id="template-payment-methods">
+                            <div style="display: flex; align-items: center; margin-bottom: 5px;"> 
+                                <img src="${methodDetails.icon}" alt="${methodDetails.name}" style="height: 20px; margin-right: 8px;"> 
+                                <span style="font-weight: 500;">${detailsText}</span>
                             </div>
+                        </div>
                     </div>
                 </div>
                 <div style="width: 45%; background: linear-gradient(45deg, #6a11cb, #2575fc); color: white; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
@@ -350,4 +354,5 @@ export const getTicketModal = () => `
         </div>
     </div>
 `;
+
 
