@@ -615,6 +615,10 @@ input:focus, select:focus {
     .ticket-preview-wrapper p {
         padding: 0 1rem;
     }
+   .predefined-options {
+        flex-wrap: wrap; /* Permite que los botones pasen a la siguiente línea */
+        gap: 0.5rem;
+    }
 }
 
 /* 9. Ajustes Finos para Pantallas Muy Estrechas */
@@ -647,6 +651,7 @@ input:focus, select:focus {
         height: 30px;
     }
 }
+
 
 
 
