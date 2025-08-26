@@ -48,7 +48,7 @@ export const getHomeView = (userName) => `
         <p>¿Qué te gustaría hacer hoy?</p>
         <div class="home-buttons">
             <a href="#/create" class="btn btn-primary">Crear Rifa</a>
-            <a href="#/explore" class="btn btn-primary">Explorar Rifas</a>
+            <a href="#/explore" class="btn btn-primary">Administrar Rifas</a>
             <a href="#/my-raffles" class="btn btn-primary">Mis Rifas</a>
             <a href="#/settings" class="btn btn-primary">Configuración</a>
         </div>
@@ -113,7 +113,6 @@ export const getExploreView = (rafflesHTML) => `
 // Genera el HTML para una sola tarjeta de rifa
 export const getRaffleCard = (raffle) => {
     const percentage = raffle.soldPercentage || 0;
-    
     const paymentIconsHTML = raffle.paymentMethods.map(methodValue => {
         const method = paymentMethods.find(p => p.value === methodValue);
         return method ? `<img src="${method.icon}" alt="${method.name}" title="${method.name}">` : '';
@@ -141,7 +140,7 @@ export const getRaffleCard = (raffle) => {
                 ${paymentIconsHTML}
             </div>
 
-            <a href="#/raffle/${raffle.id}" class="btn btn-secondary">Participar</a>
+            <a href="#/raffle/${raffle.id}" class="btn btn-secondary">Administrar</a>
         </div>
     </div>
     `;
@@ -257,6 +256,7 @@ export const getTicketModal = () => `
         </div>
     </div>
 `;
+
 
 
 
