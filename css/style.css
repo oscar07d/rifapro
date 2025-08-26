@@ -562,7 +562,33 @@ input:focus, select:focus {
     }
 }
 
+/* 9. Ajustes Finos para Pantallas Muy Estrechas */
+@media (max-width: 375px) {
+    /* Hacemos la información de la rifa un poco más compacta */
+    .raffle-info h2 {
+        font-size: 1.3rem;
+    }
+    .raffle-info p {
+        font-size: 0.9rem;
+    }
 
+    /* Reducimos aún más el padding de la tarjeta */
+    .raffle-detail-container {
+        padding: 1.5rem 0.25rem;
+    }
 
+    /* Hacemos la cuadrícula y los números lo más pequeños posible */
+    #tickets-grid {
+        gap: 1px;
+    }
+    
+    .ticket {
+        font-size: 0.65rem;
+        border-radius: 3px;
+    }
 
-
+    /* Ajustamos el tamaño del logo en el header */
+    .header-logo-img {
+        height: 30px;
+    }
+}
