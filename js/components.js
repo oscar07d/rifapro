@@ -255,11 +255,10 @@ export const getTicketModal = () => `
     <div id="ticket-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
             <span class="close-modal">&times;</span>
-            <h3 id="modal-ticket-number">Boleto #00</h3>
-            
             <div id="modal-view-container">
                 
-                <form id="ticket-form">
+                <form id="ticket-form" style="display: block;">
+                    <h3 id="modal-ticket-number-form" class="modal-title">Boleto #00</h3>
                     <div class="form-group">
                         <label for="buyer-name">Nombre del Comprador</label>
                         <input type="text" id="buyer-name" required>
@@ -280,26 +279,27 @@ export const getTicketModal = () => `
                         <button type="submit" class="btn btn-primary">Guardar Cambios</button>
                         <button type="button" id="clear-ticket-btn-form" class="btn btn-danger">Limpiar Boleto</button>
                     </div>
-                     <div class="modal-buttons" style="margin-top: 0.5rem;">
+                    <div class="modal-buttons" style="margin-top: 0.5rem;">
                         <button type="button" id="whatsapp-share-btn" class="btn btn-whatsapp">WhatsApp</button>
                         <button type="button" id="generic-share-btn" class="btn btn-secondary">Compartir</button>
                     </div>
                 </form>
 
                 <div id="ticket-info-view" style="display: none;">
+                    <h3 id="modal-ticket-number-info" class="modal-title">Boleto #00</h3>
                     <div class="form-group">
                         <label>A nombre de:</label>
-                        <p id="info-buyer-name"></p>
+                        <p id="info-buyer-name" class="info-text"></p>
                     </div>
                     <div class="form-group">
                         <label>Número de Celular</label>
-                        <p id="info-buyer-phone"></p>
+                        <p id="info-buyer-phone" class="info-text"></p>
                     </div>
                     <div class="form-group">
                         <label>Estado del Pago</label>
-                        <p id="info-payment-status"></p>
+                        <p id="info-payment-status" class="info-text"></p>
                     </div>
-                     <div class="modal-buttons">
+                    <div class="modal-buttons">
                         <button type="button" id="clear-ticket-btn-info" class="btn btn-danger">Limpiar Boleto</button>
                     </div>
                     <div class="modal-buttons" style="margin-top: 0.5rem;">
@@ -307,39 +307,35 @@ export const getTicketModal = () => `
                         <button type="button" id="generic-share-btn-info" class="btn btn-secondary">Compartir</button>
                     </div>
                 </div>
+
+                <div id="ticket-image-preview" style="display: none;"></div>
+
             </div>
         </div>
     </div>
 
     <div id="ticket-template" style="position: absolute; left: -9999px; width: 800px; background: white; display: flex; padding: 20px; box-sizing: border-box; border-radius: 15px; font-family: 'Poppins', sans-serif;">
         <div style="border: 3px solid #6a11cb; padding: 30px; border-radius: 15px; width: 100%; display: flex; flex-direction: column;">
-            
             <div style="text-align: center; border-bottom: 2px solid #f0f2f5; padding-bottom: 15px; margin-bottom: 20px;">
                 <svg id="Capa_2" data-name="Capa 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1010.84 231.45" style="height: 60px;">
                     <defs><style>.cls-1,.cls-2{stroke-miterlimit:10;stroke-width:7.4px;}.cls-1,.cls-2,.cls-3{stroke:#1d1d1b;stroke-linecap:round;}.cls-1,.cls-3{fill:none;}.cls-2{fill:#fff;}.cls-3{stroke-linejoin:round;stroke-width:12.52px;}</style></defs>
                     <g id="Capa_1-2" data-name="Capa 1"><g><g><path d="M218.07,54.14h-28.47c-2.24-1.48-4.26-3.36-5.98-5.61-5.16-6.74-6.44-15.22-3.67-22.95l-3.43-4.4c-5.13,2.5-10.89,3.47-16.69,2.74-5.8-.72-11.14-3.06-15.51-6.74l-47.45,36.96h-20.38L145.99,0l3.84,4.94c2.85,3.66,6.95,5.99,11.54,6.56,4.6,.57,9.14-.69,12.8-3.53l4.94-3.85,15.61,20.05-2.06,3.63c-2.43,4.3-2.09,9.2,.91,13.12s7.64,5.53,12.42,4.3l4.28-1.09,7.8,10.01Z"/><path d="M266.01,130.5l3.86-1.61v-31.52h-6.26c-14.87,0-26.97-12.1-26.97-26.97v-6.26H33.24v6.26c0,14.87-12.11,26.97-26.98,26.97H0v31.52l3.86,1.61c8.7,3.62,11.86,11.51,11.92,17.69,.05,6.18-2.97,14.13-11.62,17.9l-4.16,1.82v30.3H6.26c14.87,0,26.98,12.1,26.98,26.98v6.26H236.64v-6.26c0-14.88,12.1-26.98,26.97-26.98h6.26v-30.3l-4.17-1.82c-8.64-3.77-11.66-11.72-11.61-17.9,.06-6.18,3.22-14.07,11.92-17.69Zm-24.44,17.58c-.1,11.73,5.86,22.08,15.78,27.8v10.31c-16.77,2.68-30.06,15.96-32.74,32.74H45.26c-2.68-16.78-15.96-30.06-32.74-32.74v-10.31c9.92-5.72,15.88-16.07,15.78-27.8-.1-11.54-6.05-21.64-15.78-27.25v-11.43c16.78-2.68,30.06-15.97,32.74-32.74H224.61c2.68,16.77,15.97,30.06,32.74,32.74v11.43c-9.73,5.61-15.68,15.71-15.78,27.25Z"/><polygon class="cls-3" points="127.86 104.58 147.23 126.8 176.51 123.43 161.37 148.72 173.62 175.53 144.89 168.95 123.18 188.88 120.56 159.52 94.9 145.03 122.01 133.47 127.86 104.58"/><line class="cls-2" x1="53.61" y1="117.05" x2="53.61" y2="180.05"/><line class="cls-1" x1="220.68" y1="117.05" x2="220.68" y2="180.05"/><path d="M170.04,54.14h-9.96l-9.78-10.87c-1.37-1.52-1.25-3.86,.27-5.23,1.52-1.36,3.86-1.24,5.23,.28l14.24,15.82Z"/></g><g><path d="M376.56,167.69h-15.45v58.6h-29.84V74.1h59.46c29.62,0,48.51,20.39,48.51,46.79,0,21.25-12.45,37.35-32.41,43.14l32.63,62.25h-33.06l-29.84-58.6Zm8.59-25.54c15.03,0,23.83-8.59,23.83-21.04s-8.8-21.25-23.83-21.25h-24.04v42.29h24.04Z"/><path d="M473.58,68.3c9.87,0,17.6,7.94,17.6,17.82s-7.73,17.39-17.6,17.39-17.6-7.94-17.6-17.39,7.94-17.82,17.6-17.82Zm-14.17,157.98V120.68h28.55v105.61h-28.55Z"/><path d="M551.28,109.09v11.59h23.83v24.47h-23.83v81.14h-28.76v-81.14h-17.6v-24.47h17.6v-12.02c0-23.83,15.02-39.28,38.42-39.28,6.01,0,11.81,1.07,14.17,2.15v24.04c-1.5-.43-4.29-1.07-9.02-1.07-6.44,0-14.81,2.79-14.81,14.6Z"/><path d="M616.11,165.54l25.97-3.86c6.01-.86,7.94-3.86,7.94-7.51,0-7.51-5.8-13.74-17.82-13.74s-19.32,7.94-20.18,17.17l-25.33-5.37c1.72-16.53,16.96-34.77,45.29-34.77,33.48,0,45.93,18.89,45.93,40.14v51.94c0,5.58,.64,13.09,1.29,16.74h-26.19c-.64-2.79-1.07-8.59-1.07-12.66-5.37,8.37-15.45,15.67-31.12,15.67-22.54,0-36.27-15.24-36.27-31.77,0-18.89,13.95-29.41,31.55-31.98Zm33.91,18.03v-4.72l-23.83,3.65c-7.3,1.07-13.09,5.15-13.09,13.31,0,6.22,4.51,12.23,13.74,12.23,12.02,0,23.18-5.8,23.18-24.47Z"/><path d="M733.3,168.97v57.31h-29.62V74.1h56.88c30.05,0,50.01,19.96,50.01,47.44s-19.96,47.44-50.01,47.44h-27.26Zm23.61-25.54c14.81,0,23.83-8.59,23.83-21.68s-9.02-21.89-23.83-21.89h-23.4v43.57h23.4Z"/><path d="M891.07,149.01c-3.22-.64-6.01-.86-8.59-.86-14.6,0-27.26,7.08-27.26,29.84v48.3h-28.55V120.68h27.69v15.67c6.44-13.95,21.04-16.53,30.05-16.53,2.36,0,4.51,.21,6.65,.43v28.76Z"/><path d="M1010.84,173.48c0,32.41-23.83,56.02-55.38,56.02s-55.38-23.61-55.38-56.02,23.83-56.02,55.38-56.02,55.38,23.4,55.38,56.02Zm-28.55,0c0-19.96-12.88-30.05-26.83-30.05s-26.83,10.09-26.83,30.05,12.88,30.05,26.83,30.05,26.83-10.09,26.83-30.05Z"/></g></g></g>
-                </svg>
             </div>
             <div style="display: flex; flex-grow: 1; gap: 30px;">
                 <div style="width: 55%; text-align: left; display: flex; flex-direction: column; gap: 10px; font-size: 1.1rem;">
-                    <div><strong>Premio:</strong> <span id="template-prize">1,000,000</span></div>
-                    <div><strong>A nombre de:</strong> <span id="template-buyer">Santiago Hernández</span></div>
-                    <div><strong>Responsable:</strong> <span id="template-manager">José Trujillo</span></div>
-                    <div><strong>Juega con:</strong> <span id="template-lottery">Lotería de Boyacá</span></div>
-                    <div><strong>Fecha Sorteo:</strong> <span id="template-draw-date">25/8/2025</span></div>
+                    <div><strong>Premio:</strong> <span id="template-prize"></span></div>
+                    <div><strong>A nombre de:</strong> <span id="template-buyer"></span></div>
+                    <div><strong>Responsable:</strong> <span id="template-manager"></span></div>
+                    <div><strong>Juega con:</strong> <span id="template-lottery"></span></div>
+                    <div><strong>Fecha Sorteo:</strong> <span id="template-draw-date"></span></div>
                     <div style="margin-top: auto; border-top: 2px solid #f0f2f5; padding-top: 15px;">
                         <h4 style="margin: 0 0 10px 0; color: #6a11cb;">Realiza tu pago a:</h4>
-                        <div id="template-payment-methods">
-                            <div style="display: flex; align-items: center; margin-bottom: 5px;"> 
-                                <img src="${methodDetails.icon}" alt="${methodDetails.name}" style="height: 20px; margin-right: 8px;"> 
-                                <span style="font-weight: 500;">${detailsText}</span>
-                            </div>
-                        </div>
+                        <div id="template-payment-methods"></div>
                     </div>
                 </div>
                 <div style="width: 45%; background: linear-gradient(45deg, #6a11cb, #2575fc); color: white; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
                     <p style="margin: 0; font-size: 1.5rem; font-weight: 500;">TU NÚMERO</p>
-                    <p id="template-number" style="margin: 0; font-size: 8rem; font-weight: 700; line-height: 1;">57</p>
+                    <p id="template-number" style="margin: 0; font-size: 8rem; font-weight: 700; line-height: 1;"></p>
                 </div>
             </div>
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 20px; padding-top: 15px; border-top: 2px solid #f0f2f5;">
