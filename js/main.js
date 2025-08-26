@@ -471,17 +471,6 @@ async function openTicketModal(ticketNumber) {
     }
 }
 
-¡Entendido! Ese es el código de ejemplo que te di, que solo maneja Nequi y Bancolombia.
-
-Necesitas reemplazarlo con la versión final que es capaz de manejar todos los casos: Nequi, Daviplata, Bre-B y el grupo de bancos tradicionales.
-
-## Código Final para handleCreateRaffle
-Reemplaza por completo tu función handleCreateRaffle en el archivo public/js/main.js con este código definitivo.
-
-JavaScript
-
-// public/js/main.js
-
 async function handleCreateRaffle(e) {
     e.preventDefault();
     const user = firebase.auth().currentUser;
@@ -563,3 +552,4 @@ async function handleCreateRaffle(e) {
 window.addEventListener('hashchange', router);
 
 window.addEventListener('load', router);
+
