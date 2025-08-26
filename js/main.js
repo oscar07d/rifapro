@@ -79,35 +79,50 @@ async function router() {
                 appContainer.innerHTML = '<h2>Error al cargar la rifa.</h2>';
             }
         } else if (path === '/explore') {
+            const user = firebase.auth().currentUser;
+            if (!user) {
+                // Si por alguna razón no hay usuario, no mostramos nada.
+                appContainer.innerHTML = "<h2>Debes iniciar sesión para ver tus rifas.</h2>";
+                return;
+            }
+        
             try {
-                const rafflesSnapshot = await db.collection('raffles').orderBy('createdAt', 'desc').get();
+                // --- ESTA ES LA LÍNEA MÁS IMPORTANTE ---
+                // Ahora filtramos por el campo 'ownerId' para que sea igual al ID del usuario actual.
+                const rafflesSnapshot = await db.collection('raffles')
+                    .where('ownerId', '==', user.uid)
+                    .orderBy('createdAt', 'desc')
+                    .get();
+                
                 let rafflesHTML = '';
                 
                 if (rafflesSnapshot.empty) {
-                    rafflesHTML = '<p>No hay rifas disponibles en este momento. ¡Crea una!</p>';
+                    rafflesHTML = '<h2>No has creado ninguna rifa todavía.</h2><p>¡Haz clic en "Crear Rifa" para empezar!</p>';
                 } else {
-                    // Usamos Promise.all para esperar a que todos los cálculos de porcentaje terminen
                     const raffleCardPromises = rafflesSnapshot.docs.map(async (doc) => {
                         const raffleData = { id: doc.id, ...doc.data() };
-        
-                        // Hacemos una consulta para contar los boletos que NO están "disponibles"
                         const ticketsSnapshot = await db.collection('raffles').doc(raffleData.id).collection('tickets').where('status', '!=', 'available').get();
-                        
-                        // El número de boletos vendidos es el tamaño de la respuesta
-                        const soldTickets = ticketsSnapshot.size;
-                        raffleData.soldPercentage = soldTickets; // Como son 100 boletos, el número es el porcentaje
-        
+                        raffleData.soldPercentage = ticketsSnapshot.size;
                         return getRaffleCard(raffleData);
                     });
-        
-                    // Esperamos a que todas las promesas se resuelvan y unimos el HTML
                     const resolvedRaffleCards = await Promise.all(raffleCardPromises);
                     rafflesHTML = resolvedRaffleCards.join('');
                 }
-                appContainer.innerHTML = view(rafflesHTML);
+        
+                // Cambiamos el título de la vista
+                const adminViewHTML = `
+                    <div class="explore-container">
+                        <h2>Administrar Mis Rifas</h2>
+                        <div id="raffles-list">
+                            ${rafflesHTML}
+                        </div>
+                    </div>
+                `;
+                appContainer.innerHTML = adminViewHTML;
+        
             } catch (error) {
                 console.error("Error al obtener las rifas:", error);
-                appContainer.innerHTML = '<p>Error al cargar las rifas. Inténtalo de nuevo más tarde.</p>';
+                appContainer.innerHTML = '<p>Error al cargar tus rifas.</p>';
             }
         } else {
             const user = firebase.auth().currentUser;
@@ -491,3 +506,4 @@ async function handleCreateRaffle(e) {
 window.addEventListener('hashchange', router);
 
 window.addEventListener('load', router);
+
