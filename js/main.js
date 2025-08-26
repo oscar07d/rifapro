@@ -518,13 +518,15 @@ async function handleCreateRaffle(e) {
     const raffle = {
         name: document.getElementById('raffle-name').value,
         prize: document.getElementById('raffle-prize').value,
+        manager: document.getElementById('raffle-manager').value, // <-- NUEVO DATO
+        lottery: document.getElementById('raffle-lottery').value, // <-- NUEVO DATO
         ticketPrice: parseFloat(document.getElementById('ticket-price').value),
         paymentDeadline: document.getElementById('payment-deadline').value,
         drawDate: document.getElementById('draw-date').value,
-        paymentMethods: paymentMethodsData, // Guardamos el array con todos los detalles
+        paymentMethods: paymentMethodsData,
         ownerId: user.uid,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-    };
+    }
 
     try {
         const raffleRef = await db.collection('raffles').add(raffle);
@@ -552,4 +554,5 @@ async function handleCreateRaffle(e) {
 window.addEventListener('hashchange', router);
 
 window.addEventListener('load', router);
+
 
