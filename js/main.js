@@ -213,9 +213,13 @@ async function handleClearTicket() {
 }
 
 async function handleShare(type) {
+    const formView = document.getElementById('ticket-form');
+    const isFormVisible = formView.style.display !== 'none';
+
+    // Seleccionamos los botones correctos dependiendo de qué vista está activa
     const shareBtnId = type === 'whatsapp' 
-        ? (document.getElementById('whatsapp-share-btn') ? 'whatsapp-share-btn' : 'whatsapp-share-btn-info')
-        : (document.getElementById('generic-share-btn') ? 'generic-share-btn' : 'generic-share-btn-info');
+        ? (isFormVisible ? 'whatsapp-share-btn' : 'whatsapp-share-btn-info')
+        : (isFormVisible ? 'generic-share-btn' : 'generic-share-btn-info');
     
     const shareBtn = document.getElementById(shareBtnId);
     if (!shareBtn) return;
@@ -226,8 +230,13 @@ async function handleShare(type) {
 
     try {
         const raffleId = window.location.hash.slice(1).split('/')[2];
-        const ticketNumber = document.getElementById('modal-ticket-number').textContent.replace('Boleto #', '');
         
+        // --- INICIO DE LA CORRECCIÓN ---
+        // Leemos el número del boleto desde el título que esté visible
+        const ticketNumberId = isFormVisible ? 'modal-ticket-number-form' : 'modal-ticket-number-info';
+        const ticketNumber = document.getElementById(ticketNumberId).textContent.replace('Boleto #', '');
+        // --- FIN DE LA CORRECCIÓN ---
+
         const raffleDoc = await db.collection('raffles').doc(raffleId).get();
         const ticketDoc = await db.collection('raffles').doc(raffleId).collection('tickets').doc(ticketNumber).get();
         if (!raffleDoc.exists || !ticketDoc.exists) throw new Error("Datos no encontrados");
@@ -235,8 +244,7 @@ async function handleShare(type) {
         const raffleData = raffleDoc.data();
         const ticketData = ticketDoc.data();
 
-        // --- INICIO DE LA LÓGICA ACTUALIZADA ---
-        // Llenamos TODOS los campos de la plantilla final
+        // Rellenar la plantilla (esta parte ya estaba bien)
         document.getElementById('template-prize').textContent = raffleData.prize;
         document.getElementById('template-buyer').textContent = ticketData.buyerName;
         document.getElementById('template-manager').textContent = raffleData.manager;
@@ -244,7 +252,7 @@ async function handleShare(type) {
         document.getElementById('template-draw-date').textContent = new Date(raffleData.drawDate).toLocaleDateString('es-CO');
         document.getElementById('template-number').textContent = ticketData.number;
         
-        // Lógica para llenar los métodos de pago detallados
+        // Lógica para llenar los métodos de pago (esta parte ya estaba bien)
         const paymentMethodsContainer = document.getElementById('template-payment-methods');
         let paymentHTML = '';
         raffleData.paymentMethods.forEach(pm => {
@@ -255,24 +263,17 @@ async function handleShare(type) {
                     detailsText = `Celular: ${pm.phoneNumber}`;
                 } else if (pm.method === 'bre-b') {
                     detailsText = `Llave: ${pm.key}`;
-                } else if (pm.accountNumber) { // Para bancos tradicionales
+                } else if (pm.accountNumber) {
                     detailsText = `${pm.accountType.charAt(0).toUpperCase() + pm.accountType.slice(1)}: ${pm.accountNumber}`;
                 } else {
-                    // Para métodos sin detalles como 'Efectivo'
                     detailsText = methodDetails.name;
                 }
-
-                paymentHTML += `
-                    <div style="display: flex; align-items: center; margin-bottom: 5px;"> // <-- Ajusta margin-bottom aquí
-                        <img src="${methodDetails.icon}" alt="${methodDetails.name}" style="height: 20px; margin-right: 8px;"> // <-- Ajusta height y margin-right aquí
-                        <span style="font-weight: 500;">${detailsText}</span>
-                    </div>
-                `;
+                paymentHTML += `<div style="display: flex; align-items: center; margin-bottom: 8px;"><img src="${methodDetails.icon}" alt="${methodDetails.name}" style="height: 24px; margin-right: 10px;"><span style="font-weight: 500;">${detailsText}</span></div>`;
             }
         });
         paymentMethodsContainer.innerHTML = paymentHTML;
-        // --- FIN DE LA LÓGICA ACTUALIZADA ---
 
+        // El resto de la lógica para generar y compartir la imagen queda igual...
         const templateElement = document.getElementById('ticket-template');
         const canvas = await html2canvas(templateElement, { useCORS: true, scale: 2 });
         const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
@@ -304,7 +305,6 @@ async function handleShare(type) {
                 URL.revokeObjectURL(link.href);
             }
         }
-
     } catch (error) {
         console.error("Error al generar/compartir imagen:", error);
         alert("Hubo un error al procesar la imagen.");
@@ -661,6 +661,7 @@ async function handleDeleteRaffle(raffleId, cardElement) {
         alert("Hubo un error al intentar eliminar la rifa.");
     }
 }
+
 
 
 
