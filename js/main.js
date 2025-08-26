@@ -81,14 +81,11 @@ async function router() {
         } else if (path === '/explore') {
             const user = firebase.auth().currentUser;
             if (!user) {
-                // Si por alguna razón no hay usuario, no mostramos nada.
                 appContainer.innerHTML = "<h2>Debes iniciar sesión para ver tus rifas.</h2>";
                 return;
             }
         
             try {
-                // --- ESTA ES LA LÍNEA MÁS IMPORTANTE ---
-                // Ahora filtramos por el campo 'ownerId' para que sea igual al ID del usuario actual.
                 const rafflesSnapshot = await db.collection('raffles')
                     .where('ownerId', '==', user.uid)
                     .orderBy('createdAt', 'desc')
@@ -109,7 +106,6 @@ async function router() {
                     rafflesHTML = resolvedRaffleCards.join('');
                 }
         
-                // Cambiamos el título de la vista
                 const adminViewHTML = `
                     <div class="explore-container">
                         <h2>Administrar Mis Rifas</h2>
@@ -119,6 +115,21 @@ async function router() {
                     </div>
                 `;
                 appContainer.innerHTML = adminViewHTML;
+        
+                // --- INICIO DEL CÓDIGO AÑADIDO ---
+                // Se ejecuta DESPUÉS de que el HTML de las tarjetas se ha insertado en la página
+                const rafflesList = document.getElementById('raffles-list');
+                if (rafflesList) {
+                    rafflesList.addEventListener('click', (e) => {
+                        const deleteButton = e.target.closest('.btn-delete-raffle');
+                        if (deleteButton) {
+                            const card = deleteButton.closest('.raffle-card');
+                            const raffleId = card.dataset.id;
+                            handleDeleteRaffle(raffleId, card); // Llamamos a la función para borrar
+                        }
+                    });
+                }
+                // --- FIN DEL CÓDIGO AÑADIDO ---
         
             } catch (error) {
                 console.error("Error al obtener las rifas:", error);
@@ -599,3 +610,4 @@ async function handleDeleteRaffle(raffleId, cardElement) {
         alert("Hubo un error al intentar eliminar la rifa.");
     }
 }
+
