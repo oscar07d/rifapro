@@ -555,6 +555,34 @@ input:focus, select:focus {
     border-color: var(--primary-color);
 }
 
+.raffle-card-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: auto; /* Empuja los botones al final de la tarjeta */
+}
+
+.raffle-card-actions .btn-secondary {
+    flex-grow: 1; /* Hace que el botón 'Administrar' ocupe el espacio disponible */
+}
+
+.btn-icon {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.btn-icon:hover {
+    color: var(--danger-color);
+    border-color: var(--danger-color);
+    background-color: #fff5f5;
+}
+
 /* 8. Diseño Responsivo */
 @media (max-width: 768px) {
     /* Ajustes generales para pantallas pequeñas */
@@ -651,6 +679,7 @@ input:focus, select:focus {
         height: 30px;
     }
 }
+
 
 
 
