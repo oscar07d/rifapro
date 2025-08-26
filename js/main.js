@@ -429,62 +429,28 @@ function attachEventListeners(path) {
             });
         }
     } else if (isRaffleDetail) {
-        // Seleccionamos TODOS los elementos que podríamos necesitar
-        const ticketsGrid = document.getElementById('tickets-grid');
-        const modal = document.getElementById('ticket-modal');
-        const closeModalBtn = document.querySelector('.close-modal');
-        const ticketForm = document.getElementById('ticket-form');
-        
-        // Botones de compartir
-        const whatsappBtn = document.getElementById('whatsapp-share-btn');
-        const genericBtn = document.getElementById('generic-share-btn');
-        const whatsappBtnInfo = document.getElementById('whatsapp-share-btn-info');
-        const genericBtnInfo = document.getElementById('generic-share-btn-info');
-    
-        // --- AÑADIMOS LOS BOTONES DE LIMPIAR ---
-        const clearBtnForm = document.getElementById('clear-ticket-btn-form');
-        const clearBtnInfo = document.getElementById('clear-ticket-btn-info');
-    
-        // Evento para abrir el modal
-        if (ticketsGrid) {
-            ticketsGrid.addEventListener('click', (e) => {
-                if (e.target.classList.contains('ticket')) {
-                    const ticketNumber = e.target.dataset.id;
-                    openTicketModal(ticketNumber);
-                }
-            });
-        }
-    
-        // Eventos para cerrar el modal
-        if (modal) {
-            closeModalBtn.addEventListener('click', () => {
-                modal.style.display = 'none';
-            });
-            modal.addEventListener('click', (e) => {
-                if (e.target.id === 'ticket-modal') {
-                    modal.style.display = 'none';
-                }
-            });
-        }
-        
-        // Evento para guardar los datos del formulario
-        if (ticketForm) {
-            ticketForm.addEventListener('submit', handleTicketFormSubmit);
-        }
-    
-        // Eventos para los botones de compartir
-        if (whatsappBtn) whatsappBtn.addEventListener('click', () => handleShare('whatsapp'));
-        if (genericBtn) genericBtn.addEventListener('click', () => handleShare('generic'));
-        if (whatsappBtnInfo) whatsappBtnInfo.addEventListener('click', () => handleShare('whatsapp'));
-        if (genericBtnInfo) genericBtnInfo.addEventListener('click', () => handleShare('generic'));
-    
-        // --- LES ASIGNAMOS SU FUNCIÓN A LOS BOTONES DE LIMPIAR ---
-        if (clearBtnForm) {
-            clearBtnForm.addEventListener('click', handleClearTicket);
-        }
-        if (clearBtnInfo) {
-            clearBtnInfo.addEventListener('click', handleClearTicket);
-        }
+    const ticketsGrid = document.getElementById('tickets-grid');
+    const modal = document.getElementById('ticket-modal');
+    const closeModalBtn = document.querySelector('.close-modal');
+
+    // Listener para ABRIR el modal
+    if (ticketsGrid) {
+        ticketsGrid.addEventListener('click', (e) => {
+            if (e.target.classList.contains('ticket')) {
+                const ticketNumber = e.target.dataset.id;
+                openTicketModal(ticketNumber);
+            }
+        });
+    }
+
+    // Listeners para CERRAR Y RESETEAR el modal
+    if (modal) {
+        closeModalBtn.addEventListener('click', () => closeAndResetModal());
+        modal.addEventListener('click', (e) => {
+            if (e.target.id === 'ticket-modal') {
+                closeAndResetModal();
+            }
+        });
     }
 }
 
@@ -492,7 +458,7 @@ async function openTicketModal(ticketNumber) {
     const modal = document.getElementById('ticket-modal');
     if (!modal) return;
 
-    // Buscamos todos los elementos que vamos a necesitar en el nuevo modal
+    // Buscamos los elementos del modal
     const modalTitleForm = document.getElementById('modal-ticket-number-form');
     const modalTitleInfo = document.getElementById('modal-ticket-number-info');
     const formView = document.getElementById('ticket-form');
@@ -508,32 +474,46 @@ async function openTicketModal(ticketNumber) {
         if (doc.exists) {
             const data = doc.data();
             
-            // Actualizamos el título en AMBAS vistas para que siempre sea correcto
+            // Actualizamos títulos y decidimos qué vista mostrar
             modalTitleForm.textContent = `Boleto #${data.number}`;
             modalTitleInfo.textContent = `Boleto #${data.number}`;
 
             if (data.status === 'available') {
-                // Si el boleto está DISPONIBLE, mostramos el formulario y lo limpiamos
                 infoView.style.display = 'none';
                 formView.style.display = 'block';
-
                 formView.querySelector('#buyer-name').value = '';
                 formView.querySelector('#buyer-phone').value = '';
                 formView.querySelector('#payment-status').value = 'pending';
-                
             } else {
-                // Si el boleto está OCUPADO, mostramos la info y ocultamos el formulario
                 formView.style.display = 'none';
                 infoView.style.display = 'block';
-
                 infoView.querySelector('#info-buyer-name').textContent = data.buyerName || 'No disponible';
                 infoView.querySelector('#info-buyer-phone').textContent = data.buyerPhone || 'No disponible';
-                
                 const statusMap = { 'pending': 'Pendiente', 'partial': 'Pago Parcial', 'paid': 'Pagado Total' };
                 infoView.querySelector('#info-payment-status').textContent = statusMap[data.status] || data.status;
             }
             
             modal.style.display = 'flex'; // Mostramos el modal
+
+            // --- INICIO DE LA SECCIÓN AÑADIDA ---
+            // Asignamos los listeners a los botones CADA VEZ que el modal se abre
+            const form = document.getElementById('ticket-form');
+            const clearBtnForm = document.getElementById('clear-ticket-btn-form');
+            const clearBtnInfo = document.getElementById('clear-ticket-btn-info');
+            const whatsappBtn = document.getElementById('whatsapp-share-btn');
+            const genericBtn = document.getElementById('generic-share-btn');
+            const whatsappBtnInfo = document.getElementById('whatsapp-share-btn-info');
+            const genericBtnInfo = document.getElementById('generic-share-btn-info');
+
+            if (form) form.addEventListener('submit', handleTicketFormSubmit);
+            if (clearBtnForm) clearBtnForm.addEventListener('click', handleClearTicket);
+            if (clearBtnInfo) clearBtnInfo.addEventListener('click', handleClearTicket);
+            if (whatsappBtn) whatsappBtn.addEventListener('click', () => handleShare('whatsapp'));
+            if (genericBtn) genericBtn.addEventListener('click', () => handleShare('generic'));
+            if (whatsappBtnInfo) whatsappBtnInfo.addEventListener('click', () => handleShare('whatsapp'));
+            if (genericBtnInfo) genericBtnInfo.addEventListener('click', () => handleShare('generic'));
+            // --- FIN DE LA SECCIÓN AÑADIDA ---
+            
         } else {
             alert("Error: No se encontró el boleto.");
         }
@@ -662,6 +642,67 @@ async function handleDeleteRaffle(raffleId, cardElement) {
     }
 }
 
+function closeAndResetModal() {
+    const modal = document.getElementById('ticket-modal');
+    const viewContainer = document.getElementById('modal-view-container');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+    // Restaura el contenido original del modal (formulario y vista de info)
+    if (viewContainer) {
+        viewContainer.innerHTML = `
+            <form id="ticket-form" style="display: block;">
+                <h3 id="modal-ticket-number-form" class="modal-title">Boleto #00</h3>
+                <div class="form-group">
+                    <label for="buyer-name">Nombre del Comprador</label>
+                    <input type="text" id="buyer-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="buyer-phone">Número de Celular</label>
+                    <input type="tel" id="buyer-phone" required>
+                </div>
+                <div class="form-group">
+                    <label for="payment-status">Estado del Pago</label>
+                    <select id="payment-status">
+                        <option value="pending">Pendiente</option>
+                        <option value="partial">Pago Parcial</option>
+                        <option value="paid">Pagado Total</option>
+                    </select>
+                </div>
+                <div class="modal-buttons">
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    <button type="button" id="clear-ticket-btn-form" class="btn btn-danger">Limpiar Boleto</button>
+                </div>
+                <div class="modal-buttons" style="margin-top: 0.5rem;">
+                    <button type="button" id="whatsapp-share-btn" class="btn btn-whatsapp">WhatsApp</button>
+                    <button type="button" id="generic-share-btn" class="btn btn-secondary">Compartir</button>
+                </div>
+            </form>
+            <div id="ticket-info-view" style="display: none;">
+                <h3 id="modal-ticket-number-info" class="modal-title">Boleto #00</h3>
+                <div class="form-group">
+                    <label>A nombre de:</label>
+                    <p id="info-buyer-name" class="info-text"></p>
+                </div>
+                <div class="form-group">
+                    <label>Número de Celular</label>
+                    <p id="info-buyer-phone" class="info-text"></p>
+                </div>
+                <div class="form-group">
+                    <label>Estado del Pago</label>
+                    <p id="info-payment-status" class="info-text"></p>
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" id="clear-ticket-btn-info" class="btn btn-danger">Limpiar Boleto</button>
+                </div>
+                <div class="modal-buttons" style="margin-top: 0.5rem;">
+                    <button type="button" id="whatsapp-share-btn-info" class="btn btn-whatsapp">WhatsApp</button>
+                    <button type="button" id="generic-share-btn-info" class="btn btn-secondary">Compartir</button>
+                </div>
+            </div>
+        `;
+    }
+}
 
 
 
