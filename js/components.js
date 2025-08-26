@@ -118,6 +118,7 @@ export const getRaffleCard = (raffle) => {
     
     const paymentIconsHTML = raffle.paymentMethods.map(methodValue => {
         const method = paymentMethods.find(p => p.value === methodValue);
+        // Aquí usamos directamente la ruta del icono que ya tiene 'assets/banks/...'
         return method ? `<img src="${method.icon}" alt="${method.name}" title="${method.name}">` : '';
     }).join('');
 
@@ -260,6 +261,7 @@ export const getTicketModal = () => `
         </div>
     </div>
 `;
+
 
 
 
