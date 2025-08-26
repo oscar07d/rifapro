@@ -469,18 +469,32 @@ async function handleCreateRaffle(e) {
         return;
     }
 
-    // --- ESTA ES LA PARTE QUE CAMBIA ---
-    // Buscamos todos los divs de iconos que tengan la clase 'selected'
     const selectedOptions = document.querySelectorAll('.payment-option.selected');
-    // Creamos un array con los valores de los iconos seleccionados
-    const paymentMethods = Array.from(selectedOptions).map(option => option.dataset.value);
-
-    // Verificamos que el usuario haya escogido al menos uno
-    if (paymentMethods.length === 0) {
+    if (selectedOptions.length === 0) {
         alert('Por favor, selecciona al menos un método de pago.');
         return;
     }
-    // --- FIN DEL CAMBIO ---
+
+    // --- LÓGICA ACTUALIZADA PARA RECOLECTAR DATOS DETALLADOS ---
+    const paymentMethodsData = Array.from(selectedOptions).map(option => {
+        const methodValue = option.dataset.value;
+        const methodInfo = { 
+            method: methodValue // Guardamos el nombre base (ej: "nequi")
+        };
+
+        // Si es Bancolombia, recogemos sus datos específicos
+        if (methodValue === 'bancolombia') {
+            methodInfo.accountType = document.getElementById('bancolombia-account-type').value;
+            methodInfo.accountNumber = document.getElementById('bancolombia-account-number').value;
+        }
+        // Si es Nequi, recogemos su dato específico
+        if (methodValue === 'nequi') {
+            methodInfo.phoneNumber = document.getElementById('nequi-phone-number').value;
+        }
+        // Puedes agregar más `if` aquí para otros bancos que requieran detalles
+        
+        return methodInfo;
+    });
 
     const raffle = {
         name: document.getElementById('raffle-name').value,
@@ -488,7 +502,7 @@ async function handleCreateRaffle(e) {
         ticketPrice: parseFloat(document.getElementById('ticket-price').value),
         paymentDeadline: document.getElementById('payment-deadline').value,
         drawDate: document.getElementById('draw-date').value,
-        paymentMethods: paymentMethods, // Usamos el nuevo array de iconos
+        paymentMethods: paymentMethodsData, // Guardamos el nuevo array con todos los detalles
         ownerId: user.uid,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
     };
@@ -519,5 +533,6 @@ async function handleCreateRaffle(e) {
 window.addEventListener('hashchange', router);
 
 window.addEventListener('load', router);
+
 
 
