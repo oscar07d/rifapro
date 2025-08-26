@@ -565,5 +565,37 @@ window.addEventListener('hashchange', router);
 
 window.addEventListener('load', router);
 
+async function handleDeleteRaffle(raffleId, cardElement) {
+    const raffleName = cardElement.querySelector('h3').textContent;
+    const isConfirmed = confirm(`¿Estás seguro de que quieres eliminar la rifa "${raffleName}"?\n\n¡Esta acción es irreversible y borrará todos los boletos asociados!`);
 
+    if (!isConfirmed) {
+        return;
+    }
 
+    try {
+        // Paso 1: Borrar todos los boletos de la subcolección
+        const ticketsSnapshot = await db.collection('raffles').doc(raffleId).collection('tickets').get();
+        const batch = db.batch();
+        ticketsSnapshot.forEach(doc => {
+            batch.delete(doc.ref);
+        });
+        await batch.commit();
+        console.log('Todos los boletos de la subcolección han sido eliminados.');
+
+        // Paso 2: Borrar el documento principal de la rifa
+        await db.collection('raffles').doc(raffleId).delete();
+        console.log('Documento de la rifa eliminado.');
+
+        // Paso 3: Eliminar la tarjeta de la vista
+        cardElement.style.transition = 'opacity 0.5s ease';
+        cardElement.style.opacity = '0';
+        setTimeout(() => cardElement.remove(), 500);
+
+        alert(`La rifa "${raffleName}" ha sido eliminada con éxito.`);
+
+    } catch (error) {
+        console.error("Error al eliminar la rifa:", error);
+        alert("Hubo un error al intentar eliminar la rifa.");
+    }
+}
