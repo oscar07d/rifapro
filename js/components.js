@@ -59,7 +59,6 @@ export const getHomeView = (userName) => `
 
 // Vista para crear una nueva rifa
 export const getCreateRaffleView = () => {
-    // Esta parte que genera los iconos no cambia
     const paymentOptionsHTML = paymentMethods.map(method => `
         <div class="payment-option" data-value="${method.value}">
             <img src="${method.icon}" alt="${method.name}">
@@ -67,14 +66,48 @@ export const getCreateRaffleView = () => {
         </div>
     `).join('');
 
-    // El return ahora incluye los nuevos divs ocultos
     return `
     <div class="form-container">
         <h2>Crear Nueva Rifa</h2>
         <form id="create-raffle-form">
+            
+            <div class="form-group">
+                <label for="raffle-name">Nombre de la rifa</label>
+                <input type="text" id="raffle-name" required>
+            </div>
+            <div class="form-group">
+                <label for="raffle-prize">Premio(s)</label>
+                <input type="text" id="raffle-prize" required>
+            </div>
+
+            <div class="form-group">
+                <label for="raffle-manager">Responsable de la Rifa</label>
+                <input type="text" id="raffle-manager" placeholder="Ej: Tu nombre o el de tu organización" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="raffle-lottery">Juega con la lotería de</label>
+                <input type="text" id="raffle-lottery" placeholder="Ej: Lotería de Bogotá" required>
+            </div>
+
+            <div class="form-group">
+                <label for="ticket-price">Precio por boleto</label>
+                <input type="number" id="ticket-price" required min="0">
+            </div>
+            <div class="form-group">
+                <label for="payment-deadline">Fecha límite de pago</label>
+                <input type="date" id="payment-deadline" required>
+            </div>
+            <div class="form-group">
+                <label for="draw-date">Fecha del sorteo</label>
+                <input type="date" id="draw-date" required>
+            </div>
+            
             <div class="form-group">
                 <label>Métodos de pago</label>
-                <div class="payment-options-grid">${paymentOptionsHTML}</div>
+                <div class="payment-options-grid">
+                    ${paymentOptionsHTML}
+                </div>
             </div>
 
             <div id="payment-details-container">
@@ -281,6 +314,7 @@ export const getTicketModal = () => `
         </div>
     </div>
 `;
+
 
 
 
