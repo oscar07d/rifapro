@@ -4,6 +4,7 @@
 const paymentMethods = [
     { name: 'Efectivo', value: 'efectivo', icon: 'assets/banks/efectivo.svg' },
     { name: 'Nequi', value: 'nequi', icon: 'assets/banks/nequi.svg' },
+    { name: 'Bre-B', value: 'bre-b', icon: 'assets/banks/bre-b.svg' },
     { name: 'Daviplata', value: 'daviplata', icon: 'assets/banks/daviplata.svg' },
     { name: 'Nu', value: 'nu', icon: 'assets/banks/nu.svg' },
     { name: 'Bancolombia', value: 'bancolombia', icon: 'assets/banks/bancolombia.svg' },
@@ -257,6 +258,7 @@ export const getTicketModal = () => `
         </div>
     </div>
 `;
+
 
 
 
