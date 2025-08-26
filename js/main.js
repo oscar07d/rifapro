@@ -343,6 +343,7 @@ function attachEventListeners(path) {
         const createRaffleForm = document.getElementById('create-raffle-form');
         createRaffleForm.addEventListener('submit', handleCreateRaffle);
     
+        // Lógica para los métodos de pago (sin cambios)
         const paymentGrid = document.querySelector('.payment-options-grid');
         if (paymentGrid) {
             paymentGrid.addEventListener('click', (e) => {
@@ -351,15 +352,12 @@ function attachEventListeners(path) {
     
                 option.classList.toggle('selected');
                 
-                // --- LÓGICA DE VISIBILIDAD MEJORADA ---
                 const bankDetailsWrapper = document.getElementById('bank-account-details');
                 const nequiDetails = document.getElementById('nequi-details');
                 const daviplataDetails = document.getElementById('daviplata-details');
                 const brebDetails = document.getElementById('bre-b-details');
-    
                 const traditionalBanks = ['av-villas', 'bancolombia', 'bbva', 'bogota', 'caja-social', 'davivienda', 'falabella', 'finandina', 'itau', 'lulo', 'pibank', 'powwi', 'uala'];
                 
-                // Revisa qué está seleccionado y muestra/oculta los campos
                 const selectedOptions = Array.from(document.querySelectorAll('.payment-option.selected')).map(el => el.dataset.value);
     
                 nequiDetails.style.display = selectedOptions.includes('nequi') ? 'block' : 'none';
@@ -369,10 +367,22 @@ function attachEventListeners(path) {
                 const selectedBanks = selectedOptions.filter(val => traditionalBanks.includes(val));
                 if (selectedBanks.length > 0) {
                     bankDetailsWrapper.style.display = 'block';
-                    // Actualiza la lista de bancos que usan este campo
                     document.getElementById('bank-list').textContent = selectedBanks.map(b => b.charAt(0).toUpperCase() + b.slice(1)).join(', ');
                 } else {
                     bankDetailsWrapper.style.display = 'none';
+                }
+            });
+        }
+    
+        // --- AÑADE ESTA LÓGICA NUEVA PARA LOS BOTONES DE PRECIO ---
+        const priceOptionsContainer = document.querySelector('.predefined-options');
+        if (priceOptionsContainer) {
+            priceOptionsContainer.addEventListener('click', (e) => {
+                // Se asegura de que se hizo clic en un botón de opción de precio
+                if (e.target.classList.contains('price-option-btn')) {
+                    const price = e.target.dataset.price;
+                    const priceInput = document.getElementById('ticket-price');
+                    priceInput.value = price;
                 }
             });
         }
@@ -554,5 +564,6 @@ async function handleCreateRaffle(e) {
 window.addEventListener('hashchange', router);
 
 window.addEventListener('load', router);
+
 
 
