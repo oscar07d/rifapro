@@ -73,48 +73,11 @@ export const getCreateRaffleView = () => {
         <h2>Crear Nueva Rifa</h2>
         <form id="create-raffle-form">
             <div class="form-group">
-                <label for="raffle-name">Nombre de la rifa</label>
-                <input type="text" id="raffle-name" required>
-            </div>
-            <div class="form-group">
-                <label for="raffle-prize">Premio(s)</label>
-                <input type="text" id="raffle-prize" required>
-            </div>
-            <div class="form-group">
-                <label for="ticket-price">Precio por boleto</label>
-                <input type="number" id="ticket-price" required min="0">
-            </div>
-            <div class="form-group">
-                <label for="payment-deadline">Fecha límite de pago</label>
-                <input type="date" id="payment-deadline" required>
-            </div>
-            <div class="form-group">
-                <label for="draw-date">Fecha del sorteo</label>
-                <input type="date" id="draw-date" required>
-            </div>
-            <div class="form-group">
                 <label>Métodos de pago</label>
-                <div class="payment-options-grid">
-                    ${paymentOptionsHTML}
-                </div>
+                <div class="payment-options-grid">${paymentOptionsHTML}</div>
             </div>
 
             <div id="payment-details-container">
-                <div id="bancolombia-details" class="payment-details-wrapper" style="display: none;">
-                    <h4>Detalles para Bancolombia</h4>
-                    <div class="form-group">
-                        <label for="bancolombia-account-type">Tipo de Cuenta</label>
-                        <select id="bancolombia-account-type">
-                            <option value="ahorros">Ahorros</option>
-                            <option value="corriente">Corriente</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="bancolombia-account-number">Número de Cuenta</label>
-                        <input type="text" id="bancolombia-account-number" placeholder="Ej: 1234567890">
-                    </div>
-                </div>
-                
                 <div id="nequi-details" class="payment-details-wrapper" style="display: none;">
                     <h4>Detalles para Nequi</h4>
                     <div class="form-group">
@@ -122,7 +85,40 @@ export const getCreateRaffleView = () => {
                         <input type="tel" id="nequi-phone-number" placeholder="Ej: 3001234567">
                     </div>
                 </div>
+
+                <div id="daviplata-details" class="payment-details-wrapper" style="display: none;">
+                    <h4>Detalles para Daviplata</h4>
+                    <div class="form-group">
+                        <label for="daviplata-phone-number">Número de Celular</label>
+                        <input type="tel" id="daviplata-phone-number" placeholder="Ej: 3001234567">
+                    </div>
+                </div>
+
+                <div id="bre-b-details" class="payment-details-wrapper" style="display: none;">
+                    <h4>Detalles para Bre-B</h4>
+                    <div class="form-group">
+                        <label for="bre-b-key">Tu llave (debe empezar con @)</label>
+                        <input type="text" id="bre-b-key" placeholder="@tu-llave-unica">
+                    </div>
+                </div>
+
+                <div id="bank-account-details" class="payment-details-wrapper" style="display: none;">
+                    <h4>Detalles de Cuenta Bancaria</h4>
+                    <p style="font-size: 0.9rem; color: #666; margin-top: -1rem; margin-bottom: 1rem;">Aplica para: <span id="bank-list"></span></p>
+                    <div class="form-group">
+                        <label for="bank-account-type">Tipo de Cuenta</label>
+                        <select id="bank-account-type">
+                            <option value="ahorros">Ahorros</option>
+                            <option value="corriente">Corriente</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="bank-account-number">Número de Cuenta</label>
+                        <input type="text" id="bank-account-number" placeholder="Ej: 1234567890">
+                    </div>
+                </div>
             </div>
+
             <button type="submit" class="btn btn-primary">Crear Rifa</button>
         </form>
     </div>
@@ -285,6 +281,7 @@ export const getTicketModal = () => `
         </div>
     </div>
 `;
+
 
 
 
