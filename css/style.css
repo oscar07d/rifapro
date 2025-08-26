@@ -524,6 +524,37 @@ input:focus, select:focus {
     color: var(--primary-color);
 }
 
+/* --- ESTILOS PARA OPCIONES DE PRECIO PREDEFINIDAS --- */
+.predefined-options {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.predefined-options span {
+    font-size: 0.85rem;
+    color: var(--text-light-color);
+}
+
+.price-option-btn {
+    background-color: #f0f2f5;
+    color: var(--primary-color);
+    border: 1px solid var(--border-color);
+    border-radius: 20px; /* Para que sean redondeados */
+    padding: 0.25rem 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.price-option-btn:hover {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
 /* 8. Diseño Responsivo */
 @media (max-width: 768px) {
     /* Ajustes generales para pantallas pequeñas */
@@ -616,6 +647,7 @@ input:focus, select:focus {
         height: 30px;
     }
 }
+
 
 
 
