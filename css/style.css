@@ -446,24 +446,24 @@ input:focus, select:focus {
 
 .payment-options-grid {
     display: grid;
-    /* Creamos columnas de tamaño fijo para un orden perfecto */
-    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-    gap: 1rem;
+    /* Reducimos el tamaño mínimo de cada columna para que sean más pequeñas */
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 0.75rem; /* Reducimos un poco el espacio */
     margin-top: 0.5rem;
 }
 
 .payment-option {
     border: 2px solid var(--border-color);
     border-radius: var(--border-radius);
-    padding: 0.75rem;
+    padding: 0.5rem; /* Reducimos el espacio interior */
     text-align: center;
     cursor: pointer;
     transition: all 0.2s ease-in-out;
-    display: flex; /* Usamos flexbox para centrar el contenido */
+    display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    aspect-ratio: 1 / 1; /* Hacemos que sean cuadrados */
+    aspect-ratio: 1 / 1;
 }
 
 .payment-option:hover {
@@ -478,14 +478,14 @@ input:focus, select:focus {
 }
 
 .payment-option img {
-    height: 45px; /* Aumentamos el tamaño del logo */
+    height: 35px; /* Hacemos el logo un poco más pequeño */
     width: 100%;
     margin-bottom: 0.5rem;
-    object-fit: contain; /* Evita que los logos se deformen */
+    object-fit: contain;
 }
 
 .payment-option span {
-    font-size: 0.8rem; /* Reducimos un poco el texto */
+    font-size: 0.75rem; /* Hacemos el texto un poco más pequeño */
     font-weight: 500;
     color: var(--text-light-color);
     line-height: 1.2;
@@ -601,5 +601,6 @@ input:focus, select:focus {
         height: 30px;
     }
 }
+
 
 
