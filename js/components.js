@@ -2,20 +2,21 @@
 
 // LISTA CENTRAL DE MÉTODOS DE PAGO
 const paymentMethods = [
-    { name: 'AV Villas', value: 'av-villas', icon: 'assets/banks/av-villas.svg' },
+    { name: 'Efectivo', value: 'efectivo', icon: 'assets/banks/efectivo.svg' },
+    { name: 'Nequi', value: 'nequi', icon: 'assets/banks/nequi.svg' },
+    { name: 'Daviplata', value: 'daviplata', icon: 'assets/banks/daviplata.svg' },
+    { name: 'Nu', value: 'nu', icon: 'assets/banks/nu.svg' },
     { name: 'Bancolombia', value: 'bancolombia', icon: 'assets/banks/bancolombia.svg' },
+    { name: 'AV Villas', value: 'av-villas', icon: 'assets/banks/av-villas.svg' },
     { name: 'BBVA', value: 'bbva', icon: 'assets/banks/bbva.svg' },
     { name: 'Bogotá', value: 'bogota', icon: 'assets/banks/bogota.svg' },
     { name: 'Caja Social', value: 'caja-social', icon: 'assets/banks/caja-social.svg' },
-    { name: 'Daviplata', value: 'daviplata', icon: 'assets/banks/daviplata.svg' },
     { name: 'Davivienda', value: 'davivienda', icon: 'assets/banks/dvienda.svg' },
     { name: 'Falabella', value: 'falabella', icon: 'assets/banks/falabella.svg' },
     { name: 'Finandina', value: 'finandina', icon: 'assets/banks/finandina.svg' },
     { name: 'Itaú', value: 'itau', icon: 'assets/banks/itau.svg' },
     { name: 'Lulo Bank', value: 'lulo', icon: 'assets/banks/lulo.svg' },
     { name: 'Movii', value: 'movii', icon: 'assets/banks/movii.svg' },
-    { name: 'Nequi', value: 'nequi', icon: 'assets/banks/nequi.svg' },
-    { name: 'Nu', value: 'nu', icon: 'assets/banks/nu.svg' },
     { name: 'Pibank', value: 'pibank', icon: 'assets/banks/pibank.svg' },
     { name: 'Powwi', value: 'powwi', icon: 'assets/banks/powwi.svg' },
     { name: 'Ualá', value: 'uala', icon: 'assets/banks/uala.svg' }
@@ -256,6 +257,7 @@ export const getTicketModal = () => `
         </div>
     </div>
 `;
+
 
 
 
