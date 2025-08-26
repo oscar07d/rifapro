@@ -59,7 +59,7 @@ export const getHomeView = (userName) => `
 export const getCreateRaffleView = () => {
     const paymentOptionsHTML = paymentMethods.map(method => `
         <div class="payment-option" data-value="${method.value}">
-            <img src="assets/${method.icon}" alt="${method.name}">
+            <img src="${method.icon}" alt="${method.name}">
             <span>${method.name}</span>
         </div>
     `).join('');
@@ -88,14 +88,12 @@ export const getCreateRaffleView = () => {
                 <label for="draw-date">Fecha del sorteo</label>
                 <input type="date" id="draw-date" required>
             </div>
-
             <div class="form-group">
                 <label>Métodos de pago</label>
                 <div class="payment-options-grid">
                     ${paymentOptionsHTML}
                 </div>
             </div>
-
             <button type="submit" class="btn btn-primary">Crear Rifa</button>
         </form>
     </div>
@@ -118,7 +116,6 @@ export const getRaffleCard = (raffle) => {
     
     const paymentIconsHTML = raffle.paymentMethods.map(methodValue => {
         const method = paymentMethods.find(p => p.value === methodValue);
-        // Aquí usamos directamente la ruta del icono que ya tiene 'assets/banks/...'
         return method ? `<img src="${method.icon}" alt="${method.name}" title="${method.name}">` : '';
     }).join('');
 
@@ -151,10 +148,9 @@ export const getRaffleCard = (raffle) => {
 };
 
 export const getRaffleDetailView = (raffle) => {
-    // Generamos los iconos de métodos de pago para la vista de detalle
     const paymentIconsHTML = raffle.paymentMethods.map(methodValue => {
         const method = paymentMethods.find(p => p.value === methodValue);
-        return method ? `<img src="assets/${method.icon}" alt="${method.name}" title="${method.name}">` : '';
+        return method ? `<img src="${method.icon}" alt="${method.name}" title="${method.name}">` : '';
     }).join('');
 
     return `
@@ -261,6 +257,7 @@ export const getTicketModal = () => `
         </div>
     </div>
 `;
+
 
 
 
