@@ -446,7 +446,8 @@ input:focus, select:focus {
 
 .payment-options-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    /* Creamos columnas de tamaño fijo para un orden perfecto */
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
     gap: 1rem;
     margin-top: 0.5rem;
 }
@@ -454,15 +455,20 @@ input:focus, select:focus {
 .payment-option {
     border: 2px solid var(--border-color);
     border-radius: var(--border-radius);
-    padding: 1rem;
+    padding: 0.75rem;
     text-align: center;
     cursor: pointer;
     transition: all 0.2s ease-in-out;
+    display: flex; /* Usamos flexbox para centrar el contenido */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1 / 1; /* Hacemos que sean cuadrados */
 }
 
 .payment-option:hover {
     border-color: var(--secondary-color);
-    transform: translateY(-3px);
+    transform: scale(1.05);
 }
 
 .payment-option.selected {
@@ -472,15 +478,17 @@ input:focus, select:focus {
 }
 
 .payment-option img {
-    height: 40px;
+    height: 45px; /* Aumentamos el tamaño del logo */
+    width: 100%;
     margin-bottom: 0.5rem;
     object-fit: contain; /* Evita que los logos se deformen */
 }
 
 .payment-option span {
-    font-size: 0.85rem;
+    font-size: 0.8rem; /* Reducimos un poco el texto */
     font-weight: 500;
     color: var(--text-light-color);
+    line-height: 1.2;
 }
 
 /* --- ESTILOS PARA MOSTRAR LOS ICONOS SELECCIONADOS --- */
@@ -593,4 +601,5 @@ input:focus, select:focus {
         height: 30px;
     }
 }
+
 
