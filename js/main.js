@@ -490,36 +490,56 @@ function attachEventListeners(path) {
 
 async function openTicketModal(ticketNumber) {
     const modal = document.getElementById('ticket-modal');
-    const modalTitle = document.getElementById('modal-ticket-number');
-    const buyerNameInput = document.getElementById('buyer-name');
-    const buyerPhoneInput = document.getElementById('buyer-phone');
-    const paymentStatusSelect = document.getElementById('payment-status');
-    
-    // Extraemos el ID de la rifa desde la URL actual
+    if (!modal) return;
+
+    // Buscamos todos los elementos que vamos a necesitar en el nuevo modal
+    const modalTitleForm = document.getElementById('modal-ticket-number-form');
+    const modalTitleInfo = document.getElementById('modal-ticket-number-info');
+    const formView = document.getElementById('ticket-form');
+    const infoView = document.getElementById('ticket-info-view');
+
     const raffleId = window.location.hash.slice(1).split('/')[2];
     if (!raffleId) return;
 
     try {
-        // Consultamos la información actual del boleto en Firestore
         const ticketRef = db.collection('raffles').doc(raffleId).collection('tickets').doc(ticketNumber);
         const doc = await ticketRef.get();
 
         if (doc.exists) {
             const data = doc.data();
-            // Llenamos el formulario con los datos existentes
-            modalTitle.textContent = `Boleto #${data.number}`;
-            buyerNameInput.value = data.buyerName || '';
-            buyerPhoneInput.value = data.buyerPhone || '';
-            paymentStatusSelect.value = data.status === 'available' ? 'pending' : data.status;
+            
+            // Actualizamos el título en AMBAS vistas para que siempre sea correcto
+            modalTitleForm.textContent = `Boleto #${data.number}`;
+            modalTitleInfo.textContent = `Boleto #${data.number}`;
 
-            // Mostramos el modal
-            modal.style.display = 'flex';
+            if (data.status === 'available') {
+                // Si el boleto está DISPONIBLE, mostramos el formulario y lo limpiamos
+                infoView.style.display = 'none';
+                formView.style.display = 'block';
+
+                formView.querySelector('#buyer-name').value = '';
+                formView.querySelector('#buyer-phone').value = '';
+                formView.querySelector('#payment-status').value = 'pending';
+                
+            } else {
+                // Si el boleto está OCUPADO, mostramos la info y ocultamos el formulario
+                formView.style.display = 'none';
+                infoView.style.display = 'block';
+
+                infoView.querySelector('#info-buyer-name').textContent = data.buyerName || 'No disponible';
+                infoView.querySelector('#info-buyer-phone').textContent = data.buyerPhone || 'No disponible';
+                
+                const statusMap = { 'pending': 'Pendiente', 'partial': 'Pago Parcial', 'paid': 'Pagado Total' };
+                infoView.querySelector('#info-payment-status').textContent = statusMap[data.status] || data.status;
+            }
+            
+            modal.style.display = 'flex'; // Mostramos el modal
         } else {
-            console.error("No se encontró el boleto");
             alert("Error: No se encontró el boleto.");
         }
     } catch (error) {
         console.error("Error al obtener datos del boleto:", error);
+        alert("Hubo un error al obtener los datos del boleto.");
     }
 }
 
@@ -641,6 +661,7 @@ async function handleDeleteRaffle(raffleId, cardElement) {
         alert("Hubo un error al intentar eliminar la rifa.");
     }
 }
+
 
 
 
