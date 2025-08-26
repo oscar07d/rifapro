@@ -1,7 +1,7 @@
 // js/components.js
 
 // LISTA CENTRAL DE MÉTODOS DE PAGO
-const paymentMethods = [
+export const paymentMethods = [
     { name: 'Efectivo', value: 'efectivo', icon: 'assets/banks/efectivo.svg' },
     { name: 'Nequi', value: 'nequi', icon: 'assets/banks/nequi.svg' },
     { name: 'Bre-B', value: 'bre-b', icon: 'assets/banks/bre-b.svg' },
@@ -350,3 +350,4 @@ export const getTicketModal = () => `
         </div>
     </div>
 `;
+
