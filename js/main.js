@@ -4,6 +4,7 @@
 import { firebaseConfig } from './firebase-config.js';
 import * as Auth from './auth.js';
 import { 
+    paymentMethods,
     getAuthView, 
     getHomeView, 
     getCreateRaffleView, 
@@ -640,5 +641,6 @@ async function handleDeleteRaffle(raffleId, cardElement) {
         alert("Hubo un error al intentar eliminar la rifa.");
     }
 }
+
 
 
