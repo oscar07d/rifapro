@@ -343,13 +343,26 @@ function attachEventListeners(path) {
         const createRaffleForm = document.getElementById('create-raffle-form');
         createRaffleForm.addEventListener('submit', handleCreateRaffle);
     
-        // --- AÑADE ESTA LÓGICA NUEVA ---
+        // --- REEMPLAZA LA LÓGICA DEL PAYMENTGRID CON ESTO ---
         const paymentGrid = document.querySelector('.payment-options-grid');
         if (paymentGrid) {
             paymentGrid.addEventListener('click', (e) => {
                 const option = e.target.closest('.payment-option');
-                if (option) {
-                    option.classList.toggle('selected');
+                if (!option) return;
+    
+                // 1. Toggle visual de selección
+                option.classList.toggle('selected');
+    
+                // 2. Lógica para mostrar/ocultar detalles
+                const paymentValue = option.dataset.value;
+                const detailsDiv = document.getElementById(`${paymentValue}-details`);
+    
+                if (detailsDiv) {
+                    if (option.classList.contains('selected')) {
+                        detailsDiv.style.display = 'block'; // Mostrar
+                    } else {
+                        detailsDiv.style.display = 'none';  // Ocultar
+                    }
                 }
             });
         }
@@ -506,4 +519,5 @@ async function handleCreateRaffle(e) {
 window.addEventListener('hashchange', router);
 
 window.addEventListener('load', router);
+
 
