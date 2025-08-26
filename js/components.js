@@ -179,8 +179,11 @@ export const getExploreView = (rafflesHTML) => `
 // Genera el HTML para una sola tarjeta de rifa
 export const getRaffleCard = (raffle) => {
     const percentage = raffle.soldPercentage || 0;
-    const paymentIconsHTML = raffle.paymentMethods.map(methodValue => {
-        const method = paymentMethods.find(p => p.value === methodValue);
+    
+    // --- LÍNEA CORREGIDA ---
+    // Cambiamos 'methodValue' por 'methodObject' y accedemos a 'methodObject.method'
+    const paymentIconsHTML = raffle.paymentMethods.map(methodObject => {
+        const method = paymentMethods.find(p => p.value === methodObject.method);
         return method ? `<img src="${method.icon}" alt="${method.name}" title="${method.name}">` : '';
     }).join('');
 
@@ -213,8 +216,10 @@ export const getRaffleCard = (raffle) => {
 };
 
 export const getRaffleDetailView = (raffle) => {
-    const paymentIconsHTML = raffle.paymentMethods.map(methodValue => {
-        const method = paymentMethods.find(p => p.value === methodValue);
+    // --- LÍNEA CORREGIDA ---
+    // Aplicamos la misma corrección aquí
+    const paymentIconsHTML = raffle.paymentMethods.map(methodObject => {
+        const method = paymentMethods.find(p => p.value === methodObject.method);
         return method ? `<img src="${method.icon}" alt="${method.name}" title="${method.name}">` : '';
     }).join('');
 
@@ -223,10 +228,12 @@ export const getRaffleDetailView = (raffle) => {
         <div class="raffle-info">
             <h2>${raffle.name}</h2>
             <p><strong>Premio:</strong> ${raffle.prize}</p>
-            <p><strong>Responsable:</strong> ${raffle.manager}</p> <p><strong>Juega con:</strong> ${raffle.lottery}</p> <p><strong>Precio del boleto:</strong> $${raffle.ticketPrice.toLocaleString('es-CO')}</p>
+            <p><strong>Responsable:</strong> ${raffle.manager}</p>
+            <p><strong>Juega con:</strong> ${raffle.lottery}</p>
+            <p><strong>Precio del boleto:</strong> $${raffle.ticketPrice.toLocaleString('es-CO')}</p>
             <p><strong>Fecha del sorteo:</strong> ${new Date(raffle.drawDate).toLocaleDateString('es-CO')}</p>
             <div class="payment-icons-list detail-view">
-                <strong>Métodos de pago:</strong> ${paymentIconsHTML}
+                <strong style="margin-right: 5px;">Métodos de pago:</strong> ${paymentIconsHTML}
             </div>
         </div>
         <div class="tickets-grid-container">
@@ -322,6 +329,7 @@ export const getTicketModal = () => `
         </div>
     </div>
 `;
+
 
 
 
