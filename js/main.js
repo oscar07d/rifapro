@@ -641,3 +641,65 @@ async function handleDeleteRaffle(raffleId, cardElement) {
         alert("Hubo un error al intentar eliminar la rifa.");
     }
 }
+
+function closeAndResetModal() {
+    const modal = document.getElementById('ticket-modal');
+    const viewContainer = document.getElementById('modal-view-container');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+    // Restaura el contenido original del modal para la proxima vez que se abra
+    if (viewContainer) {
+        viewContainer.innerHTML = `
+            <form id="ticket-form" style="display: block;">
+                <h3 id="modal-ticket-number-form" class="modal-title">Boleto #00</h3>
+                <div class="form-group">
+                    <label for="buyer-name">Nombre del Comprador</label>
+                    <input type="text" id="buyer-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="buyer-phone">Número de Celular</label>
+                    <input type="tel" id="buyer-phone" required>
+                </div>
+                <div class="form-group">
+                    <label for="payment-status">Estado del Pago</label>
+                    <select id="payment-status">
+                        <option value="pending">Pendiente</option>
+                        <option value="partial">Pago Parcial</option>
+                        <option value="paid">Pagado Total</option>
+                    </select>
+                </div>
+                <div class="modal-buttons">
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    <button type="button" id="clear-ticket-btn-form" class="btn btn-danger">Limpiar Boleto</button>
+                </div>
+                <div class="modal-buttons" style="margin-top: 0.5rem;">
+                    <button type="button" id="whatsapp-share-btn" class="btn btn-whatsapp">WhatsApp</button>
+                    <button type="button" id="generic-share-btn" class="btn btn-secondary">Compartir</button>
+                </div>
+            </form>
+            <div id="ticket-info-view" style="display: none;">
+                <h3 id="modal-ticket-number-info" class="modal-title">Boleto #00</h3>
+                <div class="form-group">
+                    <label>A nombre de:</label>
+                    <p id="info-buyer-name" class="info-text"></p>
+                </div>
+                <div class="form-group">
+                    <label>Número de Celular</label>
+                    <p id="info-buyer-phone" class="info-text"></p>
+                </div>
+                <div class="form-group">
+                    <label>Estado del Pago</label>
+                    <p id="info-payment-status" class="info-text"></p>
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" id="clear-ticket-btn-info" class="btn btn-danger">Limpiar Boleto</button>
+                </div>
+                <div class="modal-buttons" style="margin-top: 0.5rem;">
+                    <button type="button" id="whatsapp-share-btn-info" class="btn btn-whatsapp">WhatsApp</button>
+                    <button type="button" id="generic-share-btn-info" class="btn btn-secondary">Compartir</button>
+                </div>
+            </div>
+        `;
+    }
+}
