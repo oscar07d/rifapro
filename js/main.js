@@ -648,7 +648,7 @@ function closeAndResetModal() {
     if (modal) {
         modal.style.display = 'none';
     }
-    // Restaura el contenido original del modal para la proxima vez que se abra
+    // Restaura el contenido original del modal para la próxima vez que se abra
     if (viewContainer) {
         viewContainer.innerHTML = `
             <form id="ticket-form" style="display: block;">
