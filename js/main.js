@@ -370,7 +370,7 @@ function attachEventListeners(path) {
         });
 
         googleLoginBtn.addEventListener('click', Auth.loginWithGoogle);
-        
+
         const toggleAuthMode = e => {
             e.preventDefault();
             isLogin = !isLogin;
@@ -384,28 +384,28 @@ function attachEventListeners(path) {
     } else if (path === '/create') {
         const createRaffleForm = document.getElementById('create-raffle-form');
         createRaffleForm.addEventListener('submit', handleCreateRaffle);
-    
+
         // Lógica para los métodos de pago (sin cambios)
         const paymentGrid = document.querySelector('.payment-options-grid');
         if (paymentGrid) {
             paymentGrid.addEventListener('click', (e) => {
                 const option = e.target.closest('.payment-option');
                 if (!option) return;
-    
+
                 option.classList.toggle('selected');
-                
+
                 const bankDetailsWrapper = document.getElementById('bank-account-details');
                 const nequiDetails = document.getElementById('nequi-details');
                 const daviplataDetails = document.getElementById('daviplata-details');
                 const brebDetails = document.getElementById('bre-b-details');
                 const traditionalBanks = ['av-villas', 'bancolombia', 'bbva', 'bogota', 'caja-social', 'davivienda', 'falabella', 'finandina', 'itau', 'lulo', 'pibank', 'powwi', 'uala'];
-                
+
                 const selectedOptions = Array.from(document.querySelectorAll('.payment-option.selected')).map(el => el.dataset.value);
-    
+
                 nequiDetails.style.display = selectedOptions.includes('nequi') ? 'block' : 'none';
                 daviplataDetails.style.display = selectedOptions.includes('daviplata') ? 'block' : 'none';
                 brebDetails.style.display = selectedOptions.includes('bre-b') ? 'block' : 'none';
-    
+
                 const selectedBanks = selectedOptions.filter(val => traditionalBanks.includes(val));
                 if (selectedBanks.length > 0) {
                     bankDetailsWrapper.style.display = 'block';
@@ -415,7 +415,7 @@ function attachEventListeners(path) {
                 }
             });
         }
-    
+
         // --- AÑADE ESTA LÓGICA NUEVA PARA LOS BOTONES DE PRECIO ---
         const priceOptionsContainer = document.querySelector('.predefined-options');
         if (priceOptionsContainer) {
@@ -429,28 +429,29 @@ function attachEventListeners(path) {
             });
         }
     } else if (isRaffleDetail) {
-    const ticketsGrid = document.getElementById('tickets-grid');
-    const modal = document.getElementById('ticket-modal');
-    const closeModalBtn = document.querySelector('.close-modal');
+        const ticketsGrid = document.getElementById('tickets-grid');
+        const modal = document.getElementById('ticket-modal');
+        const closeModalBtn = document.querySelector('.close-modal');
 
-    // Listener para ABRIR el modal
-    if (ticketsGrid) {
-        ticketsGrid.addEventListener('click', (e) => {
-            if (e.target.classList.contains('ticket')) {
-                const ticketNumber = e.target.dataset.id;
-                openTicketModal(ticketNumber);
-            }
-        });
-    }
+        // Listener para ABRIR el modal
+        if (ticketsGrid) {
+            ticketsGrid.addEventListener('click', (e) => {
+                if (e.target.classList.contains('ticket')) {
+                    const ticketNumber = e.target.dataset.id;
+                    openTicketModal(ticketNumber);
+                }
+            });
+        }
 
-    // Listeners para CERRAR Y RESETEAR el modal
-    if (modal) {
-        closeModalBtn.addEventListener('click', () => closeAndResetModal());
-        modal.addEventListener('click', (e) => {
-            if (e.target.id === 'ticket-modal') {
-                closeAndResetModal();
-            }
-        });
+        // Listeners para CERRAR Y RESETEAR el modal
+        if (modal) {
+            closeModalBtn.addEventListener('click', () => closeAndResetModal());
+            modal.addEventListener('click', (e) => {
+                if (e.target.id === 'ticket-modal') {
+                    closeAndResetModal();
+                }
+            });
+        }
     }
 }
 
