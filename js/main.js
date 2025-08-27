@@ -148,12 +148,15 @@ async function router() {
 }
 
 async function handleTicketFormSubmit(e) {
-    e.preventDefault(); // Evita que la página se recargue
+    e.preventDefault();
 
     const buyerName = document.getElementById('buyer-name').value;
     const buyerPhone = document.getElementById('buyer-phone').value;
     const status = document.getElementById('payment-status').value;
-    const ticketNumber = document.getElementById('modal-ticket-number').textContent.replace('Boleto #', '');
+    
+    // --- LÍNEA CORREGIDA ---
+    // Leemos el número desde el ID del título del formulario, que siempre está visible aquí.
+    const ticketNumber = document.getElementById('modal-ticket-number-form').textContent.replace('Boleto #', '');
     const raffleId = window.location.hash.slice(1).split('/')[2];
     
     if (!buyerName || !buyerPhone) {
@@ -171,7 +174,10 @@ async function handleTicketFormSubmit(e) {
         const ticketRef = db.collection('raffles').doc(raffleId).collection('tickets').doc(ticketNumber);
         await ticketRef.update(dataToUpdate);
         
-        document.getElementById('ticket-modal').style.display = 'none';
+        console.log(`Boleto #${ticketNumber} actualizado correctamente.`);
+        
+        // Cerramos y reseteamos el modal
+        closeAndResetModal();
 
     } catch (error) {
         console.error("Error al actualizar el boleto:", error);
@@ -1484,3 +1490,4 @@ function closeAndResetModal() {
         `;
     }
 }
+
