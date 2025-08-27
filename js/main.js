@@ -214,7 +214,7 @@ async function handleClearTicket() {
 
 async function handleShare(type) {
     const isFormVisible = document.getElementById('ticket-form').style.display !== 'none';
-
+    
     const shareBtnId = type === 'whatsapp' 
         ? (isFormVisible ? 'whatsapp-share-btn' : 'whatsapp-share-btn-info')
         : (isFormVisible ? 'generic-share-btn' : 'generic-share-btn-info');
@@ -238,6 +238,7 @@ async function handleShare(type) {
         const raffleData = raffleDoc.data();
         const ticketData = ticketDoc.data();
 
+        // Rellenar la plantilla completa
         document.getElementById('template-prize').textContent = raffleData.prize;
         document.getElementById('template-buyer').textContent = ticketData.buyerName;
         document.getElementById('template-manager').textContent = raffleData.manager;
@@ -245,8 +246,7 @@ async function handleShare(type) {
         document.getElementById('template-draw-date').textContent = new Date(raffleData.drawDate).toLocaleDateString('es-CO');
         document.getElementById('template-number').textContent = ticketData.number;
         
-        // --- INICIO DE LA CORRECCIÓN CLAVE ---
-        // Lógica para llenar los métodos de pago con estilos más robustos
+        // Lógica para llenar los métodos de pago con estilos robustos
         const paymentMethodsContainer = document.getElementById('template-payment-methods');
         let paymentHTML = '';
         raffleData.paymentMethods.forEach(pm => {
@@ -262,8 +262,6 @@ async function handleShare(type) {
                 } else {
                     detailsText = methodDetails.name;
                 }
-                
-                // Añadimos estilos explícitos para asegurar el renderizado
                 paymentHTML += `
                     <div style="height: 28px; line-height: 28px; margin-bottom: 8px;">
                         <img src="${methodDetails.icon}" alt="${methodDetails.name}" style="height: 22px; max-height: 22px; width: auto; margin-right: 10px; vertical-align: middle;">
@@ -273,8 +271,8 @@ async function handleShare(type) {
             }
         });
         paymentMethodsContainer.innerHTML = paymentHTML;
-        // --- FIN DE LA CORRECCIÓN CLAVE ---
-        
+
+        // Generar la imagen a partir de la plantilla
         const templateElement = document.getElementById('ticket-template');
         const canvas = await html2canvas(templateElement, { useCORS: true, scale: 2 });
         const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
@@ -282,11 +280,33 @@ async function handleShare(type) {
         const file = new File([blob], fileName, { type: 'image/png' });
         const shareText = `¡Hola ${ticketData.buyerName}! Aquí está tu boleto #${ticketData.number} para la rifa. ¡Mucha suerte!`;
 
+        // --- LÓGICA DE COMPARTIR RESTAURADA ---
         if (type === 'whatsapp') {
-            // ... (lógica de vista previa de WhatsApp) ...
-        } else {
-            // ... (lógica de compartir genérico) ...
+            const viewContainer = document.getElementById('modal-view-container');
+            const imageUrl = URL.createObjectURL(blob);
+            viewContainer.innerHTML = `
+                <div class="ticket-preview-wrapper">
+                    <h4>¡Boleto listo para WhatsApp!</h4>
+                    <p>1. Mantén presionada la imagen y elige "Copiar imagen".</p>
+                    <p>2. Haz clic en el botón para abrir WhatsApp y pega la imagen en el chat.</p>
+                    <a href="https://wa.me/?text=${encodeURIComponent(shareText)}" target="_blank" class="btn btn-whatsapp" style="margin-top:1rem; width: auto;">Abrir WhatsApp</a>
+                    <img src="${imageUrl}" alt="Boleto de Rifa">
+                </div>
+            `;
+        } else { // Para el botón de "Compartir" genérico
+            const shareData = { files: [file], title: `Boleto: ${raffleData.name}`, text: shareText };
+            if (navigator.canShare && navigator.canShare(shareData)) {
+                await navigator.share(shareData);
+            } else {
+                // Fallback de descarga si no se puede compartir
+                const link = document.createElement('a');
+                link.download = fileName;
+                link.href = URL.createObjectURL(blob);
+                link.click();
+                URL.revokeObjectURL(link.href);
+            }
         }
+        // --- FIN DE LA LÓGICA RESTAURADA ---
 
     } catch (error) {
         console.error("Error al generar/compartir imagen:", error);
@@ -687,4 +707,5 @@ function closeAndResetModal() {
         `;
     }
 }
+
 
