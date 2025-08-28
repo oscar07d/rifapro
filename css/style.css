@@ -280,12 +280,39 @@ input:focus, select:focus {
 }
 
 /* Detalle de la Rifa y Cuadrícula de Boletos (ESTILOS RESTAURADOS) */
+
 .raffle-detail-container .raffle-info {
     border-bottom: 1px solid var(--border-color);
-    padding-bottom: 1.5rem;
-    margin-bottom: 1.5rem;
-    text-align: left;
-    /* Centramos la info principal */
+    padding-bottom: 2rem;
+    margin-bottom: 2rem;
+    display: flex; /* Usamos flexbox para el diseño de columnas */
+    flex-wrap: wrap; /* Permitimos que se apile en pantallas pequeñas */
+    gap: 1rem 2rem; /* Espacio vertical y horizontal entre elementos */
+}
+
+.raffle-info h2 {
+    width: 100%; /* El título ocupa todo el ancho */
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.info-block {
+    flex: 1; /* Permite que los bloques crezcan y ocupen el espacio */
+    min-width: 250px; /* Ancho mínimo antes de que se apilen */
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+}
+
+.info-block p {
+    margin: 0.5rem 0;
+    font-size: 1rem;
+    color: var(--text-light-color);
+}
+
+.info-block strong {
+    color: var(--text-color);
 }
 
 /* NUEVA REGLA para controlar el tamaño total de la cuadrícula */
@@ -502,7 +529,12 @@ input:focus, select:focus {
 }
 
 .payment-icons-list.detail-view {
-    margin-bottom: 0;
+    margin-top: 0.5rem;
+    align-items: center;
+}
+
+.payment-icons-list.detail-view strong {
+    margin-right: 10px;
 }
 
 .payment-icons-list img {
@@ -581,6 +613,80 @@ input:focus, select:focus {
     color: var(--danger-color);
     border-color: var(--danger-color);
     background-color: #fff5f5;
+}
+
+/* --- ESTILOS PARA EL BOTÓN Y MODAL DE COMPARTIR ESTADO --- */
+
+.grid-actions {
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.color-picker-group {
+    display: flex;
+    gap: 2rem;
+}
+
+.background-options {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.bg-option {
+    padding: 0.5rem 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.bg-option.selected {
+    border-color: var(--primary-color);
+    background-color: #f8f5ff;
+    font-weight: 600;
+}
+
+/* --- ESTILOS MEJORADOS PARA SELECTORES DE COLOR --- */
+
+/* Contenedor para alinear la etiqueta y el círculo */
+.form-group label[for^="color-"] {
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+/* Estilo principal del selector de color */
+input[type="color"] {
+    -webkit-appearance: none; /* Quita el estilo por defecto en Chrome/Safari */
+    -moz-appearance: none;    /* Quita el estilo por defecto en Firefox */
+    appearance: none;         /* Quita el estilo por defecto estándar */
+    
+    width: 40px;      /* Ancho del círculo */
+    height: 40px;     /* Alto del círculo */
+    padding: 0;       /* Quitamos cualquier padding */
+    border: 3px solid var(--border-color); /* Borde exterior */
+    border-radius: 50%; /* Lo hace perfectamente redondo */
+    background-color: transparent; /* Fondo transparente */
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+}
+
+input[type="color"]:hover {
+    border-color: var(--primary-color); /* Resalta el borde al pasar el mouse */
+}
+
+/* Estilo del círculo de color interior (para Chrome/Safari) */
+input[type="color"]::-webkit-color-swatch {
+    border: none;
+    border-radius: 50%;
+    padding: 0;
+}
+
+/* Estilo del círculo de color interior (para Firefox) */
+input[type="color"]::-moz-color-swatch {
+    border: none;
+    border-radius: 50%;
+    padding: 0;
 }
 
 /* 8. Diseño Responsivo */
