@@ -45,41 +45,45 @@ async function router() {
     const view = isRaffleDetail ? getRaffleDetailView : routes[path];
 
     if (view) {
-        if (isRaffleDetail) {
-            const raffleId = path.split('/')[2];
-            try {
-                // 1. Obtenemos los datos generales de la rifa
-                const raffleDoc = await db.collection('raffles').doc(raffleId).get();
-                if (!raffleDoc.exists) {
-                    appContainer.innerHTML = '<h2>Error: Rifa no encontrada</h2>';
-                    return;
-                }
-                const raffleData = { id: raffleDoc.id, ...raffleDoc.data() };
-                
-                // 2. Mostramos el HTML base del detalle de la rifa
-                appContainer.innerHTML = view(raffleData);
-                const ticketsGrid = document.getElementById('tickets-grid');
-                ticketsGrid.innerHTML = 'Cargando boletos...';
+		if (isRaffleDetail) {
+			const raffleId = path.split('/')[2];
+			try {
+				const raffleDoc = await db.collection('raffles').doc(raffleId).get();
+				if (!raffleDoc.exists) {
+					appContainer.innerHTML = '<h2>Error: Rifa no encontrada</h2>';
+					return;
+				}
+				const raffleData = { id: raffleDoc.id, ...raffleDoc.data() };
 
-                // 3. Nos suscribimos a los cambios de los boletos EN TIEMPO REAL
-                const ticketsCollection = db.collection('raffles').doc(raffleId).collection('tickets').orderBy('number');
-                
-                unsubscribeFromTickets = ticketsCollection.onSnapshot(snapshot => {
-                    ticketsGrid.innerHTML = ''; // Limpiamos la cuadrícula
-                    snapshot.forEach(doc => {
-                        const ticketData = doc.data();
-                        const ticketElement = document.createElement('div');
-                        ticketElement.classList.add('ticket', ticketData.status);
-                        ticketElement.textContent = ticketData.number;
-                        ticketElement.dataset.id = ticketData.number;
-                        ticketsGrid.appendChild(ticketElement);
-                    });
-                });
-            } catch (error) {
-                console.error("Error al obtener el detalle de la rifa:", error);
-                appContainer.innerHTML = '<h2>Error al cargar la rifa.</h2>';
-            }
-        } else if (path === '/explore') {
+				appContainer.innerHTML = view(raffleData);
+				const ticketsGrid = document.getElementById('tickets-grid');
+				ticketsGrid.innerHTML = 'Cargando boletos...';
+
+				const ticketsCollection = db.collection('raffles').doc(raffleId).collection('tickets').orderBy('number');
+
+				unsubscribeFromTickets = ticketsCollection.onSnapshot(snapshot => {
+					ticketsGrid.innerHTML = ''; 
+					snapshot.forEach(doc => {
+						const ticketData = doc.data();
+						const ticketElement = document.createElement('div');
+						ticketElement.classList.add('ticket', ticketData.status);
+						ticketElement.textContent = ticketData.number;
+						ticketElement.dataset.id = ticketData.number;
+						ticketsGrid.appendChild(ticketElement);
+					});
+				});
+
+				// --- Lógica actualizada para el botón de compartir ---
+				const shareStatusBtn = document.getElementById('share-status-btn');
+				if (shareStatusBtn) {
+					shareStatusBtn.addEventListener('click', () => openSimpleStatusModal(raffleData));
+				}
+
+			} catch (error) {
+				console.error("Error al obtener el detalle de la rifa:", error);
+				appContainer.innerHTML = '<h2>Error al cargar la rifa.</h2>';
+			}
+		} else if (path === '/explore') {
             const user = firebase.auth().currentUser;
             if (!user) {
                 appContainer.innerHTML = "<h2>Debes iniciar sesión para ver tus rifas.</h2>";
@@ -709,5 +713,206 @@ function closeAndResetModal() {
                 </div>
             </div>
         `;
+    }
+}
+
+// Dejaremos esta función preparada para el siguiente paso
+
+function openSimpleStatusModal(raffleData) {
+    const modal = document.getElementById('status-modal');
+    if (!modal) return;
+
+    const titleTypeSelect = document.getElementById('status-title-type');
+    const prizeOptions = document.getElementById('prize-options-wrapper');
+    const statusForm = document.getElementById('status-form');
+    const closeModalBtn = modal.querySelector('.close-status-modal');
+
+    titleTypeSelect.onchange = () => {
+        prizeOptions.style.display = titleTypeSelect.value === 'prize' ? 'block' : 'none';
+    };
+
+    closeModalBtn.onclick = () => modal.style.display = 'none';
+
+    statusForm.onsubmit = (e) => {
+        e.preventDefault();
+        const settings = {
+            titleType: document.getElementById('status-title-type').value,
+            prizePrefix: document.getElementById('status-prize-prefix').value
+        };
+        generateFinalStatusImage(raffleData, settings);
+        modal.style.display = 'none';
+    };
+
+    modal.style.display = 'flex';
+}
+
+async function generateFinalStatusImage(raffleData, settings) {
+    const shareBtn = document.getElementById('share-status-btn');
+    shareBtn.textContent = 'Generando...';
+    shareBtn.disabled = true;
+
+    try {
+        // 1. Crear el lienzo HTML dinámico
+        const statusTemplate = document.createElement('div');
+        statusTemplate.id = 'status-template-generator';
+        statusTemplate.style.cssText = `
+            position:absolute; left:-9999px;
+            width:1080px; height:1920px;
+            color:white; border-radius:40px;
+            padding:50px 40px; box-sizing:border-box;
+            display:flex; flex-direction:column;
+            font-family:'Poppins', sans-serif;
+            background:linear-gradient(160deg,#4A00E0 0%,#8E2DE2 100%);
+        `;
+
+        // 2. Título
+        let titleHTML = '';
+        if (settings.titleType === 'prize') {
+            titleHTML = settings.prizePrefix.replace(
+                '{premio}',
+                `<span style="font-weight:800;">${raffleData.prize}</span>`
+            );
+        } else {
+            titleHTML = raffleData.name;
+        }
+
+        // 3. Tickets
+        const ticketsSnapshot = await db.collection('raffles')
+            .doc(raffleData.id)
+            .collection('tickets')
+            .orderBy('number')
+            .get();
+
+        let ticketsHTML = '';
+        ticketsSnapshot.forEach(doc => {
+            const ticket = doc.data();
+            const isAvailable = ticket.status === 'available';
+            const classes = isAvailable
+                ? 'background-color:#fff;color:#2c2c2c;'
+                : 'background-color:rgba(0,0,0,0.6);color:transparent;';
+            const content = isAvailable ? ticket.number : '';
+            ticketsHTML += `
+                <div style="
+                    border-radius:16px;
+                    display:flex; justify-content:center; align-items:center;
+                    font-weight:600; aspect-ratio:1/1;
+                    font-size:2rem; ${classes}
+                ">${content}</div>`;
+        });
+
+        // 4. Métodos de pago
+        let paymentHTML = raffleData.paymentMethods.map(pm => {
+            const methodDetails = paymentMethods.find(m => m.value === pm.method);
+            if (!methodDetails) return '';
+
+            const pngPath = methodDetails.icon.replace('/banks/', '/banks/png-banks/').replace('.svg', '.png');
+            let detailsText = '';
+            if (pm.accountNumber) {
+                detailsText = `${pm.accountType.charAt(0).toUpperCase() + pm.accountType.slice(1)}: ${pm.accountNumber}`;
+            } else if (pm.phoneNumber) {
+                detailsText = `Cel: ${pm.phoneNumber}`;
+            } else {
+                detailsText = methodDetails.name;
+            }
+
+            return `
+                <div style="display:flex;align-items:center;margin-bottom:12px;">
+                    <img src="${pngPath}" style="height:60px;margin-right:20px;">
+                    <div style="font-weight:500;line-height:1.2;">
+                        <span style="font-size:1.6rem;opacity:0.8;">${methodDetails.name}</span><br>
+                        <span style="font-size:2rem;">${detailsText}</span>
+                    </div>
+                </div>`;
+        }).join('');
+
+        // 5. Plantilla final
+        statusTemplate.innerHTML = `
+            <div style="flex:1;display:flex;flex-direction:column;">
+                <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:40px;">
+                    <!-- LOGO SVG más grande -->
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1010.84 231.45"
+						 style="height:140px; margin-bottom:40px;" fill="white">
+					  <g>
+						<g>
+						  <path d="M218.07,54.14h-28.47c-2.24-1.48-4.26-3.36-5.98-5.61-5.16-6.74-6.44-15.22-3.67-22.95l-3.43-4.4c-5.13,2.5-10.89,3.47-16.69,2.74-5.8-.72-11.14-3.06-15.51-6.74l-47.45,36.96h-20.38L145.99,0l3.84,4.94c2.85,3.66,6.95,5.99,11.54,6.56,4.6,.57,9.14-.69,12.8-3.53l4.94-3.85,15.61,20.05-2.06,3.63c-2.43,4.3-2.09,9.2,.91,13.12s7.64,5.53,12.42,4.3l4.28-1.09,7.8,10.01Z"/>
+						  <path d="M266.01,130.5l3.86-1.61v-31.52h-6.26c-14.87,0-26.97-12.1-26.97-26.97v-6.26H33.24v6.26c0,14.87-12.11,26.97-26.98,26.97H0v31.52l3.86,1.61c8.7,3.62,11.86,11.51,11.92,17.69,.05,6.18-2.97,14.13-11.62,17.9l-4.16,1.82v30.3H6.26c14.87,0,26.98,12.1,26.98,26.98v6.26H236.64v-6.26c0-14.88,12.1-26.98,26.97-26.98h6.26v-30.3l-4.17-1.82c-8.64-3.77-11.66-11.72-11.61-17.9,.06-6.18,3.22-14.07,11.92-17.69Zm-24.44,17.58c-.1,11.73,5.86,22.08,15.78,27.8v10.31c-16.77,2.68-30.06,15.96-32.74,32.74H45.26c-2.68-16.78-15.96-30.06-32.74-32.74v-10.31c9.92-5.72,15.88-16.07,15.78-27.8-.1-11.54-6.05-21.64-15.78-27.25v-11.43c16.78-2.68,30.06-15.97,32.74-32.74H224.61c2.68,16.77,15.97,30.06,32.74,32.74v11.43c-9.73,5.61-15.68,15.71-15.78,27.25Z" fill="white"/>
+						  <polygon points="127.86 104.58 147.23 126.8 176.51 123.43 161.37 148.72 173.62 175.53 144.89 168.95 123.18 188.88 120.56 159.52 94.9 145.03 122.01 133.47 127.86 104.58" fill="white"/>
+						  <path d="M170.04,54.14h-9.96l-9.78-10.87c-1.37-1.52-1.25-3.86,.27-5.23,1.52-1.36,3.86-1.24,5.23,.28l14.24,15.82Z" fill="white"/>
+						</g>
+						<g>
+						  <!-- Texto RifaPro -->
+						  <path d="M376.56,167.69h-15.45v58.6h-29.84V74.1h59.46c29.62,0,48.51,20.39,48.51,46.79,0,21.25-12.45,37.35-32.41,43.14l32.63,62.25h-33.06l-29.84-58.6Z" fill="white"/>
+						  <path d="M473.58,68.3c9.87,0,17.6,7.94,17.6,17.82s-7.73,17.39-17.6,17.39-17.6-7.94-17.6-17.39,7.94-17.82,17.6-17.82Z" fill="white"/>
+						  <path d="M551.28,109.09v11.59h23.83v24.47h-23.83v81.14h-28.76v-81.14h-17.6v-24.47h17.6v-12.02c0-23.83,15.02-39.28,38.42-39.28,6.01,0,11.81,1.07,14.17,2.15v24.04c-1.5-.43-4.29-1.07-9.02-1.07-6.44,0-14.81,2.79-14.81,14.6Z" fill="white"/>
+						  <path d="M616.11,165.54l25.97-3.86c6.01-.86,7.94-3.86,7.94-7.51,0-7.51-5.8-13.74-17.82-13.74s-19.32,7.94-20.18,17.17l-25.33-5.37c1.72-16.53,16.96-34.77,45.29-34.77,33.48,0,45.93,18.89,45.93,40.14v51.94c0,5.58,.64,13.09,1.29,16.74h-26.19c-.64-2.79-1.07-8.59-1.07-12.66-5.37,8.37-15.45,15.67-31.12,15.67-22.54,0-36.27-15.24-36.27-31.77,0-18.89,13.95-29.41,31.55-31.98Z" fill="white"/>
+						  <path d="M733.3,168.97v57.31h-29.62V74.1h56.88c30.05,0,50.01,19.96,50.01,47.44s-19.96,47.44-50.01,47.44h-27.26Z" fill="white"/>
+						  <path d="M891.07,149.01c-3.22-.64-6.01-.86-8.59-.86-14.6,0-27.26,7.08-27.26,29.84v48.3h-28.55V120.68h27.69v15.67c6.44-13.95,21.04-16.53,30.05-16.53,2.36,0,4.51,.21,6.65,.43v28.76Z" fill="white"/>
+						  <path d="M1010.84,173.48c0,32.41-23.83,56.02-55.38,56.02s-55.38-23.61-55.38-56.02,23.83-56.02,55.38-56.02,55.38,23.4,55.38,56.02Z" fill="white"/>
+						</g>
+					  </g>
+					</svg>
+
+                    <div style="text-align:center;padding:25px;background:rgba(255,255,255,0.15);border-radius:20px;">
+                        <h2 style="margin:0;font-size:4rem;font-weight:700;line-height:1.2;color:white;">
+                            ${titleHTML}
+                        </h2>
+                    </div>
+                </div>
+
+                <div style="flex-grow:1;display:flex;flex-direction:column;justify-content:center;padding:40px 0;">
+                    <h3 style="text-align:center;margin:0 0 40px 0;font-weight:600;font-size:2.5rem;color:white;">
+                        ¡Números disponibles!
+                    </h3>
+                    <div style="display:grid;grid-template-columns:repeat(10,1fr);gap:15px;">
+                        ${ticketsHTML}
+                    </div>
+                </div>
+
+                <div style="padding:25px;background:rgba(255,255,255,0.15);border-radius:20px;text-align:left;color:white;">
+                    <p style="margin:0 0 20px 0;font-size:1.8rem;text-align:center;color:white;">
+                        <strong>Juega:</strong> ${new Date(raffleData.drawDate).toLocaleDateString('es-CO')} con ${raffleData.lottery}
+                    </p>
+                    <div style="border-top:1px solid rgba(255,255,255,0.3);
+                                border-bottom:1px solid rgba(255,255,255,0.3);
+                                padding:25px 10px;display:flex;flex-direction:column;gap:15px;">
+                        ${paymentHTML}
+                    </div>
+                    <p style="margin:20px 0 10px 0;font-size:1.6rem;opacity:0.9;text-align:center;color:white;">
+                        Rifa organizada por: ${raffleData.manager}
+                    </p>
+                    <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:10px;">
+                        <p style="margin:0;font-size:1.4rem;color:white;opacity:0.8;">Desarrollado por</p>
+                        <img src="assets/logo/developed-by-logo.svg" alt="Developed By Logo"
+                            style="height:30px;filter:brightness(200%);opacity:0.8;">
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(statusTemplate);
+
+        // 6. Captura sin forzar width/height
+        const canvas = await html2canvas(statusTemplate, { useCORS: true, scale: 1 });
+        document.body.removeChild(statusTemplate);
+
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        const file = new File([blob], `estado-rifa.png`, { type: 'image/png' });
+
+        const shareData = { files: [file] };
+        if (navigator.canShare && navigator.canShare(shareData)) {
+            await navigator.share(shareData);
+        } else {
+            const link = document.createElement('a');
+            link.download = `estado-rifa.png`;
+            link.href = URL.createObjectURL(blob);
+            link.click();
+            URL.revokeObjectURL(link.href);
+        }
+    } catch (error) {
+        console.error("Error al generar imagen de estado:", error);
+        alert("Hubo un error al generar la imagen.");
+    } finally {
+        shareBtn.textContent = 'Compartir Estado de la Rifa';
+        shareBtn.disabled = false;
     }
 }
