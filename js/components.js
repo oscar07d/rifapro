@@ -221,8 +221,6 @@ export const getRaffleCard = (raffle) => {
 };
 
 export const getRaffleDetailView = (raffle) => {
-    // --- LÍNEA CORREGIDA ---
-    // Aplicamos la misma corrección aquí
     const paymentIconsHTML = raffle.paymentMethods.map(methodObject => {
         const method = paymentMethods.find(p => p.value === methodObject.method);
         return method ? `<img src="${method.icon}" alt="${method.name}" title="${method.name}">` : '';
@@ -232,22 +230,33 @@ export const getRaffleDetailView = (raffle) => {
     <div class="raffle-detail-container">
         <div class="raffle-info">
             <h2>${raffle.name}</h2>
-            <p><strong>Premio:</strong> ${raffle.prize}</p>
-            <p><strong>Responsable:</strong> ${raffle.manager}</p>
-            <p><strong>Juega con:</strong> ${raffle.lottery}</p>
-            <p><strong>Precio del boleto:</strong> $${raffle.ticketPrice.toLocaleString('es-CO')}</p>
-            <p><strong>Fecha del sorteo:</strong> ${new Date(raffle.drawDate).toLocaleDateString('es-CO')}</p>
-            <div class="payment-icons-list detail-view">
-                <strong style="margin-right: 5px;">Métodos de pago:</strong> ${paymentIconsHTML}
+            
+            <div class="info-block">
+                <p><strong>Premio:</strong> ${raffle.prize}</p>
+                <p><strong>Precio del boleto:</strong> $${raffle.ticketPrice.toLocaleString('es-CO')}</p>
+                <p><strong>Responsable:</strong> ${raffle.manager}</p>
+            </div>
+            
+            <div class="info-block">
+                <p><strong>Juega con:</strong> ${raffle.lottery}</p>
+                <p><strong>Fecha del sorteo:</strong> ${new Date(raffle.drawDate).toLocaleDateString('es-CO')}</p>
+                <div class="payment-icons-list detail-view">
+                    <strong>Métodos de pago:</strong> ${paymentIconsHTML}
+                </div>
             </div>
         </div>
+
         <div class="tickets-grid-container">
             <h3>Selecciona tu número</h3>
             <div id="tickets-grid"></div>
-        </div>
+
+            <div class="grid-actions">
+                <button type="button" id="share-status-btn" class="btn btn-primary">Compartir Estado de la Rifa</button>
+            </div>
+            </div>
     </div>
     ${getTicketModal()}
-    `;
+    ${getStatusModal()} `;
 };
 
 // AHORA, DEFINIMOS LA SEGUNDA FUNCIÓN POR SEPARADO
@@ -351,3 +360,31 @@ export const getTicketModal = () => `
     </div>
 `;
 
+export const getStatusModal = () => `
+    <div id="status-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <span class="close-status-modal">&times;</span>
+            <h3>Personalizar Título</h3>
+            <form id="status-form">
+                
+                <div class="form-group">
+                    <label>Título Principal</label>
+                    <select id="status-title-type">
+                        <option value="raffle_name">Mostrar Nombre de la Rifa</option>
+                        <option value="prize">Mostrar Premio</option>
+                    </select>
+                </div>
+
+                <div id="prize-options-wrapper" class="form-group" style="display: none;">
+                    <label for="status-prize-prefix">Estilo del Título del Premio</label>
+                    <select id="status-prize-prefix">
+                        <option value="¡Gana {premio}">¡Gana {premio}!</option>
+                        <option value="Gran Rifa de {premio}">Gran Rifa de {premio}</option>
+                        </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Generar y Compartir</button>
+            </form>
+        </div>
+    </div>
+`;
