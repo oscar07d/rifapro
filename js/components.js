@@ -238,7 +238,7 @@ export const getRaffleDetailView = (raffle) => {
             </div>
             
             <div class="info-block">
-                <p><strong>Juega con:</strong> ${raffle.lottery}</p>
+                <p><strong>Juega con:</strong> Loteria de ${raffle.lottery}</p>
                 <p><strong>Fecha del sorteo:</strong> ${new Date(raffle.drawDate).toLocaleDateString('es-CO')}</p>
                 <div class="payment-icons-list detail-view">
                     <strong>Métodos de pago:</strong> ${paymentIconsHTML}
@@ -335,7 +335,7 @@ export const getTicketModal = () => `
                     <div><strong>Premio:</strong> <span id="template-prize"></span></div>
                     <div><strong>A nombre de:</strong> <span id="template-buyer"></span></div>
                     <div><strong>Responsable:</strong> <span id="template-manager"></span></div>
-                    <div><strong>Juega con:</strong> <span id="template-lottery"></span></div>
+                    <div><strong>Juega con:</strong> Loteria de <span id="template-lottery"></span></div>
                     <div><strong>Fecha Sorteo:</strong> <span id="template-draw-date"></span></div>
                     <div style="margin-top: auto; border-top: 2px solid #f0f2f5; padding-top: 15px;">
                         <h4 style="margin: 0 0 10px 0; color: #6a11cb;">Realiza tu pago a:</h4>
