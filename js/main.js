@@ -758,7 +758,7 @@ async function generateFinalStatusImage(raffleData, settings) {
         statusTemplate.style.cssText = `
             position:absolute; left:-9999px;
             width:1080px; height:1920px;
-            color:white; border-radius:40px;
+            color:white;
             padding:50px 40px; box-sizing:border-box;
             display:flex; flex-direction:column;
             font-family:'Poppins', sans-serif;
@@ -802,40 +802,30 @@ async function generateFinalStatusImage(raffleData, settings) {
 
         // 4. Métodos de pago
         let paymentHTML = raffleData.paymentMethods.map(pm => {
-            const methodDetails = paymentMethods.find(m => m.value === pm.method);
-            if (!methodDetails) return '';
+			const methodDetails = paymentMethods.find(m => m.value === pm.method);
+			if (!methodDetails) return '';
 
-            const pngPath = methodDetails.icon.replace('/banks/', '/banks/png-banks/').replace('.svg', '.png');
-            let detailsText = '';
-            if (pm.accountNumber) {
-                detailsText = `${pm.accountType.charAt(0).toUpperCase() + pm.accountType.slice(1)}: ${pm.accountNumber}`;
-            } else if (pm.phoneNumber) {
-                detailsText = `Cel: ${pm.phoneNumber}`;
-            } else {
-                detailsText = methodDetails.name;
-            }
+			const pngPath = methodDetails.icon.replace('/banks/', '/banks/png-banks/').replace('.svg', '.png');
+			let detailsText = '';
+			if (pm.accountNumber) {
+				detailsText = `${pm.accountType.charAt(0).toUpperCase() + pm.accountType.slice(1)}: ${pm.accountNumber}`;
+			} else if (pm.phoneNumber) {
+				detailsText = `Cel: ${pm.phoneNumber}`;
+			} else {
+				detailsText = methodDetails.name;
+			}
 
-            return `
-				<div style="
-					display:flex;
-					align-items:center;
-					gap:8px;
-					min-width:0;
-					flex:1;
-				">
-					<img src="${pngPath}" 
-						 style="height:clamp(28px, 4vw, 40px); flex-shrink:0;">
-					<div style="
-						font-size:clamp(1.1rem, 2vw, 1.6rem);
-						line-height:1.2;
-						white-space:nowrap;
-						overflow:hidden;
-						text-overflow:ellipsis;
-					">
-						<strong>${methodDetails.name}:</strong> ${detailsText}
-					</div>
-				</div>`;
-        }).join('');
+			return `
+			  <div style="display:flex;align-items:center;gap:6px;">
+				<img src="${pngPath}" 
+					 alt="${methodDetails.name}" 
+					 style="width:clamp(30px, 6vw, 60px);height:auto;object-fit:contain;" />
+				<span style="font-size:clamp(30px, 1.5vw, 16px);">
+				  <strong>${methodDetails.name}:</strong> ${detailsText}
+				</span>
+			  </div>
+			`;
+		}).join('');
 
         // 5. Plantilla final
         statusTemplate.innerHTML = `
@@ -871,7 +861,7 @@ async function generateFinalStatusImage(raffleData, settings) {
 							<path d="M376.56,167.69h-15.45v58.6h-29.84V74.1h59.46c29.62,0,48.51,20.39,48.51,46.79,0,21.25-12.45,37.35-32.41,43.14l32.63,62.25h-33.06l-29.84-58.6Zm8.59-25.54c15.03,0,23.83-8.59,23.83-21.04s-8.8-21.25-23.83-21.25h-24.04v42.29h24.04Z"/>
 							<path d="M473.58,68.3c9.87,0,17.6,7.94,17.6,17.82s-7.73,17.39-17.6,17.39-17.6-7.94-17.6-17.39,7.94-17.82,17.6-17.82Zm-14.17,157.98V120.68h28.55v105.61h-28.55Z"/>
 							<path d="M551.28,109.09v11.59h23.83v24.47h-23.83v81.14h-28.76v-81.14h-17.6v-24.47h17.6v-12.02c0-23.83,15.02-39.28,38.42-39.28,6.01,0,11.81,1.07,14.17,2.15v24.04c-1.5-.43-4.29-1.07-9.02-1.07-6.44,0-14.81,2.79-14.81,14.6Z"/>
-							<path d="M616.11,165.54l25.97-3.86c6.01-.86,7.94-3.86,7.94-7.51,0-7.51-5.8-13.74-17.82-13.74s-19.32,7.94-20.18,17.17l-25.33-5.37c1.72-16.53,16.96-34.77,45.29-34.77,33.48,0,45.93,18.89,45.93,40.14v51.94c0,5.58,.64,13.09,1.29,16.74h-26.19c-.64-2.79-1.07-8.59-1.07-12.66-5.37,8.37-15.45,15.67-31.12,15.67-22.54,0-36.27-15.24-36.27-31.77,0-18.89,13.95-29.41,31.55-31.98Z"/>
+							<path d="M616.11,165.54l25.97-3.86c6.01-.86,7.94-3.86,7.94-7.51,0-7.51-5.8-13.74-17.82-13.74s-19.32,7.94-20.18,17.17l-25.33-5.37c1.72-16.53,16.96-34.77,45.29-34.77,33.48,0,45.93,18.89,45.93,40.14v51.94c0,5.58,.64,13.09,1.29,16.74h-26.19c-.64-2.79-1.07-8.59-1.07-12.66-5.37,8.37-15.45,15.67-31.12,15.67-22.54,0-36.27-15.24-36.27-31.77,0-18.89,13.95-29.41,31.55-31.98Zm33.91,18.03v-4.72l-23.83,3.65c-7.3,1.07-13.09,5.15-13.09,13.31,0,6.22,4.51,12.23,13.74,12.23,12.02,0,23.18-5.8,23.18-24.47Z"/>
 							<path d="M733.3,168.97v57.31h-29.62V74.1h56.88c30.05,0,50.01,19.96,50.01,47.44s-19.96,47.44-50.01,47.44h-27.26Zm23.61-25.54c14.81,0,23.83-8.59,23.83-21.68s-9.02-21.89-23.83-21.89h-23.4v43.57h23.4Z"/>
 							<path d="M891.07,149.01c-3.22-.64-6.01-.86-8.59-.86-14.6,0-27.26,7.08-27.26,29.84v48.3h-28.55V120.68h27.69v15.67c6.44-13.95,21.04-16.53,30.05-16.53,2.36,0,4.51,.21,6.65,.43v28.76Z"/>
 							<path d="M1010.84,173.48c0,32.41-23.83,56.02-55.38,56.02s-55.38-23.61-55.38-56.02,23.83-56.02,55.38-56.02,55.38,23.4,55.38,56.02Zm-28.55,0c0-19.96-12.88-30.05-26.83-30.05s-26.83,10.09-26.83,30.05,12.88,30.05,26.83,30.05,26.83-10.09,26.83-30.05Z"/>
@@ -898,16 +888,20 @@ async function generateFinalStatusImage(raffleData, settings) {
 
                 <div style="padding:25px;background:rgba(255,255,255,0.15);border-radius:20px;text-align:left;color:white;">
                     <p style="margin:0 0 20px 0;font-size:1.8rem;text-align:center;color:white;">
-                        <strong>Juega:</strong> ${new Date(raffleData.drawDate).toLocaleDateString('es-CO')} con ${raffleData.lottery}
+                        <strong>Juega:</strong> ${new Date(raffleData.drawDate).toLocaleDateString('es-CO')} con Loteria de ${raffleData.lottery}
                     </p>
                     <div style="
 						display:grid;
 						grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 						gap:10px;
 						align-items:center;
+						border-top: 1px solid rgba(255,255,255,0.3);
+						border-bottom: 1px solid rgba(255,255,255,0.3);
+						padding: 15px 5px;
 					">
 						${paymentHTML}
 					</div>
+					<p style="font-size: 2rem; margin: 10px 0 5px 0; text-align: center;"><strong>Precio del boleto:</strong> $${raffleData.ticketPrice.toLocaleString('es-CO')}</p>
                     <p style="margin:20px 0 10px 0;font-size:1.6rem;opacity:0.9;text-align:center;color:white;">
                         Rifa organizada por: ${raffleData.manager}
                     </p>
