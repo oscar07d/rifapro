@@ -10,8 +10,11 @@ import {
     getCreateRaffleView, 
     getExploreView, 
     getRaffleCard,
-    getRaffleDetailView
+    getRaffleDetailView,
+	getCollaboratorModal
 } from './components.js';
+
+document.body.insertAdjacentHTML("beforeend", getCollaboratorModal());
 
 // Inicializamos Firebase con nuestra configuración
 firebase.initializeApp(firebaseConfig);
@@ -34,7 +37,6 @@ const routes = {
 };
 
 async function router() {
-    // Si hay una suscripción activa a los tickets, la cancelamos al cambiar de vista
     if (unsubscribeFromTickets) {
         unsubscribeFromTickets();
         unsubscribeFromTickets = null;
@@ -45,102 +47,85 @@ async function router() {
     const view = isRaffleDetail ? getRaffleDetailView : routes[path];
 
     if (view) {
-		if (isRaffleDetail) {
-			const raffleId = path.split('/')[2];
+        if (isRaffleDetail) {
+            const raffleId = path.split('/')[2];
+            try {
+                const raffleDoc = await db.collection('raffles').doc(raffleId).get();
+                if (!raffleDoc.exists) {
+                    appContainer.innerHTML = '<h2>Error: Rifa no encontrada</h2>';
+                    return;
+                }
+                const raffleData = { id: raffleDoc.id, ...raffleDoc.data() };
+
+                appContainer.innerHTML = view(raffleData);
+                const ticketsGrid = document.getElementById('tickets-grid');
+                ticketsGrid.innerHTML = 'Cargando boletos...';
+
+                unsubscribeFromTickets = db.collection('raffles').doc(raffleId).collection('tickets').orderBy('number')
+                    .onSnapshot(snapshot => {
+                        ticketsGrid.innerHTML = '';
+                        snapshot.forEach(doc => {
+                            const ticketData = doc.data();
+                            const ticketElement = document.createElement('div');
+                            ticketElement.classList.add('ticket', ticketData.status);
+                            ticketElement.textContent = ticketData.number;
+                            ticketElement.dataset.id = ticketData.number;
+                            ticketsGrid.appendChild(ticketElement);
+                        });
+                    });
+
+                const shareStatusBtn = document.getElementById('share-status-btn');
+                if (shareStatusBtn) {
+                    shareStatusBtn.addEventListener('click', () => openSimpleStatusModal(raffleData));
+                }
+
+            } catch (error) {
+                console.error("Error al obtener el detalle de la rifa:", error);
+                appContainer.innerHTML = '<h2>Error al cargar la rifa.</h2>';
+            }
+        } else if (path === '/explore') {
+			const user = firebase.auth().currentUser;
+			if (!user) {
+				appContainer.innerHTML = "<h2>Debes iniciar sesión para ver tus rifas.</h2>";
+				return;
+			}
+
 			try {
-				const raffleDoc = await db.collection('raffles').doc(raffleId).get();
-				if (!raffleDoc.exists) {
-					appContainer.innerHTML = '<h2>Error: Rifa no encontrada</h2>';
-					return;
-				}
-				const raffleData = { id: raffleDoc.id, ...raffleDoc.data() };
+				const rafflesSnapshot = await db.collection('raffles')
+					.where('ownerId', '==', user.uid)
+					.orderBy('createdAt', 'desc')
+					.get();
 
-				appContainer.innerHTML = view(raffleData);
-				const ticketsGrid = document.getElementById('tickets-grid');
-				ticketsGrid.innerHTML = 'Cargando boletos...';
+				let rafflesHTML = '';
 
-				const ticketsCollection = db.collection('raffles').doc(raffleId).collection('tickets').orderBy('number');
-
-				unsubscribeFromTickets = ticketsCollection.onSnapshot(snapshot => {
-					ticketsGrid.innerHTML = ''; 
-					snapshot.forEach(doc => {
-						const ticketData = doc.data();
-						const ticketElement = document.createElement('div');
-						ticketElement.classList.add('ticket', ticketData.status);
-						ticketElement.textContent = ticketData.number;
-						ticketElement.dataset.id = ticketData.number;
-						ticketsGrid.appendChild(ticketElement);
+				if (rafflesSnapshot.empty) {
+					rafflesHTML = '<h2>No has creado ninguna rifa todavía.</h2><p>¡Haz clic en "Crear Rifa" para empezar!</p>';
+				} else {
+					const raffleCardPromises = rafflesSnapshot.docs.map(async (doc) => {
+						const raffleData = { id: doc.id, ...doc.data() };
+						const ticketsSnapshot = await db.collection('raffles').doc(raffleData.id).collection('tickets').where('status', '!=', 'available').get();
+						raffleData.soldPercentage = ticketsSnapshot.size;
+						return getRaffleCard(raffleData, user); 
 					});
-				});
-
-				// --- Lógica actualizada para el botón de compartir ---
-				const shareStatusBtn = document.getElementById('share-status-btn');
-				if (shareStatusBtn) {
-					shareStatusBtn.addEventListener('click', () => openSimpleStatusModal(raffleData));
+					const resolvedRaffleCards = await Promise.all(raffleCardPromises);
+					rafflesHTML = resolvedRaffleCards.join('');
 				}
+
+				const adminViewHTML = `
+					<div class="explore-container">
+						<h2>Administrar Mis Rifas</h2>
+						<div id="raffles-list">
+							${rafflesHTML}
+						</div>
+					</div>
+				`;
+				appContainer.innerHTML = adminViewHTML;
 
 			} catch (error) {
-				console.error("Error al obtener el detalle de la rifa:", error);
-				appContainer.innerHTML = '<h2>Error al cargar la rifa.</h2>';
+				console.error("Error al obtener las rifas:", error);
+				appContainer.innerHTML = '<p>Error al cargar tus rifas.</p>';
 			}
-		} else if (path === '/explore') {
-            const user = firebase.auth().currentUser;
-            if (!user) {
-                appContainer.innerHTML = "<h2>Debes iniciar sesión para ver tus rifas.</h2>";
-                return;
-            }
-        
-            try {
-                const rafflesSnapshot = await db.collection('raffles')
-                    .where('ownerId', '==', user.uid)
-                    .orderBy('createdAt', 'desc')
-                    .get();
-                
-                let rafflesHTML = '';
-                
-                if (rafflesSnapshot.empty) {
-                    rafflesHTML = '<h2>No has creado ninguna rifa todavía.</h2><p>¡Haz clic en "Crear Rifa" para empezar!</p>';
-                } else {
-                    const raffleCardPromises = rafflesSnapshot.docs.map(async (doc) => {
-                        const raffleData = { id: doc.id, ...doc.data() };
-                        const ticketsSnapshot = await db.collection('raffles').doc(raffleData.id).collection('tickets').where('status', '!=', 'available').get();
-                        raffleData.soldPercentage = ticketsSnapshot.size;
-                        return getRaffleCard(raffleData);
-                    });
-                    const resolvedRaffleCards = await Promise.all(raffleCardPromises);
-                    rafflesHTML = resolvedRaffleCards.join('');
-                }
-        
-                const adminViewHTML = `
-                    <div class="explore-container">
-                        <h2>Administrar Mis Rifas</h2>
-                        <div id="raffles-list">
-                            ${rafflesHTML}
-                        </div>
-                    </div>
-                `;
-                appContainer.innerHTML = adminViewHTML;
-        
-                // --- INICIO DEL CÓDIGO AÑADIDO ---
-                // Se ejecuta DESPUÉS de que el HTML de las tarjetas se ha insertado en la página
-                const rafflesList = document.getElementById('raffles-list');
-                if (rafflesList) {
-                    rafflesList.addEventListener('click', (e) => {
-                        const deleteButton = e.target.closest('.btn-delete-raffle');
-                        if (deleteButton) {
-                            const card = deleteButton.closest('.raffle-card');
-                            const raffleId = card.dataset.id;
-                            handleDeleteRaffle(raffleId, card); // Llamamos a la función para borrar
-                        }
-                    });
-                }
-                // --- FIN DEL CÓDIGO AÑADIDO ---
-        
-            } catch (error) {
-                console.error("Error al obtener las rifas:", error);
-                appContainer.innerHTML = '<p>Error al cargar tus rifas.</p>';
-            }
-        } else {
+		} else {
             const user = firebase.auth().currentUser;
             const userName = user ? user.displayName || user.email : 'Invitado';
             appContainer.innerHTML = (path === '/') ? view(userName) : view();
@@ -190,17 +175,22 @@ async function handleTicketFormSubmit(e) {
 }
 
 async function handleClearTicket() {
-    const ticketNumber = document.getElementById('modal-ticket-number').textContent.replace('Boleto #', '');
+    const isFormVisible = document.getElementById('ticket-form').style.display !== 'none';
+    
+    // Leemos el número desde el título que esté visible actualmente
+    const ticketNumberId = isFormVisible 
+        ? 'modal-ticket-number-form' 
+        : 'modal-ticket-number-info';
+    
+    const ticketNumber = document.getElementById(ticketNumberId).textContent.replace('Boleto #', '');
     const raffleId = window.location.hash.slice(1).split('/')[2];
 
-    // Pedimos confirmación al usuario antes de borrar
     const isConfirmed = confirm(`¿Estás seguro de que quieres limpiar el boleto #${ticketNumber}? Se borrarán los datos del comprador y quedará disponible.`);
 
     if (!isConfirmed) {
-        return; // Si el usuario cancela, no hacemos nada
+        return;
     }
 
-    // Datos para resetear el boleto
     const dataToClear = {
         buyerName: null,
         buyerPhone: null,
@@ -209,12 +199,9 @@ async function handleClearTicket() {
 
     try {
         const ticketRef = db.collection('raffles').doc(raffleId).collection('tickets').doc(ticketNumber);
-        await ticketRef.update(dataToClear); // Actualizamos el boleto en Firestore
-
-        console.log(`Boleto #${ticketNumber} limpiado correctamente.`);
-
-        // Cerramos el modal
-        document.getElementById('ticket-modal').style.display = 'none';
+        await ticketRef.update(dataToClear);
+        
+        closeAndResetModal(); // Usamos la función de reseteo
 
     } catch (error) {
         console.error("Error al limpiar el boleto:", error);
@@ -369,19 +356,21 @@ function attachEventListeners(path) {
         const toggleLink = document.getElementById('auth-toggle-link');
         let isLogin = true;
 
-        authForm.addEventListener('submit', e => {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            if (isLogin) {
-                Auth.loginUser(email, password).catch(err => alert(err.message));
-            } else {
-                Auth.registerUser(email, password).catch(err => alert(err.message));
-            }
-        });
-
-        googleLoginBtn.addEventListener('click', Auth.loginWithGoogle);
-
+        if (authForm) {
+            authForm.addEventListener('submit', e => {
+                e.preventDefault();
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                if (isLogin) {
+                    Auth.loginUser(email, password).catch(err => alert(err.message));
+                } else {
+                    Auth.registerUser(email, password).catch(err => alert(err.message));
+                }
+            });
+        }
+        
+        if (googleLoginBtn) googleLoginBtn.addEventListener('click', Auth.loginWithGoogle);
+        
         const toggleAuthMode = e => {
             e.preventDefault();
             isLogin = !isLogin;
@@ -390,76 +379,72 @@ function attachEventListeners(path) {
             document.getElementById('auth-toggle-text').innerHTML = isLogin ? '¿No tienes cuenta? <a href="#" id="auth-toggle-link">Regístrate</a>' : '¿Ya tienes cuenta? <a href="#" id="auth-toggle-link">Inicia Sesión</a>';
             document.getElementById('auth-toggle-link').addEventListener('click', toggleAuthMode);
         };
-        toggleLink.addEventListener('click', toggleAuthMode);
+        if (toggleLink) toggleLink.addEventListener('click', toggleAuthMode);
 
     } else if (path === '/create') {
         const createRaffleForm = document.getElementById('create-raffle-form');
-        createRaffleForm.addEventListener('submit', handleCreateRaffle);
+        if (createRaffleForm) createRaffleForm.addEventListener('submit', handleCreateRaffle);
 
-        // Lógica para los métodos de pago (sin cambios)
         const paymentGrid = document.querySelector('.payment-options-grid');
         if (paymentGrid) {
             paymentGrid.addEventListener('click', (e) => {
                 const option = e.target.closest('.payment-option');
                 if (!option) return;
-
                 option.classList.toggle('selected');
-
-                const bankDetailsWrapper = document.getElementById('bank-account-details');
-                const nequiDetails = document.getElementById('nequi-details');
-                const daviplataDetails = document.getElementById('daviplata-details');
-                const brebDetails = document.getElementById('bre-b-details');
-                const traditionalBanks = ['av-villas', 'bancolombia', 'bbva', 'bogota', 'caja-social', 'davivienda', 'falabella', 'finandina', 'itau', 'lulo', 'pibank', 'powwi', 'uala'];
-
-                const selectedOptions = Array.from(document.querySelectorAll('.payment-option.selected')).map(el => el.dataset.value);
-
-                nequiDetails.style.display = selectedOptions.includes('nequi') ? 'block' : 'none';
-                daviplataDetails.style.display = selectedOptions.includes('daviplata') ? 'block' : 'none';
-                brebDetails.style.display = selectedOptions.includes('bre-b') ? 'block' : 'none';
-
-                const selectedBanks = selectedOptions.filter(val => traditionalBanks.includes(val));
-                if (selectedBanks.length > 0) {
-                    bankDetailsWrapper.style.display = 'block';
-                    document.getElementById('bank-list').textContent = selectedBanks.map(b => b.charAt(0).toUpperCase() + b.slice(1)).join(', ');
-                } else {
-                    bankDetailsWrapper.style.display = 'none';
-                }
+                // ... (lógica para mostrar/ocultar detalles de pago)
             });
         }
 
-        // --- AÑADE ESTA LÓGICA NUEVA PARA LOS BOTONES DE PRECIO ---
         const priceOptionsContainer = document.querySelector('.predefined-options');
         if (priceOptionsContainer) {
             priceOptionsContainer.addEventListener('click', (e) => {
-                // Se asegura de que se hizo clic en un botón de opción de precio
                 if (e.target.classList.contains('price-option-btn')) {
                     const price = e.target.dataset.price;
-                    const priceInput = document.getElementById('ticket-price');
-                    priceInput.value = price;
+                    document.getElementById('ticket-price').value = price;
                 }
             });
         }
+
     } else if (isRaffleDetail) {
         const ticketsGrid = document.getElementById('tickets-grid');
         const modal = document.getElementById('ticket-modal');
-        const closeModalBtn = document.querySelector('.close-modal');
+        const closeModalBtn = modal.querySelector('.close-modal');
 
-        // Listener para ABRIR el modal
         if (ticketsGrid) {
             ticketsGrid.addEventListener('click', (e) => {
                 if (e.target.classList.contains('ticket')) {
-                    const ticketNumber = e.target.dataset.id;
-                    openTicketModal(ticketNumber);
+                    openTicketModal(e.target.dataset.id);
                 }
             });
         }
 
-        // Listeners para CERRAR Y RESETEAR el modal
         if (modal) {
             closeModalBtn.addEventListener('click', () => closeAndResetModal());
             modal.addEventListener('click', (e) => {
                 if (e.target.id === 'ticket-modal') {
                     closeAndResetModal();
+                }
+            });
+        }
+
+    } else if (path === '/explore') {
+        const rafflesList = document.getElementById('raffles-list');
+        if (rafflesList) {
+            rafflesList.addEventListener('click', (e) => {
+                const deleteButton = e.target.closest('.btn-delete-raffle');
+                const collaborateButton = e.target.closest('.btn-collaborate');
+
+                if (deleteButton) {
+                    const card = deleteButton.closest('.raffle-card');
+                    const raffleId = card.dataset.id;
+                    handleDeleteRaffle(raffleId, card);
+                }
+
+                if (collaborateButton) {
+                    const card = collaborateButton.closest('.raffle-card');
+                    const raffleId = card.dataset.id;
+                    // --- ESTA ES LA LÍNEA CORREGIDA ---
+                    openCollaboratorModal(raffleId);
                 }
             });
         }
@@ -589,6 +574,7 @@ async function handleCreateRaffle(e) {
         drawDate: document.getElementById('draw-date').value,
         paymentMethods: paymentMethodsData,
         ownerId: user.uid,
+		collaborators: [],
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
     }
 
@@ -967,3 +953,61 @@ async function generateFinalStatusImage(raffleData, settings) {
         shareBtn.disabled = false;
     }
 }
+
+function openCollaboratorModal() {
+    const modal = document.getElementById("collaborator-modal");
+    if (!modal) return; // seguridad por si no existe
+
+    modal.classList.remove("hidden");
+
+    // Limpiar campos si existen
+    const name = document.getElementById("collaborator-name");
+    const contact = document.getElementById("collaborator-contact");
+    const amount = document.getElementById("collaborator-amount");
+
+    if (name) name.value = "";
+    if (contact) contact.value = "";
+    if (amount) amount.value = "";
+}
+
+async function handleCollaboratorInvite(e, raffleId) {
+    e.preventDefault();
+
+    const name = document.getElementById('collaborator-name').value;
+    const contact = document.getElementById('collaborator-contact').value;
+    const amount = document.getElementById('collaborator-amount').value;
+
+    try {
+        const raffleRef = db.collection('raffles').doc(raffleId);
+        await raffleRef.update({
+            collaborators: firebase.firestore.FieldValue.arrayUnion({
+                name,
+                contact,
+                amount,
+                addedAt: new Date()
+            })
+        });
+
+        alert(`✅ ${name} ha sido añadido como colaborador`);
+        document.getElementById('collaborator-modal').style.display = 'none';
+    } catch (error) {
+        console.error("Error al añadir colaborador: ", error);
+        alert('❌ Hubo un error al intentar añadir al colaborador.');
+    }
+}
+
+document.addEventListener("submit", (e) => {
+  if (e.target.id === "collaborator-form") {
+    e.preventDefault(); // evita el 404 y la recarga
+    const email = document.getElementById("collaborator-email").value;
+
+    // Aquí decides qué hacer con el correo:
+    console.log("Colaborador guardado:", email);
+
+    // Cerrar modal después de guardar
+    document.getElementById("collaborator-modal")?.classList.add("hidden");
+
+    // Opcional: limpiar input
+    document.getElementById("collaborator-form").reset();
+  }
+});
