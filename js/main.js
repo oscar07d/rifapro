@@ -955,62 +955,65 @@ async function generateFinalStatusImage(raffleData, settings) {
     }
 }
 
-function openCollaboratorModal() {
-    const modal = document.getElementById("collaborator-modal");
-    if (!modal) return; // seguridad por si no existe
+function openCollaboratorModal(raffleId) {
+    const modal = document.getElementById('collaborator-modal');
+    if (!modal) return;
 
-    modal.classList.remove("hidden");
+    const form = document.getElementById('collaborator-form');
+    // CORRECCIÓN: Quitamos el punto antes de la clase
+    const closeModalBtn = modal.querySelector('close-collaborator-modal');
 
-    // Limpiar campos si existen
-    const name = document.getElementById("collaborator-name");
-    const contact = document.getElementById("collaborator-contact");
-    const amount = document.getElementById("collaborator-amount");
+    form.querySelector('#collaborator-email').value = '';
+    form.onsubmit = (e) => handleCollaboratorInvite(e, raffleId);
+    
+    if (closeModalBtn) {
+        closeModalBtn.onclick = () => modal.style.display = 'none';
+    }
 
-    if (name) name.value = "";
-    if (contact) contact.value = "";
-    if (amount) amount.value = "";
+    modal.style.display = 'flex';
 }
 
 async function handleCollaboratorInvite(e, raffleId) {
     e.preventDefault();
+    const email = document.getElementById('collaborator-email').value;
+    const currentUser = firebase.auth().currentUser;
 
-    const name = document.getElementById('collaborator-name').value;
-    const contact = document.getElementById('collaborator-contact').value;
-    const amount = document.getElementById('collaborator-amount').value;
+    if (!email) {
+        alert('Por favor, ingresa un correo electrónico.');
+        return;
+    }
 
     try {
+        // 1. Busca si existe un usuario con ese correo en RifaPro
+        const usersRef = db.collection('users').where('email', '==', email);
+        const snapshot = await usersRef.get();
+
+        if (snapshot.empty) {
+            alert('Error: No se encontró ningún usuario con ese correo electrónico en RifaPro.');
+            return;
+        }
+
+        const collaborator = snapshot.docs[0];
+        const collaboratorId = collaborator.id;
+        
+        // 2. Evita que el dueño se añada a sí mismo
+        if (collaboratorId === currentUser.uid) {
+            alert('No puedes añadirte a ti mismo como colaborador.');
+            return;
+        }
+        
+        // 3. Añade el ID del colaborador a las listas de la rifa
         const raffleRef = db.collection('raffles').doc(raffleId);
         await raffleRef.update({
-            collaborators: firebase.firestore.FieldValue.arrayUnion({
-                name,
-                contact,
-                amount,
-                addedAt: new Date()
-            })
+            collaborators: firebase.firestore.FieldValue.arrayUnion(collaboratorId),
+            viewableBy: firebase.firestore.FieldValue.arrayUnion(collaboratorId)
         });
 
-        alert(`✅ ${name} ha sido añadido como colaborador`);
+        alert(`¡${email} ha sido añadido como colaborador!`);
         document.getElementById('collaborator-modal').style.display = 'none';
+
     } catch (error) {
         console.error("Error al añadir colaborador: ", error);
-        alert('❌ Hubo un error al intentar añadir al colaborador.');
+        alert('Hubo un error al intentar añadir al colaborador.');
     }
 }
-
-document.addEventListener("submit", (e) => {
-  if (e.target.id === "collaborator-form") {
-    e.preventDefault(); // evita el 404 y la recarga
-    const email = document.getElementById("collaborator-email").value;
-
-    // Aquí decides qué hacer con el correo:
-    console.log("Colaborador guardado:", email);
-
-    // Cerrar modal después de guardar
-    document.getElementById("collaborator-modal")?.classList.add("hidden");
-
-    // Opcional: limpiar input
-    document.getElementById("collaborator-form").reset();
-  }
-});
-
-
