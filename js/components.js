@@ -169,12 +169,12 @@ export const getCreateRaffleView = () => {
 // Vista para la página de "Explorar Rifas"
 export const getExploreView = (rafflesHTML) => `
     <div class="explore-container">
-        <h2>Rifas Disponibles</h2>
+        <h2>Administrar Mis Rifas</h2>
         <div id="raffles-list">
             ${rafflesHTML}
         </div>
     </div>
-	${getCollaboratorModal()} `;
+    ${getCollaboratorModal()} `;
 
 // Genera el HTML para una sola tarjeta de rifa
 export const getRaffleCard = (raffle, currentUser) => {
@@ -413,21 +413,22 @@ export const getStatusModal = () => `
     </div>
 `;
 
-export const getCollaboratorModal = () => {
-  return `
-  <div id="collaborator-modal" class="modal hidden">
-    <div class="modal-content">
-      <span id="close-collaborator-modal" class="close-modal">&times;</span>
-      <h2>Añadir colaborador</h2>
-      <form id="collaborator-form">
-          <label for="collaborator-email">Correo:</label>
-          <input type="email" id="collaborator-email" required>
-          <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">Guardar</button>
-      </form>
+export const getCollaboratorModal = () => `
+    <div id="collaborator-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <span class="close-collaborator-modal">&times;</span>
+            <h3>Añadir Colaborador</h3>
+            <p>Ingresa el correo del usuario de RifaPro que te ayudará a administrar esta rifa.</p>
+            <form id="collaborator-form">
+                <div class="form-group">
+                    <label for="collaborator-email">Correo del Colaborador</label>
+                    <input type="email" id="collaborator-email" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Añadir</button>
+            </form>
+        </div>
     </div>
-  </div>
-  `;
-};
+`;
 
 document.addEventListener("click", (e) => {
     if (e.target.id === "close-collaborator-modal") {
