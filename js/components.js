@@ -311,6 +311,7 @@ export const getTicketModal = () => `
                     <div class="modal-buttons">
                         <button type="submit" class="btn btn-primary">Guardar Cambios</button>
                         <button type="button" id="clear-ticket-btn-form" class="btn btn-danger">Limpiar Boleto</button>
+						<button type="button" id="cancel-edit-btn" class="btn btn-secondary">Cancelar</button>
                     </div>
                     <div class="modal-buttons" style="margin-top: 0.5rem;">
                         <button type="button" id="whatsapp-share-btn" class="btn btn-whatsapp">WhatsApp</button>
@@ -333,6 +334,7 @@ export const getTicketModal = () => `
                         <p id="info-payment-status" class="info-text"></p>
                     </div>
                     <div class="modal-buttons">
+						<button type="button" id="edit-ticket-btn-info" class="btn btn-primary">Editar Boleto</button>
                         <button type="button" id="clear-ticket-btn-info" class="btn btn-danger">Limpiar Boleto</button>
                     </div>
                     <div class="modal-buttons" style="margin-top: 0.5rem;">
