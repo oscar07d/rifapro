@@ -575,7 +575,7 @@ async function handleCreateRaffle(e) {
         paymentMethods: paymentMethodsData,
         ownerId: user.uid,
 		collaborators: [],
-		viewableBy: [user.uid]
+		viewableBy: [user.uid],
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
     }
 
@@ -1012,4 +1012,5 @@ document.addEventListener("submit", (e) => {
     document.getElementById("collaborator-form").reset();
   }
 });
+
 
