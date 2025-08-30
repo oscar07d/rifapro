@@ -36,6 +36,23 @@ const routes = {
     '/explore': getExploreView,
 };
 
+async function createTicketsForRaffle(raffleId) {
+    const ticketsRef = db.collection("raffles").doc(raffleId).collection("tickets");
+
+    const batch = db.batch();
+    for (let i = 0; i < 100; i++) {
+        const num = i.toString().padStart(2, "0"); // genera "00", "01", ..., "99"
+        const ticketDoc = ticketsRef.doc(num);
+        batch.set(ticketDoc, {
+            number: num,
+            status: "available" // todos los boletos empiezan libres
+        });
+    }
+
+    await batch.commit();
+    console.log("✅ 100 boletos creados para la rifa:", raffleId);
+}
+
 async function router() {
     if (unsubscribeFromTickets) {
         unsubscribeFromTickets();
@@ -63,17 +80,28 @@ async function router() {
 
                 unsubscribeFromTickets = db.collection('raffles').doc(raffleId).collection('tickets').orderBy('number')
                     .onSnapshot(snapshot => {
-                        ticketsGrid.innerHTML = '';
+                        console.log(`Snapshot recibido: ${snapshot.size} boletos encontrados.`);
+                        ticketsGrid.innerHTML = ''; 
+                        
+                        if (snapshot.empty) {
+                            ticketsGrid.innerHTML = '<p>No se encontraron boletos para esta rifa.</p>';
+                            return;
+                        }
+                        
                         snapshot.forEach(doc => {
                             const ticketData = doc.data();
                             const ticketElement = document.createElement('div');
-                            ticketElement.classList.add('ticket', ticketData.status);
+                            ticketElement.className = `ticket ${ticketData.status}`;
                             ticketElement.textContent = ticketData.number;
                             ticketElement.dataset.id = ticketData.number;
                             ticketsGrid.appendChild(ticketElement);
                         });
+                    }, error => {
+                        // Si hay un error (ej. por las reglas de Firestore), se mostrará aquí
+                        console.error("Error al suscribirse a los boletos:", error);
+                        ticketsGrid.innerHTML = '<p style="color: red; text-align: center;">Error al cargar los boletos. Revisa las reglas de seguridad de Firestore.</p>';
                     });
-
+				
                 const shareStatusBtn = document.getElementById('share-status-btn');
                 if (shareStatusBtn) {
                     shareStatusBtn.addEventListener('click', () => openSimpleStatusModal(raffleData));
@@ -142,9 +170,7 @@ async function handleTicketFormSubmit(e) {
     const buyerName = document.getElementById('buyer-name').value;
     const buyerPhone = document.getElementById('buyer-phone').value;
     const status = document.getElementById('payment-status').value;
-    
-    // --- LÍNEA CORREGIDA ---
-    // Leemos el número desde el ID del título del formulario, que siempre está visible aquí.
+
     const ticketNumber = document.getElementById('modal-ticket-number-form').textContent.replace('Boleto #', '');
     const raffleId = window.location.hash.slice(1).split('/')[2];
     
@@ -153,11 +179,7 @@ async function handleTicketFormSubmit(e) {
         return;
     }
 
-    const dataToUpdate = {
-        buyerName: buyerName,
-        buyerPhone: buyerPhone,
-        status: status
-    };
+    const dataToUpdate = { buyerName, buyerPhone, status };
 
     try {
         const ticketRef = db.collection('raffles').doc(raffleId).collection('tickets').doc(ticketNumber);
@@ -165,7 +187,6 @@ async function handleTicketFormSubmit(e) {
         
         console.log(`Boleto #${ticketNumber} actualizado correctamente.`);
         
-        // Cerramos y reseteamos el modal
         closeAndResetModal();
 
     } catch (error) {
@@ -173,6 +194,7 @@ async function handleTicketFormSubmit(e) {
         alert("Hubo un error al guardar los cambios.");
     }
 }
+
 
 async function handleClearTicket() {
     const isFormVisible = document.getElementById('ticket-form').style.display !== 'none';
@@ -390,8 +412,32 @@ function attachEventListeners(path) {
             paymentGrid.addEventListener('click', (e) => {
                 const option = e.target.closest('.payment-option');
                 if (!option) return;
+
                 option.classList.toggle('selected');
-                // ... (lógica para mostrar/ocultar detalles de pago)
+                
+                // Elementos de los formularios de detalles
+                const bankDetailsWrapper = document.getElementById('bank-account-details');
+                const nequiDetails = document.getElementById('nequi-details');
+                const daviplataDetails = document.getElementById('daviplata-details');
+                const brebDetails = document.getElementById('bre-b-details');
+
+                const traditionalBanks = ['av-villas', 'bancolombia', 'bbva', 'bogota', 'caja-social', 'davivienda', 'falabella', 'finandina', 'itau', 'lulo', 'pibank', 'powwi', 'uala'];
+                
+                const selectedOptions = Array.from(document.querySelectorAll('.payment-option.selected')).map(el => el.dataset.value);
+
+                // Muestra u oculta los campos según la selección
+                nequiDetails.style.display = selectedOptions.includes('nequi') ? 'block' : 'none';
+                daviplataDetails.style.display = selectedOptions.includes('daviplata') ? 'block' : 'none';
+                brebDetails.style.display = selectedOptions.includes('bre-b') ? 'block' : 'none';
+
+                // Lógica para el contenedor genérico de bancos
+                const selectedBanks = selectedOptions.filter(val => traditionalBanks.includes(val));
+                if (selectedBanks.length > 0) {
+                    bankDetailsWrapper.style.display = 'block';
+                    document.getElementById('bank-list').textContent = selectedBanks.map(b => paymentMethods.find(p => p.value === b).name).join(', ');
+                } else {
+                    bankDetailsWrapper.style.display = 'none';
+                }
             });
         }
 
@@ -455,7 +501,7 @@ async function openTicketModal(ticketNumber) {
     const modal = document.getElementById('ticket-modal');
     if (!modal) return;
 
-    // Buscamos los elementos del modal
+    // Elementos principales (se asumem que el modal ya existe en el DOM)
     const modalTitleForm = document.getElementById('modal-ticket-number-form');
     const modalTitleInfo = document.getElementById('modal-ticket-number-info');
     const formView = document.getElementById('ticket-form');
@@ -468,57 +514,105 @@ async function openTicketModal(ticketNumber) {
         const ticketRef = db.collection('raffles').doc(raffleId).collection('tickets').doc(ticketNumber);
         const doc = await ticketRef.get();
 
-        if (doc.exists) {
-            const data = doc.data();
-            
-            // Actualizamos títulos y decidimos qué vista mostrar
-            modalTitleForm.textContent = `Boleto #${data.number}`;
-            modalTitleInfo.textContent = `Boleto #${data.number}`;
+        if (!doc.exists) {
+            alert("Error: No se encontró el boleto.");
+            return;
+        }
 
-            if (data.status === 'available') {
+        const data = doc.data();
+
+        // Actualizar títulos
+        if (modalTitleForm) modalTitleForm.textContent = `Boleto #${data.number}`;
+        if (modalTitleInfo) modalTitleInfo.textContent = `Boleto #${data.number}`;
+
+        // Llenar siempre el form (aunque esté oculto)
+        const buyerNameInput = formView?.querySelector('#buyer-name');
+        const buyerPhoneInput = formView?.querySelector('#buyer-phone');
+        const paymentStatusInput = formView?.querySelector('#payment-status');
+
+        if (buyerNameInput) buyerNameInput.value = data.buyerName || '';
+        if (buyerPhoneInput) buyerPhoneInput.value = data.buyerPhone || '';
+        if (paymentStatusInput) paymentStatusInput.value = data.status || 'pending';
+
+        // Llenar vista info
+        infoView.querySelector('#info-buyer-name').textContent = data.buyerName || 'No disponible';
+        infoView.querySelector('#info-buyer-phone').textContent = data.buyerPhone || 'No disponible';
+        const statusMap = { 'pending': 'Pendiente', 'partial': 'Pago Parcial', 'paid': 'Pagado Total' };
+        infoView.querySelector('#info-payment-status').textContent = statusMap[data.status] || data.status;
+
+        // Estado inicial: mostrar infoView (por defecto) y ocultar formView
+        if (formView) formView.style.display = 'none';
+        if (infoView) infoView.style.display = 'block';
+        modal.style.display = 'flex';
+
+        // --- Seleccionamos botones y limpiamos handlers previos (si existieran) ---
+        const editBtnInfo = document.getElementById('edit-ticket-btn-info');
+        const cancelEditBtn = document.getElementById('cancel-edit-btn');
+        const closeBtn = modal.querySelector('.close-modal');
+		const form = document.getElementById('ticket-form');
+	
+		if (form) {
+			form.onsubmit = handleTicketFormSubmit; 
+		}
+
+        // Aseguramos estado visual por defecto (si existe el botón)
+        if (editBtnInfo) editBtnInfo.style.display = 'inline-block';
+        if (cancelEditBtn) cancelEditBtn.style.display = 'none';
+
+        // Quitamos posibles handlers previos (por si acaso)
+        if (editBtnInfo) editBtnInfo.onclick = null;
+        if (cancelEditBtn) cancelEditBtn.onclick = null;
+        if (closeBtn) closeBtn.onclick = null;
+
+        // --- Asignamos handlers ---
+        if (editBtnInfo) {
+            editBtnInfo.addEventListener('click', () => {
+                // rellenar campos por si cambiaron
+                if (buyerNameInput) buyerNameInput.value = data.buyerName || '';
+                if (buyerPhoneInput) buyerPhoneInput.value = data.buyerPhone || '';
+                if (paymentStatusInput) paymentStatusInput.value = data.status || 'pending';
+
                 infoView.style.display = 'none';
                 formView.style.display = 'block';
-                formView.querySelector('#buyer-name').value = '';
-                formView.querySelector('#buyer-phone').value = '';
-                formView.querySelector('#payment-status').value = 'pending';
-            } else {
+
+                // mostrar cancelar
+                if (cancelEditBtn) cancelEditBtn.style.display = 'inline-block';
+                // opcional: ocultar editar (no necesario, pero limpio)
+                // editBtnInfo.style.display = 'none';
+            });
+        }
+
+        if (cancelEditBtn) {
+            cancelEditBtn.addEventListener('click', () => {
                 formView.style.display = 'none';
                 infoView.style.display = 'block';
-                infoView.querySelector('#info-buyer-name').textContent = data.buyerName || 'No disponible';
-                infoView.querySelector('#info-buyer-phone').textContent = data.buyerPhone || 'No disponible';
-                const statusMap = { 'pending': 'Pendiente', 'partial': 'Pago Parcial', 'paid': 'Pagado Total' };
-                infoView.querySelector('#info-payment-status').textContent = statusMap[data.status] || data.status;
-            }
-            
-            modal.style.display = 'flex'; // Mostramos el modal
-
-            // --- INICIO DE LA SECCIÓN AÑADIDA ---
-            // Asignamos los listeners a los botones CADA VEZ que el modal se abre
-            const form = document.getElementById('ticket-form');
-            const clearBtnForm = document.getElementById('clear-ticket-btn-form');
-            const clearBtnInfo = document.getElementById('clear-ticket-btn-info');
-            const whatsappBtn = document.getElementById('whatsapp-share-btn');
-            const genericBtn = document.getElementById('generic-share-btn');
-            const whatsappBtnInfo = document.getElementById('whatsapp-share-btn-info');
-            const genericBtnInfo = document.getElementById('generic-share-btn-info');
-
-            if (form) form.addEventListener('submit', handleTicketFormSubmit);
-            if (clearBtnForm) clearBtnForm.addEventListener('click', handleClearTicket);
-            if (clearBtnInfo) clearBtnInfo.addEventListener('click', handleClearTicket);
-            if (whatsappBtn) whatsappBtn.addEventListener('click', () => handleShare('whatsapp'));
-            if (genericBtn) genericBtn.addEventListener('click', () => handleShare('generic'));
-            if (whatsappBtnInfo) whatsappBtnInfo.addEventListener('click', () => handleShare('whatsapp'));
-            if (genericBtnInfo) genericBtnInfo.addEventListener('click', () => handleShare('generic'));
-            // --- FIN DE LA SECCIÓN AÑADIDA ---
-            
-        } else {
-            alert("Error: No se encontró el boleto.");
+                // ocultamos cancelar otra vez
+                cancelEditBtn.style.display = 'none';
+                // aseguramos que editar esté visible
+                if (editBtnInfo) editBtnInfo.style.display = 'inline-block';
+            });
         }
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                modal.style.display = 'none';
+                // Al cerrar, dejamos el modal en estado inicial (info visible)
+                if (formView) formView.style.display = 'none';
+                if (infoView) infoView.style.display = 'block';
+                if (cancelEditBtn) cancelEditBtn.style.display = 'none';
+                if (editBtnInfo) editBtnInfo.style.display = 'inline-block';
+            });
+        }
+
+        // (Los otros listeners del form/clear/share ya los tienes asignados
+        //  en tu función openTicketModal original o global; si no, asegúrate de que se asignen
+        //  aquí con addEventListener, pero sin re-clonar elementos.)
     } catch (error) {
         console.error("Error al obtener datos del boleto:", error);
         alert("Hubo un error al obtener los datos del boleto.");
     }
 }
+
 
 async function handleCreateRaffle(e) {
     e.preventDefault();
@@ -643,64 +737,26 @@ async function handleDeleteRaffle(raffleId, cardElement) {
 
 function closeAndResetModal() {
     const modal = document.getElementById('ticket-modal');
-    const viewContainer = document.getElementById('modal-view-container');
-    if (modal) {
-        modal.style.display = 'none';
-    }
-    // Restaura el contenido original del modal para la próxima vez que se abra
-    if (viewContainer) {
-        viewContainer.innerHTML = `
-            <form id="ticket-form" style="display: block;">
-                <h3 id="modal-ticket-number-form" class="modal-title">Boleto #00</h3>
-                <div class="form-group">
-                    <label for="buyer-name">Nombre del Comprador</label>
-                    <input type="text" id="buyer-name" required>
-                </div>
-                <div class="form-group">
-                    <label for="buyer-phone">Número de Celular</label>
-                    <input type="tel" id="buyer-phone" required>
-                </div>
-                <div class="form-group">
-                    <label for="payment-status">Estado del Pago</label>
-                    <select id="payment-status">
-                        <option value="pending">Pendiente</option>
-                        <option value="partial">Pago Parcial</option>
-                        <option value="paid">Pagado Total</option>
-                    </select>
-                </div>
-                <div class="modal-buttons">
-                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-                    <button type="button" id="clear-ticket-btn-form" class="btn btn-danger">Limpiar Boleto</button>
-                </div>
-                <div class="modal-buttons" style="margin-top: 0.5rem;">
-                    <button type="button" id="whatsapp-share-btn" class="btn btn-whatsapp">WhatsApp</button>
-                    <button type="button" id="generic-share-btn" class="btn btn-secondary">Compartir</button>
-                </div>
-            </form>
-            <div id="ticket-info-view" style="display: none;">
-                <h3 id="modal-ticket-number-info" class="modal-title">Boleto #00</h3>
-                <div class="form-group">
-                    <label>A nombre de:</label>
-                    <p id="info-buyer-name" class="info-text"></p>
-                </div>
-                <div class="form-group">
-                    <label>Número de Celular</label>
-                    <p id="info-buyer-phone" class="info-text"></p>
-                </div>
-                <div class="form-group">
-                    <label>Estado del Pago</label>
-                    <p id="info-payment-status" class="info-text"></p>
-                </div>
-                <div class="modal-buttons">
-                    <button type="button" id="clear-ticket-btn-info" class="btn btn-danger">Limpiar Boleto</button>
-                </div>
-                <div class="modal-buttons" style="margin-top: 0.5rem;">
-                    <button type="button" id="whatsapp-share-btn-info" class="btn btn-whatsapp">WhatsApp</button>
-                    <button type="button" id="generic-share-btn-info" class="btn btn-secondary">Compartir</button>
-                </div>
-            </div>
-        `;
-    }
+    const formView = document.getElementById('ticket-form');
+    const infoView = document.getElementById('ticket-info-view');
+    const cancelEditBtn = document.getElementById('cancel-edit-btn');
+    const editBtnInfo = document.getElementById('edit-ticket-btn-info');
+
+    if (modal) modal.style.display = 'none';
+
+    // resetear estados
+    if (formView) formView.style.display = 'none';
+    if (infoView) infoView.style.display = 'block';
+    if (cancelEditBtn) cancelEditBtn.style.display = 'none';
+    if (editBtnInfo) editBtnInfo.style.display = 'inline-block';
+
+    // limpiar inputs
+    const buyerName = document.getElementById('buyer-name');
+    const buyerPhone = document.getElementById('buyer-phone');
+    const paymentStatus = document.getElementById('payment-status');
+    if (buyerName) buyerName.value = '';
+    if (buyerPhone) buyerPhone.value = '';
+    if (paymentStatus) paymentStatus.value = 'pending';
 }
 
 // Dejaremos esta función preparada para el siguiente paso
@@ -1017,3 +1073,13 @@ async function handleCollaboratorInvite(e, raffleId) {
         alert('Hubo un error al intentar añadir al colaborador.');
     }
 }
+
+window.addEventListener("DOMContentLoaded", () => {
+    const editBtn = document.getElementById('edit-ticket-btn');
+    if (editBtn) {
+        editBtn.addEventListener('click', () => {
+            document.getElementById('ticket-info-view').style.display = 'none';
+            document.getElementById('ticket-form').style.display = 'block';
+        });
+    }
+});
