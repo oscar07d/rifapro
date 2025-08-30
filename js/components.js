@@ -174,22 +174,29 @@ export const getExploreView = (rafflesHTML) => `
             ${rafflesHTML}
         </div>
     </div>
-`;
+	${getCollaboratorModal()} `;
 
 // Genera el HTML para una sola tarjeta de rifa
-export const getRaffleCard = (raffle) => {
+export const getRaffleCard = (raffle, currentUser) => {
+    // Verificaciones para asegurar que los datos existen
     const percentage = raffle.soldPercentage || 0;
-    
-    const paymentIconsHTML = raffle.paymentMethods.map(methodObject => {
+    const raffleName = raffle.name || 'Rifa sin nombre';
+    const prize = raffle.prize || 'No especificado';
+    const ticketPrice = raffle.ticketPrice ? raffle.ticketPrice.toLocaleString('es-CO') : 'N/A';
+    const drawDate = raffle.drawDate ? new Date(raffle.drawDate).toLocaleDateString('es-CO') : 'No definida';
+
+    const paymentIconsHTML = (raffle.paymentMethods || []).map(methodObject => {
         const method = paymentMethods.find(p => p.value === methodObject.method);
         return method ? `<img src="${method.icon}" alt="${method.name}" title="${method.name}">` : '';
     }).join('');
 
+    const isOwner = currentUser && raffle.ownerId === currentUser.uid;
+
     return `
     <div class="raffle-card" data-id="${raffle.id}">
         <div class="raffle-card-content">
-            <h3>${raffle.name}</h3>
-            <p class="info-row"><strong>Premio:</strong> ${raffle.prize}</p>
+            <h3>${raffleName}</h3>
+            <p class="info-row"><strong>Premio:</strong> ${prize}</p>
             
             <div class="progress-bar-container">
                 <div class="progress-bar-label">
@@ -201,21 +208,37 @@ export const getRaffleCard = (raffle) => {
                 </div>
             </div>
 
-            <p class="info-row"><strong>Precio:</strong> $${raffle.ticketPrice.toLocaleString('es-CO')} | <strong>Sorteo:</strong> ${new Date(raffle.drawDate).toLocaleDateString('es-CO')}</p>
+            <p class="info-row"><strong>Precio:</strong> $${ticketPrice} | <strong>Sorteo:</strong> ${drawDate}</p>
             
             <div class="payment-icons-list">
                 ${paymentIconsHTML}
             </div>
 
             <div class="raffle-card-actions">
+                <button type="button" class="btn-icon btn-collaborate" title="Añadir Colaborador">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 492.22 292.02" width="24" height="24" fill="currentColor">
+						<path d="M259.13,277.82c-.08-.15-.16-.3-.25-.44-18.3-31.63-46.49-54.31-79.39-65.06,41.05-24.43,54.51-77.51,30.08-118.55-20.59-34.57-61.5-49.58-98.42-38.84-.18,10.85-9.06,19.63-19.96,19.63h-14.73c-.65,.6-1.28,1.2-1.91,1.83v14.8c0,11.02-8.96,19.98-19.97,19.98-.51,0-1.01-.02-1.51-.06-7.5,22.91-5.42,48.81,7.87,71.14,7.37,12.37,17.7,22.71,30.07,30.07-32.9,10.74-61.09,33.42-79.38,65.06-2.78,4.52-1.36,10.44,3.17,13.21,4.52,2.78,10.44,1.36,13.21-3.16,.09-.15,.17-.29,.26-.44,22.63-39.11,62.62-62.46,106.98-62.46s84.36,23.35,106.99,62.46c2.53,4.66,8.37,6.39,13.03,3.86,4.67-2.54,6.39-8.37,3.86-13.03ZM67.99,138.04c0-37.15,30.11-67.26,67.26-67.26s67.27,30.11,67.27,67.26-30.12,67.27-67.27,67.27c-37.13-.04-67.22-30.13-67.26-67.27Z"/>
+						<path d="M243.22,282.32c0-.84,.11-1.65,.3-2.43-1.1,4.01,.52,8.42,4.24,10.7,1.45,.88,3.04,1.35,4.62,1.41-5.1-.28-9.16-4.51-9.16-9.68Zm248.24,5.63s-.04,.06-.06,.08c.01-.01,.02-.03,.03-.04,.11-.14,.21-.29,.31-.44,.14-.2,.26-.4,.36-.61,.04-.08,.08-.16,.12-.24-.07,.14-.15,.28-.23,.42-.16,.29-.34,.56-.53,.83Zm-6.9,4.01c1.26-.11,2.51-.47,3.68-1.11,1.3-.71,2.36-1.69,3.16-2.82-.29,.4-.62,.79-.97,1.14-1.54,1.54-3.59,2.56-5.87,2.79Z"/>
+						<path d="M244.99,276.72c-.13,.22-.26,.44-.39,.66-.24,.39-.45,.79-.63,1.2,.27-.66,.61-1.28,1.02-1.86Z"/>
+						<g>
+							<path d="M394.69,284.98c-.01,.13-.03,.26-.04,.39l-.1,.6c-.11,.55-.29,1.08-.51,1.58-.04,.1-.09,.19-.14,.28,0,0-.01,.02-.01,.03-.06,.11-.12,.22-.18,.33-.14,.23-.29,.46-.44,.68-.24,.33-.5,.64-.79,.92-1.2,1.21-2.81,2.01-4.6,2.19-.26,.02-.52,.04-.77,.04h-112.7c2.77-6.85,2.58-14.85-1.22-21.83-.17-.33-.36-.65-.55-.97-7.07-12.19-15.56-23.28-25.21-33.05,8.63-4.65,14.57-6.62,14.57-6.62,2.24-.74,4.44-1.39,6.63-1.95,8.45,4.24,17.98,6.64,28.05,6.65h.02c10.09,0,19.62-2.39,28.08-6.63,2.84,.73,5.06,1.43,6.58,1.93,38.7,12.73,57.32,42.58,61.82,50.3,.01,0,.02,.02,.02,.02,.13,.23,.26,.45,.4,.68,.06,.11,.13,.23,.19,.35,.71,1.29,.99,2.71,.9,4.08Z"/>
+							<path d="M243.97,171.32c0-29.12,23.6-52.72,52.72-52.72s52.73,23.6,52.73,52.72-23.61,52.73-52.73,52.73c-29.11-.03-52.69-23.62-52.72-52.73Z"/>
+						</g>
+						<path d="M95.16,47.59c0,6.06-4.92,10.97-10.97,10.97h-25.64v25.63c0,6.06-4.91,10.98-10.97,10.98s-10.97-4.92-10.97-10.98v-25.63H10.97c-6.05,0-10.97-4.91-10.97-10.97s4.92-10.98,10.97-10.98h25.64V10.98c0-6.06,4.91-10.98,10.97-10.98s10.97,4.92,10.97,10.98v25.63h25.64c6.05,0,10.97,4.91,10.97,10.98Z"/>
+					</svg>
+				</button>
+
                 <a href="#/raffle/${raffle.id}" class="btn btn-secondary">Administrar</a>
+                
+                ${isOwner ? `
                 <button type="button" class="btn-icon btn-delete-raffle" title="Eliminar Rifa">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
                         <path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z"></path>
                     </svg>
                 </button>
+                ` : ''}
             </div>
-            </div>
+        </div>
     </div>
     `;
 };
@@ -256,7 +279,8 @@ export const getRaffleDetailView = (raffle) => {
             </div>
     </div>
     ${getTicketModal()}
-    ${getStatusModal()} `;
+    ${getStatusModal()} 
+	${getCollaboratorModal()} `;
 };
 
 // AHORA, DEFINIMOS LA SEGUNDA FUNCIÓN POR SEPARADO
@@ -388,3 +412,25 @@ export const getStatusModal = () => `
         </div>
     </div>
 `;
+
+export const getCollaboratorModal = () => {
+  return `
+  <div id="collaborator-modal" class="modal hidden">
+    <div class="modal-content">
+      <span id="close-collaborator-modal" class="close-modal">&times;</span>
+      <h2>Añadir colaborador</h2>
+      <form id="collaborator-form">
+          <label for="collaborator-email">Correo:</label>
+          <input type="email" id="collaborator-email" required>
+          <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">Guardar</button>
+      </form>
+    </div>
+  </div>
+  `;
+};
+
+document.addEventListener("click", (e) => {
+    if (e.target.id === "close-collaborator-modal") {
+        document.getElementById("collaborator-modal").classList.add("hidden");
+    }
+});
