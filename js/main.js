@@ -92,7 +92,7 @@ async function router() {
 
 			try {
 				const rafflesSnapshot = await db.collection('raffles')
-					.where('ownerId', '==', user.uid)
+					.where('viewableBy', 'array-contains', user.uid)
 					.orderBy('createdAt', 'desc')
 					.get();
 
