@@ -11,7 +11,9 @@ import {
     getExploreView, 
     getRaffleCard,
     getRaffleDetailView,
-	getCollaboratorModal
+	getCollaboratorModal,
+	getStatisticsListView,  // <-- Asegúrate de que esta exista
+    getStatisticsDetailView
 } from './components.js';
 
 document.body.insertAdjacentHTML("beforeend", getCollaboratorModal());
@@ -34,6 +36,7 @@ const routes = {
     '/login': getAuthView,
     '/create': getCreateRaffleView,
     '/explore': getExploreView,
+	'/statistics': getStatisticsListView,
 };
 
 async function createTicketsForRaffle(raffleId) {
@@ -60,8 +63,15 @@ async function router() {
     }
 
     const path = window.location.hash.slice(1) || '/';
+    
+    // 1. PRIMERO declaramos las variables que necesitamos
     const isRaffleDetail = path.startsWith('/raffle/');
-    const view = isRaffleDetail ? getRaffleDetailView : routes[path];
+    const isStatisticsDetail = path.startsWith('/statistics/'); // <-- Esta línea debe ir aquí arriba
+
+    // 2. LUEGO las usamos para encontrar la vista correcta
+    const view = isRaffleDetail 
+        ? getRaffleDetailView 
+        : (isStatisticsDetail ? getStatisticsDetailView : routes[path]);
 
     if (view) {
         if (isRaffleDetail) {
@@ -111,7 +121,90 @@ async function router() {
                 console.error("Error al obtener el detalle de la rifa:", error);
                 appContainer.innerHTML = '<h2>Error al cargar la rifa.</h2>';
             }
-        } else if (path === '/explore') {
+        } else if (isStatisticsDetail) {
+			const participantsBtn = document.getElementById('show-participants-list-btn');
+			if (participantsBtn) {
+				participantsBtn.addEventListener('click', () => {
+					// Lógica para mostrar la lista de participantes (la haremos después)
+					const container = document.getElementById('participants-list-container');
+					if(container.style.display === 'none') {
+						container.style.display = 'block';
+						participantsBtn.textContent = 'Ocultar Lista de Participantes';
+					} else {
+						container.style.display = 'none';
+						participantsBtn.textContent = 'Ver Lista de Participantes';
+					}
+				});
+			}
+			const statCards = document.querySelectorAll('.stat-card.clickable');
+			statCards.forEach(card => {
+				card.addEventListener('click', () => {
+					const status = card.dataset.status;
+					// Lógica para filtrar y mostrar la lista por estado
+					alert(`Mostrar lista filtrada por: ${status}`);
+				});
+			});
+			const raffleId = path.split('/')[2];
+			try {
+				// 1. Get the main raffle data
+				const raffleDoc = await db.collection('raffles').doc(raffleId).get();
+				if (!raffleDoc.exists) {
+					appContainer.innerHTML = '<h2>Rifa no encontrada</h2>';
+					return;
+				}
+				const raffleData = { id: raffleDoc.id, ...raffleDoc.data() };
+				appContainer.innerHTML = getStatisticsDetailView(raffleData);
+
+				// 2. Get ALL tickets for this raffle to perform calculations
+				const ticketsSnapshot = await db.collection('raffles').doc(raffleId).collection('tickets').get();
+
+				// 3. Initialize counters
+				let paidCount = 0;
+				let partialCount = 0;
+				let pendingCount = 0;
+				let availableCount = 0;
+
+				// 4. Loop through tickets and calculate stats
+				ticketsSnapshot.forEach(doc => {
+					const ticket = doc.data();
+					switch (ticket.status) {
+						case 'paid':
+							paidCount++;
+							break;
+						case 'partial':
+							partialCount++;
+							break;
+
+						case 'pending':
+							pendingCount++;
+							break;
+						case 'available':
+							availableCount++;
+							break;
+					}
+				});
+
+				// 5. Calculate revenue
+				const ticketPrice = raffleData.ticketPrice || 0;
+				const paidRevenue = paidCount * ticketPrice;
+				const partialRevenue = partialCount * ticketPrice;
+				const pendingRevenue = pendingCount * ticketPrice;
+
+				// 6. Update the HTML with the calculated values
+				document.getElementById('stats-revenue-paid').textContent = `$${paidRevenue.toLocaleString('es-CO')}`;
+				document.getElementById('stats-revenue-partial').textContent = `$${partialRevenue.toLocaleString('es-CO')}`;
+				document.getElementById('stats-revenue-pending').textContent = `$${pendingRevenue.toLocaleString('es-CO')}`;
+
+				document.getElementById('stats-count-available').textContent = availableCount;
+				document.getElementById('stats-count-paid').textContent = paidCount;
+				document.getElementById('stats-count-partial').textContent = partialCount;
+				document.getElementById('stats-count-pending').textContent = pendingCount;
+
+			} catch (error) {
+				console.error("Error al cargar estadísticas:", error);
+				appContainer.innerHTML = '<p>Error al cargar la página de estadísticas.</p>';
+			}
+		} else if (path === '/explore') {
 			const user = firebase.auth().currentUser;
 			if (!user) {
 				appContainer.innerHTML = "<h2>Debes iniciar sesión para ver tus rifas.</h2>";
@@ -127,7 +220,7 @@ async function router() {
 				let rafflesHTML = '';
 
 				if (rafflesSnapshot.empty) {
-					rafflesHTML = '<h2>No has creado ninguna rifa todavía.</h2><p>¡Haz clic en "Crear Rifa" para empezar!</p>';
+					rafflesHTML = '<h2>No tienes rifas para administrar.</h2><p>Crea una nueva o pide que te añadan como colaborador.</p>';
 				} else {
 					const raffleCardPromises = rafflesSnapshot.docs.map(async (doc) => {
 						const raffleData = { id: doc.id, ...doc.data() };
@@ -139,19 +232,51 @@ async function router() {
 					rafflesHTML = resolvedRaffleCards.join('');
 				}
 
-				const adminViewHTML = `
-					<div class="explore-container">
-						<h2>Administrar Mis Rifas</h2>
-						<div id="raffles-list">
-							${rafflesHTML}
-						</div>
-					</div>
-				`;
-				appContainer.innerHTML = adminViewHTML;
+				// CORRECCIÓN: Llamamos a la función de la vista para construir el HTML
+				appContainer.innerHTML = getExploreView(rafflesHTML);
 
 			} catch (error) {
 				console.error("Error al obtener las rifas:", error);
-				appContainer.innerHTML = '<p>Error al cargar tus rifas.</p>';
+				appContainer.innerHTML = '<p>Error al cargar las rifas.</p>';
+			}
+		} else if (path === '/statistics') {
+			const user = firebase.auth().currentUser;
+			if (!user) {
+				appContainer.innerHTML = "<h2>Debes iniciar sesión para ver las estadísticas.</h2>";
+				return;
+			}
+
+			try {
+				// Buscamos las rifas que el usuario puede ver
+				const rafflesSnapshot = await db.collection('raffles')
+					.where('viewableBy', 'array-contains', user.uid)
+					.orderBy('createdAt', 'desc')
+					.get();
+
+				let rafflesHTML = '';
+				if (rafflesSnapshot.empty) {
+					rafflesHTML = '<h2>No tienes rifas para ver estadísticas.</h2>';
+				} else {
+					// Reutilizamos getRaffleCard, pero cambiando el texto y el enlace del botón
+					rafflesSnapshot.forEach(doc => {
+						const raffle = { id: doc.id, ...doc.data() };
+						rafflesHTML += `
+							<div class="raffle-card" data-id="${raffle.id}">
+								<div class="raffle-card-content">
+									<h3>${raffle.name || 'Rifa sin nombre'}</h3>
+									<p><strong>Premio:</strong> ${raffle.prize || 'No especificado'}</p>
+									<a href="#/statistics/${raffle.id}" class="btn btn-primary">Ver Estadísticas</a>
+								</div>
+							</div>
+						`;
+					});
+				}
+
+				appContainer.innerHTML = getStatisticsListView(rafflesHTML);
+
+			} catch (error) {
+				console.error("Error al obtener rifas para estadísticas:", error);
+				appContainer.innerHTML = '<p>Error al cargar las rifas.</p>';
 			}
 		} else {
             const user = firebase.auth().currentUser;
@@ -473,6 +598,28 @@ function attachEventListeners(path) {
             });
         }
 
+    } else if (isStatisticsDetail) {
+        const participantsBtn = document.getElementById('show-participants-list-btn');
+        const participantsContainer = document.getElementById('participants-list-container');
+        const statCards = document.querySelectorAll('.stat-card.clickable');
+
+        if (participantsBtn) {
+            participantsBtn.addEventListener('click', () => {
+                const isHidden = participantsContainer.style.display === 'none';
+                participantsContainer.style.display = isHidden ? 'block' : 'none';
+                participantsBtn.textContent = isHidden ? 'Ocultar Lista' : 'Ver Lista de Participantes';
+            });
+        }
+
+        statCards.forEach(card => {
+            card.addEventListener('click', () => {
+                const status = card.dataset.status;
+                participantsContainer.style.display = 'block';
+                participantsBtn.textContent = 'Ocultar Lista';
+                document.getElementById('status-filter').value = status;
+                alert(`Filtro aplicado para: ${status}`);
+            });
+        });
     } else if (path === '/explore') {
         const rafflesList = document.getElementById('raffles-list');
         if (rafflesList) {
@@ -501,7 +648,7 @@ async function openTicketModal(ticketNumber) {
     const modal = document.getElementById('ticket-modal');
     if (!modal) return;
 
-    // Elementos principales (se asumem que el modal ya existe en el DOM)
+    // Elementos principales
     const modalTitleForm = document.getElementById('modal-ticket-number-form');
     const modalTitleInfo = document.getElementById('modal-ticket-number-info');
     const formView = document.getElementById('ticket-form');
@@ -521,11 +668,11 @@ async function openTicketModal(ticketNumber) {
 
         const data = doc.data();
 
-        // Actualizar títulos
+        // --- Actualizar títulos ---
         if (modalTitleForm) modalTitleForm.textContent = `Boleto #${data.number}`;
         if (modalTitleInfo) modalTitleInfo.textContent = `Boleto #${data.number}`;
 
-        // Llenar siempre el form (aunque esté oculto)
+        // --- Llenar siempre el form (aunque esté oculto) ---
         const buyerNameInput = formView?.querySelector('#buyer-name');
         const buyerPhoneInput = formView?.querySelector('#buyer-phone');
         const paymentStatusInput = formView?.querySelector('#payment-status');
@@ -534,40 +681,47 @@ async function openTicketModal(ticketNumber) {
         if (buyerPhoneInput) buyerPhoneInput.value = data.buyerPhone || '';
         if (paymentStatusInput) paymentStatusInput.value = data.status || 'pending';
 
-        // Llenar vista info
-        infoView.querySelector('#info-buyer-name').textContent = data.buyerName || 'No disponible';
-        infoView.querySelector('#info-buyer-phone').textContent = data.buyerPhone || 'No disponible';
+        // --- Llenar vista info ---
+        infoView.querySelector('#info-buyer-name').textContent = data.buyerName || 'Usa el boton "Editar Boleto"';
+        infoView.querySelector('#info-buyer-phone').textContent = data.buyerPhone || 'Usa el boton "Editar Boleto"';
         const statusMap = { 'pending': 'Pendiente', 'partial': 'Pago Parcial', 'paid': 'Pagado Total' };
         infoView.querySelector('#info-payment-status').textContent = statusMap[data.status] || data.status;
 
-        // Estado inicial: mostrar infoView (por defecto) y ocultar formView
+        // --- Estado inicial ---
         if (formView) formView.style.display = 'none';
         if (infoView) infoView.style.display = 'block';
         modal.style.display = 'flex';
 
-        // --- Seleccionamos botones y limpiamos handlers previos (si existieran) ---
+        // --- Botones ---
         const editBtnInfo = document.getElementById('edit-ticket-btn-info');
         const cancelEditBtn = document.getElementById('cancel-edit-btn');
         const closeBtn = modal.querySelector('.close-modal');
-		const form = document.getElementById('ticket-form');
-	
-		if (form) {
-			form.onsubmit = handleTicketFormSubmit; 
-		}
 
-        // Aseguramos estado visual por defecto (si existe el botón)
+        const clearBtnInfo = document.getElementById('clear-ticket-btn-info');
+        const whatsappBtnInfo = document.getElementById('whatsapp-share-btn-info');
+        const shareBtnInfo = document.getElementById('generic-share-btn-info');
+
+        const clearBtnForm = document.getElementById('clear-ticket-btn-form');
+        const whatsappBtnForm = document.getElementById('whatsapp-share-btn');
+        const shareBtnForm = document.getElementById('generic-share-btn');
+
+        const form = document.getElementById('ticket-form');
+        if (form) form.onsubmit = handleTicketFormSubmit;
+
+        // --- Reset visual ---
         if (editBtnInfo) editBtnInfo.style.display = 'inline-block';
         if (cancelEditBtn) cancelEditBtn.style.display = 'none';
 
-        // Quitamos posibles handlers previos (por si acaso)
-        if (editBtnInfo) editBtnInfo.onclick = null;
-        if (cancelEditBtn) cancelEditBtn.onclick = null;
-        if (closeBtn) closeBtn.onclick = null;
+        // --- Limpieza previa de handlers ---
+        [editBtnInfo, cancelEditBtn, closeBtn,
+         clearBtnInfo, whatsappBtnInfo, shareBtnInfo,
+         clearBtnForm, whatsappBtnForm, shareBtnForm].forEach(btn => {
+            if (btn) btn.onclick = null;
+        });
 
-        // --- Asignamos handlers ---
+        // --- Editar ---
         if (editBtnInfo) {
-            editBtnInfo.addEventListener('click', () => {
-                // rellenar campos por si cambiaron
+            editBtnInfo.onclick = () => {
                 if (buyerNameInput) buyerNameInput.value = data.buyerName || '';
                 if (buyerPhoneInput) buyerPhoneInput.value = data.buyerPhone || '';
                 if (paymentStatusInput) paymentStatusInput.value = data.status || 'pending';
@@ -575,43 +729,71 @@ async function openTicketModal(ticketNumber) {
                 infoView.style.display = 'none';
                 formView.style.display = 'block';
 
-                // mostrar cancelar
                 if (cancelEditBtn) cancelEditBtn.style.display = 'inline-block';
-                // opcional: ocultar editar (no necesario, pero limpio)
-                // editBtnInfo.style.display = 'none';
-            });
+            };
         }
 
+        // --- Cancelar edición ---
         if (cancelEditBtn) {
-            cancelEditBtn.addEventListener('click', () => {
+            cancelEditBtn.onclick = () => {
                 formView.style.display = 'none';
                 infoView.style.display = 'block';
-                // ocultamos cancelar otra vez
                 cancelEditBtn.style.display = 'none';
-                // aseguramos que editar esté visible
                 if (editBtnInfo) editBtnInfo.style.display = 'inline-block';
-            });
+            };
         }
 
+        // --- Cerrar modal ---
         if (closeBtn) {
-            closeBtn.addEventListener('click', () => {
+            closeBtn.onclick = () => {
                 modal.style.display = 'none';
-                // Al cerrar, dejamos el modal en estado inicial (info visible)
                 if (formView) formView.style.display = 'none';
                 if (infoView) infoView.style.display = 'block';
                 if (cancelEditBtn) cancelEditBtn.style.display = 'none';
                 if (editBtnInfo) editBtnInfo.style.display = 'inline-block';
-            });
+            };
         }
 
-        // (Los otros listeners del form/clear/share ya los tienes asignados
-        //  en tu función openTicketModal original o global; si no, asegúrate de que se asignen
-        //  aquí con addEventListener, pero sin re-clonar elementos.)
+        // --- Limpiar boleto (INFO) ---
+        if (clearBtnInfo) {
+            clearBtnInfo.onclick = async () => {
+                await ticketRef.update({ buyerName: '', buyerPhone: '', status: 'pending' });
+                alert("Boleto limpiado correctamente.");
+                closeAndResetModal();
+            };
+        }
+
+        // --- Limpiar boleto (FORM) ---
+        if (clearBtnForm) {
+            clearBtnForm.onclick = async () => {
+                await ticketRef.update({ buyerName: '', buyerPhone: '', status: 'pending' });
+                alert("Boleto limpiado correctamente.");
+                closeAndResetModal();
+            };
+        }
+
+        // --- Compartir WhatsApp (INFO) ---
+        if (whatsappBtnInfo) {
+			whatsappBtnInfo.onclick = () => handleShare("whatsapp");
+		}
+		if (whatsappBtnForm) {
+			whatsappBtnForm.onclick = () => handleShare("whatsapp");
+		}
+
+        // --- Compartir genérico (INFO) ---
+        if (shareBtnInfo) {
+			shareBtnInfo.onclick = () => handleShare("generic");
+		}
+		if (shareBtnForm) {
+			shareBtnForm.onclick = () => handleShare("generic");
+		}
+
     } catch (error) {
         console.error("Error al obtener datos del boleto:", error);
         alert("Hubo un error al obtener los datos del boleto.");
     }
 }
+
 
 
 async function handleCreateRaffle(e) {
