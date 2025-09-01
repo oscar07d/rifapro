@@ -173,7 +173,6 @@ input:focus, select:focus {
     color: white;
 }
 
-
 /* 6. Vistas Específicas (Explore, Home, Detalle, etc.) */
 
 /* Contenedor de botones en el Home */
@@ -973,3 +972,10 @@ input[type="color"]::-moz-color-swatch {
         height: 30px;
     }
 }
+
+
+
+
+
+
+
