@@ -727,7 +727,153 @@ input[type="color"]::-moz-color-swatch {
     padding: 0;
 }
 
+/* --- ESTILOS PARA LA PÁGINA DE ESTADÍSTICAS --- */
+
+.stats-raffle-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.statistics-container {
+    background-color: var(--card-bg-color);
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+}
+
+.stats-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.stats-group {
+    margin-bottom: 2rem;
+}
+
+.stats-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.stat-card {
+    background-color: #f8f9fa;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.stat-card.clickable {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.stat-card.clickable:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary-color);
+}
+
+.stat-card h4 {
+    margin: 0.5rem 0;
+    font-size: 1rem;
+    color: var(--text-light-color);
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.stat-icon svg {
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.filters {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+#participants-list .participant {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+}
+#participants-list .participant:hover {
+    background-color: #f8f9fa;
+}
+
+/* --- ESTILOS PARA LA PÁGINA DE Ver Lista de Participantes --- */
+
+.participants-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.participant-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transition: background 0.2s ease;
+  cursor: pointer;
+}
+
+.participant-card:hover {
+  background: #f9f9ff;
+}
+
+.participant-card h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #6c5ce7;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.participant-card p {
+  margin: 0 12px;
+  font-size: 14px;
+}
+
+.card-content {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+
 /* 8. Diseño Responsivo */
+@media (max-width: 600px) {
+  .participant-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .card-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
 @media (max-width: 768px) {
     /* Ajustes generales para pantallas pequeñas */
     body {
@@ -790,6 +936,10 @@ input[type="color"]::-moz-color-swatch {
    .predefined-options {
         flex-wrap: wrap; /* Permite que los botones pasen a la siguiente línea */
         gap: 0.5rem;
+    }
+	.participant-card {
+        flex-direction: column;
+        align-items: flex-start;
     }
 }
 
