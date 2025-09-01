@@ -51,8 +51,18 @@ export const getHomeView = (userName) => `
         <div class="home-buttons">
             <a href="#/create" class="btn btn-primary">Crear Rifa</a>
             <a href="#/explore" class="btn btn-primary">Administrar Rifas</a>
-            <a href="#/my-raffles" class="btn btn-primary">Mis Rifas</a>
+            <a href="#/statistics" class="btn btn-primary">Estadísticas</a> 
             <a href="#/settings" class="btn btn-primary">Configuración</a>
+        </div>
+    </div>
+`;
+
+export const getStatisticsListView = (rafflesHTML) => `
+    <div class="explore-container">
+        <h2>Estadísticas de Rifas</h2>
+        <p>Selecciona una rifa para ver sus detalles y estadísticas.</p>
+        <div class="stats-raffle-list">
+            ${rafflesHTML}
         </div>
     </div>
 `;
@@ -437,3 +447,118 @@ document.addEventListener("click", (e) => {
         document.getElementById("collaborator-modal").classList.add("hidden");
     }
 });
+
+export const getStatisticsDetailView = (raffle) => `
+    <div class="statistics-container">
+        <div class="stats-header">
+            <h2>Estadísticas: ${raffle.name}</h2>
+            <div class="header-actions">
+				<a href="#/participants/${raffle.id}" class="btn btn-secondary">
+					<svg xmlns="http://www.w3.org/2000/svg" height="35px" viewBox="0 -960 960 960" width="40px" fill="#6a11cb"><path d="M638.35-402q-53.24 0-88.88-35.81-35.63-35.8-35.63-89.05 0-53.24 35.73-88.96 35.73-35.71 88.87-35.71 53.24 0 89.01 35.76 35.76 35.77 35.76 88.96 0 53.28-35.8 89.05Q691.6-402 638.35-402ZM392.51-147.8v-75.33q0-21.33 10.11-40.35 10.11-19.03 27.5-28.15 45.64-30.81 98.88-45.92 53.23-15.12 109.39-15.12 56.15 0 109.11 16.12 52.96 16.11 99.43 44.92 16.73 11.14 27.17 29.21 10.44 18.06 10.44 39.27v75.35H392.51ZM113.62-399.25v-75.92h309.55v75.92H113.62Zm0-339.11v-75.75h472.39v75.75H113.62Zm338.76 169.48H113.62v-75.76h372.22q-12.72 16.33-20.99 35.35-8.27 19.01-12.47 40.41Z"/></svg>
+					Ver Lista de Participantes
+				</a>
+			</div>
+        </div>
+
+        <div class="stats-group">
+            <h3>Cálculo de Ganancias</h3>
+            <div class="stats-cards-grid">
+                <div class="stat-card">
+                    <h4>Pagado Total</h4>
+                    <span id="stats-revenue-paid" class="stat-value">$0</span>
+                </div>
+                <div class="stat-card">
+                    <h4>Pago Parcial</h4>
+                    <span id="stats-revenue-partial" class="stat-value">$0</span>
+                </div>
+                <div class="stat-card">
+                    <h4>Pendiente</h4>
+                    <span id="stats-revenue-pending" class="stat-value">$0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-group">
+            <h3>Estado de los Boletos</h3>
+            <div class="stats-cards-grid">
+                <div class="stat-card clickable" data-status="available">
+                    <span class="stat-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#6a11cb"><path d="M481.01-287.91q16.71 0 28.31-11.5 11.59-11.49 11.59-28.19 0-16.7-11.44-28.3-11.45-11.6-28.36-11.6-16.59 0-28.31 11.44-11.71 11.45-11.71 28.37 0 16.58 11.61 28.18 11.61 11.6 28.31 11.6Zm0-153.18q16.71 0 28.31-11.61 11.59-11.61 11.59-28.31 0-16.71-11.44-28.31-11.45-11.59-28.36-11.59-16.59 0-28.31 11.44-11.71 11.45-11.71 28.36 0 16.59 11.61 28.31 11.61 11.71 28.31 11.71Zm0-153.41q16.71 0 28.31-11.61 11.59-11.61 11.59-28.32 0-16.7-11.44-28.18-11.45-11.48-28.36-11.48-16.59 0-28.31 11.38-11.71 11.38-11.71 28.19 0 16.59 11.61 28.3 11.61 11.72 28.31 11.72Zm312.12 433.63H167.87q-35.72 0-60.86-25.14t-25.14-60.86V-403.3q32.76 0 55.88-22.57 23.12-22.56 23.12-54.38 0-32.29-23.12-54.87T81.87-557.7v-156.43q0-35.72 25.14-60.86t60.86-25.14h625.26q35.72 0 60.86 25.14t25.14 60.86v156.43q-32.52 0-55.76 22.58-23.24 22.58-23.24 54.87 0 31.82 23.24 54.38 23.24 22.57 55.76 22.57v156.43q0 35.72-25.14 60.86t-60.86 25.14Zm0-86v-96.93q-36.26-21.24-57.63-57.44-21.37-36.2-21.37-78.85 0-43.02 21.12-79.44 21.12-36.43 57.88-57.67v-96.93H167.87v96.93q37.24 21.24 58.12 57.67 20.88 36.43 20.88 79.35 0 42.92-21.13 79.03t-57.87 57.35v96.93h625.26ZM480.5-480.5Z"/></svg>
+                    </span>
+                    <h4>Disponibles</h4>
+                    <span id="stats-count-available" class="stat-value">0</span>
+                </div>
+                <div class="stat-card clickable" data-status="paid">
+                     <span class="stat-icon">
+						<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#2e7d32"><path d="M481.01-287.91q16.71 0 28.31-11.5 11.59-11.49 11.59-28.19 0-16.7-11.44-28.3-11.45-11.6-28.36-11.6-16.59 0-28.31 11.44-11.71 11.45-11.71 28.37 0 16.58 11.61 28.18 11.61 11.6 28.31 11.6Zm0-153.18q16.71 0 28.31-11.61 11.59-11.61 11.59-28.31 0-16.71-11.44-28.31-11.45-11.59-28.36-11.59-16.59 0-28.31 11.44-11.71 11.45-11.71 28.36 0 16.59 11.61 28.31 11.61 11.71 28.31 11.71Zm0-153.41q16.71 0 28.31-11.61 11.59-11.61 11.59-28.32 0-16.7-11.44-28.18-11.45-11.48-28.36-11.48-16.59 0-28.31 11.38-11.71 11.38-11.71 28.19 0 16.59 11.61 28.3 11.61 11.72 28.31 11.72Zm312.12 433.63H167.87q-35.72 0-60.86-25.14t-25.14-60.86V-403.3q32.76 0 55.88-22.57 23.12-22.56 23.12-54.38 0-32.29-23.12-54.87T81.87-557.7v-156.43q0-35.72 25.14-60.86t60.86-25.14h625.26q35.72 0 60.86 25.14t25.14 60.86v156.43q-32.52 0-55.76 22.58-23.24 22.58-23.24 54.87 0 31.82 23.24 54.38 23.24 22.57 55.76 22.57v156.43q0 35.72-25.14 60.86t-60.86 25.14Zm0-86v-96.93q-36.26-21.24-57.63-57.44-21.37-36.2-21.37-78.85 0-43.02 21.12-79.44 21.12-36.43 57.88-57.67v-96.93H167.87v96.93q37.24 21.24 58.12 57.67 20.88 36.43 20.88 79.35 0 42.92-21.13 79.03t-57.87 57.35v96.93h625.26ZM480.5-480.5Z"/></svg>
+					</span>
+                    <h4>Ocupados (Pagados)</h4>
+                    <span id="stats-count-paid" class="stat-value">0</span>
+                </div>
+                <div class="stat-card clickable" data-status="partial">
+                    <span class="stat-icon">
+						<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#fb8c00"><path d="M481.01-287.91q16.71 0 28.31-11.5 11.59-11.49 11.59-28.19 0-16.7-11.44-28.3-11.45-11.6-28.36-11.6-16.59 0-28.31 11.44-11.71 11.45-11.71 28.37 0 16.58 11.61 28.18 11.61 11.6 28.31 11.6Zm0-153.18q16.71 0 28.31-11.61 11.59-11.61 11.59-28.31 0-16.71-11.44-28.31-11.45-11.59-28.36-11.59-16.59 0-28.31 11.44-11.71 11.45-11.71 28.36 0 16.59 11.61 28.31 11.61 11.71 28.31 11.71Zm0-153.41q16.71 0 28.31-11.61 11.59-11.61 11.59-28.32 0-16.7-11.44-28.18-11.45-11.48-28.36-11.48-16.59 0-28.31 11.38-11.71 11.38-11.71 28.19 0 16.59 11.61 28.3 11.61 11.72 28.31 11.72Zm312.12 433.63H167.87q-35.72 0-60.86-25.14t-25.14-60.86V-403.3q32.76 0 55.88-22.57 23.12-22.56 23.12-54.38 0-32.29-23.12-54.87T81.87-557.7v-156.43q0-35.72 25.14-60.86t60.86-25.14h625.26q35.72 0 60.86 25.14t25.14 60.86v156.43q-32.52 0-55.76 22.58-23.24 22.58-23.24 54.87 0 31.82 23.24 54.38 23.24 22.57 55.76 22.57v156.43q0 35.72-25.14 60.86t-60.86 25.14Zm0-86v-96.93q-36.26-21.24-57.63-57.44-21.37-36.2-21.37-78.85 0-43.02 21.12-79.44 21.12-36.43 57.88-57.67v-96.93H167.87v96.93q37.24 21.24 58.12 57.67 20.88 36.43 20.88 79.35 0 42.92-21.13 79.03t-57.87 57.35v96.93h625.26ZM480.5-480.5Z"/></svg>
+					</span>
+                    <h4>Reservados (Parcial)</h4>
+                    <span id="stats-count-partial" class="stat-value">0</span>
+                </div>
+                <div class="stat-card clickable" data-status="pending">
+                    <span class="stat-icon">
+						<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#c62828"><path d="M481.01-287.91q16.71 0 28.31-11.5 11.59-11.49 11.59-28.19 0-16.7-11.44-28.3-11.45-11.6-28.36-11.6-16.59 0-28.31 11.44-11.71 11.45-11.71 28.37 0 16.58 11.61 28.18 11.61 11.6 28.31 11.6Zm0-153.18q16.71 0 28.31-11.61 11.59-11.61 11.59-28.31 0-16.71-11.44-28.31-11.45-11.59-28.36-11.59-16.59 0-28.31 11.44-11.71 11.45-11.71 28.36 0 16.59 11.61 28.31 11.61 11.71 28.31 11.71Zm0-153.41q16.71 0 28.31-11.61 11.59-11.61 11.59-28.32 0-16.7-11.44-28.18-11.45-11.48-28.36-11.48-16.59 0-28.31 11.38-11.71 11.38-11.71 28.19 0 16.59 11.61 28.3 11.61 11.72 28.31 11.72Zm312.12 433.63H167.87q-35.72 0-60.86-25.14t-25.14-60.86V-403.3q32.76 0 55.88-22.57 23.12-22.56 23.12-54.38 0-32.29-23.12-54.87T81.87-557.7v-156.43q0-35.72 25.14-60.86t60.86-25.14h625.26q35.72 0 60.86 25.14t25.14 60.86v156.43q-32.52 0-55.76 22.58-23.24 22.58-23.24 54.87 0 31.82 23.24 54.38 23.24 22.57 55.76 22.57v156.43q0 35.72-25.14 60.86t-60.86 25.14Zm0-86v-96.93q-36.26-21.24-57.63-57.44-21.37-36.2-21.37-78.85 0-43.02 21.12-79.44 21.12-36.43 57.88-57.67v-96.93H167.87v96.93q37.24 21.24 58.12 57.67 20.88 36.43 20.88 79.35 0 42.92-21.13 79.03t-57.87 57.35v96.93h625.26ZM480.5-480.5Z"/></svg>
+					</span>
+                    <h4>Pendientes</h4>
+                    <span id="stats-count-pending" class="stat-value">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+`;
+
+export const getParticipantsListView = (raffle, tickets) => {
+    if (!tickets.length) {
+        return `
+            <section class="participants-list">
+                <h2>Lista de Participantes</h2>
+                <p>No hay participantes con boletos asignados en esta rifa.</p>
+            </section>
+        `;
+    }
+
+    // ✅ Primero generamos los cards
+    const cardsHTML = tickets.map(ticket => `
+        <div class="participant-card" data-ticket="${ticket.number}" data-raffle="${raffle.id}">
+            <div class="card-content">
+                <h3>
+                    <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#6c5ce7">
+                        <path d="M481.01-287.91q16.71 0 28.31-11.5 11.59-11.49 11.59-28.19 0-16.7-11.44-28.3-11.45-11.6-28.36-11.6-16.59 0-28.31 11.44-11.71 11.45-11.71 28.37 0 16.58 11.61 28.18 11.61 11.6 28.31 11.6Zm0-153.18q16.71 0 28.31-11.61 11.59-11.61 11.59-28.31 0-16.71-11.44-28.31-11.45-11.59-28.36-11.59-16.59 0-28.31 11.44-11.71 11.45-11.71 28.36 0 16.59 11.61 28.31 11.61 11.71 28.31 11.71Zm0-153.41q16.71 0 28.31-11.61 11.59-11.61 11.59-28.32 0-16.7-11.44-28.18-11.45-11.48-28.36-11.48-16.59 0-28.31 11.38-11.71 11.38-11.71 28.19 0 16.59 11.61 28.3 11.61 11.72 28.31 11.72Zm312.12 433.63H167.87q-35.72 0-60.86-25.14t-25.14-60.86V-403.3q32.76 0 55.88-22.57 23.12-22.56 23.12-54.38 0-32.29-23.12-54.87T81.87-557.7v-156.43q0-35.72 25.14-60.86t60.86-25.14h625.26q35.72 0 60.86 25.14t25.14 60.86v156.43q-32.52 0-55.76 22.58-23.24 22.58-23.24 54.87 0 31.82 23.24 54.38 23.24 22.57 55.76 22.57v156.43q0 35.72-25.14 60.86t-60.86 25.14Zm0-86v-96.93q-36.26-21.24-57.63-57.44-21.37-36.2-21.37-78.85 0-43.02 21.12-79.44 21.12-36.43 57.88-57.67v-96.93H167.87v96.93q37.24 21.24 58.12 57.67 20.88 36.43 20.88 79.35 0 42.92-21.13 79.03t-57.87 57.35v96.93h625.26ZM480.5-480.5Z"/></svg>
+                    Boleto #${ticket.number}
+                </h3>
+                <p><strong>Nombre:</strong> ${ticket.name || ticket.buyerName || 'N/A'}</p>
+                <p><strong>Teléfono:</strong> ${ticket.phone || ticket.buyerPhone || 'N/A'}</p>
+                <p><strong>Estado:</strong> ${ticket.status}</p>
+            </div>
+        </div>
+    `).join('');
+
+    // ✅ Después lo retornamos
+    return `
+        <section class="participants-list">
+            <h2>Lista de Participantes - ${raffle.name || 'Rifa'}</h2>
+
+            <div class="filters">
+                <input type="text" id="search-participant" placeholder="Buscar por nombre o teléfono..." />
+                <select id="status-filter">
+                    <option value="all">Todos</option>
+                    <option value="paid">Pagados</option>
+                    <option value="partial">Parcial</option>
+                    <option value="pending">Pendientes</option>
+                    <option value="available">Disponibles</option>
+                </select>
+            </div>
+
+            <div class="participants-grid">
+                ${cardsHTML}
+            </div>
+        </section>
+    `;
+};
