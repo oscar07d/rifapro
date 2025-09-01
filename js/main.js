@@ -12,8 +12,9 @@ import {
     getRaffleCard,
     getRaffleDetailView,
 	getCollaboratorModal,
-	getStatisticsListView,  // <-- Asegúrate de que esta exista
-    getStatisticsDetailView
+	getStatisticsListView,  
+    getStatisticsDetailView,
+    getParticipantsListView   // <-- Aquí lo agregamos
 } from './components.js';
 
 document.body.insertAdjacentHTML("beforeend", getCollaboratorModal());
@@ -63,20 +64,26 @@ async function router() {
     }
 
     const path = window.location.hash.slice(1) || '/';
-    
-    // 1. PRIMERO declaramos las variables que necesitamos
-    const isRaffleDetail = path.startsWith('/raffle/');
-    const isStatisticsDetail = path.startsWith('/statistics/'); // <-- Esta línea debe ir aquí arriba
 
-    // 2. LUEGO las usamos para encontrar la vista correcta
-    const view = isRaffleDetail 
-        ? getRaffleDetailView 
+    // Detectamos rutas dinámicas
+    const isRaffleDetail = path.startsWith('/raffle/');
+    const isStatisticsDetail = path.startsWith('/statistics/');
+    const isParticipantsList = path.startsWith('/participants/');
+
+    // Vistas base (solo si es una ruta plana registrada en routes)
+    const view = isRaffleDetail
+        ? getRaffleDetailView
         : (isStatisticsDetail ? getStatisticsDetailView : routes[path]);
 
-    if (view) {
+    // 👇 Ajuste importante: añadimos isParticipantsList a la condición
+    if (isRaffleDetail || isStatisticsDetail || isParticipantsList || view) {
+
         if (isRaffleDetail) {
+            // ---------------------- DETALLE DE RIFA ----------------------
             const raffleId = path.split('/')[2];
             try {
+				console.log("RaffleId que intento abrir:", raffleId, "Usuario:", user.uid);
+				
                 const raffleDoc = await db.collection('raffles').doc(raffleId).get();
                 if (!raffleDoc.exists) {
                     appContainer.innerHTML = '<h2>Error: Rifa no encontrada</h2>';
@@ -90,14 +97,11 @@ async function router() {
 
                 unsubscribeFromTickets = db.collection('raffles').doc(raffleId).collection('tickets').orderBy('number')
                     .onSnapshot(snapshot => {
-                        console.log(`Snapshot recibido: ${snapshot.size} boletos encontrados.`);
                         ticketsGrid.innerHTML = ''; 
-                        
                         if (snapshot.empty) {
                             ticketsGrid.innerHTML = '<p>No se encontraron boletos para esta rifa.</p>';
                             return;
                         }
-                        
                         snapshot.forEach(doc => {
                             const ticketData = doc.data();
                             const ticketElement = document.createElement('div');
@@ -107,11 +111,10 @@ async function router() {
                             ticketsGrid.appendChild(ticketElement);
                         });
                     }, error => {
-                        // Si hay un error (ej. por las reglas de Firestore), se mostrará aquí
                         console.error("Error al suscribirse a los boletos:", error);
                         ticketsGrid.innerHTML = '<p style="color: red; text-align: center;">Error al cargar los boletos. Revisa las reglas de seguridad de Firestore.</p>';
                     });
-				
+
                 const shareStatusBtn = document.getElementById('share-status-btn');
                 if (shareStatusBtn) {
                     shareStatusBtn.addEventListener('click', () => openSimpleStatusModal(raffleData));
@@ -121,173 +124,203 @@ async function router() {
                 console.error("Error al obtener el detalle de la rifa:", error);
                 appContainer.innerHTML = '<h2>Error al cargar la rifa.</h2>';
             }
+
         } else if (isStatisticsDetail) {
-			const participantsBtn = document.getElementById('show-participants-list-btn');
-			if (participantsBtn) {
-				participantsBtn.addEventListener('click', () => {
-					// Lógica para mostrar la lista de participantes (la haremos después)
-					const container = document.getElementById('participants-list-container');
-					if(container.style.display === 'none') {
-						container.style.display = 'block';
-						participantsBtn.textContent = 'Ocultar Lista de Participantes';
-					} else {
-						container.style.display = 'none';
-						participantsBtn.textContent = 'Ver Lista de Participantes';
-					}
-				});
-			}
-			const statCards = document.querySelectorAll('.stat-card.clickable');
-			statCards.forEach(card => {
-				card.addEventListener('click', () => {
-					const status = card.dataset.status;
-					// Lógica para filtrar y mostrar la lista por estado
-					alert(`Mostrar lista filtrada por: ${status}`);
-				});
-			});
-			const raffleId = path.split('/')[2];
-			try {
-				// 1. Get the main raffle data
-				const raffleDoc = await db.collection('raffles').doc(raffleId).get();
-				if (!raffleDoc.exists) {
-					appContainer.innerHTML = '<h2>Rifa no encontrada</h2>';
-					return;
-				}
-				const raffleData = { id: raffleDoc.id, ...raffleDoc.data() };
-				appContainer.innerHTML = getStatisticsDetailView(raffleData);
+            // ---------------------- DETALLE DE ESTADÍSTICAS ----------------------
+            const raffleId = path.split('/')[2];
+            try {
+                const raffleDoc = await db.collection('raffles').doc(raffleId).get();
+                if (!raffleDoc.exists) {
+                    appContainer.innerHTML = '<h2>Rifa no encontrada</h2>';
+                    return;
+                }
+                const raffleData = { id: raffleDoc.id, ...raffleDoc.data() };
 
-				// 2. Get ALL tickets for this raffle to perform calculations
-				const ticketsSnapshot = await db.collection('raffles').doc(raffleId).collection('tickets').get();
+                appContainer.innerHTML = getStatisticsDetailView(raffleData);
 
-				// 3. Initialize counters
-				let paidCount = 0;
-				let partialCount = 0;
-				let pendingCount = 0;
-				let availableCount = 0;
+                const ticketsSnapshot = await db.collection('raffles').doc(raffleId).collection('tickets').get();
 
-				// 4. Loop through tickets and calculate stats
-				ticketsSnapshot.forEach(doc => {
-					const ticket = doc.data();
-					switch (ticket.status) {
-						case 'paid':
-							paidCount++;
-							break;
-						case 'partial':
-							partialCount++;
-							break;
+                let paidCount = 0, partialCount = 0, pendingCount = 0, availableCount = 0;
+                const tickets = [];
 
-						case 'pending':
-							pendingCount++;
-							break;
-						case 'available':
-							availableCount++;
-							break;
-					}
-				});
+                ticketsSnapshot.forEach(doc => {
+                    const ticket = doc.data();
+                    tickets.push(ticket);
+                    switch (ticket.status) {
+                        case 'paid': paidCount++; break;
+                        case 'partial': partialCount++; break;
+                        case 'pending': pendingCount++; break;
+                        case 'available': availableCount++; break;
+                    }
+                });
 
-				// 5. Calculate revenue
-				const ticketPrice = raffleData.ticketPrice || 0;
-				const paidRevenue = paidCount * ticketPrice;
-				const partialRevenue = partialCount * ticketPrice;
-				const pendingRevenue = pendingCount * ticketPrice;
+                const ticketPrice = raffleData.ticketPrice || 0;
+                const paidRevenue = paidCount * ticketPrice;
+                const partialRevenue = partialCount * ticketPrice;
+                const pendingRevenue = pendingCount * ticketPrice;
 
-				// 6. Update the HTML with the calculated values
-				document.getElementById('stats-revenue-paid').textContent = `$${paidRevenue.toLocaleString('es-CO')}`;
-				document.getElementById('stats-revenue-partial').textContent = `$${partialRevenue.toLocaleString('es-CO')}`;
-				document.getElementById('stats-revenue-pending').textContent = `$${pendingRevenue.toLocaleString('es-CO')}`;
+                document.getElementById('stats-revenue-paid').textContent = `$${paidRevenue.toLocaleString('es-CO')}`;
+                document.getElementById('stats-revenue-partial').textContent = `$${partialRevenue.toLocaleString('es-CO')}`;
+                document.getElementById('stats-revenue-pending').textContent = `$${pendingRevenue.toLocaleString('es-CO')}`;
 
-				document.getElementById('stats-count-available').textContent = availableCount;
-				document.getElementById('stats-count-paid').textContent = paidCount;
-				document.getElementById('stats-count-partial').textContent = partialCount;
-				document.getElementById('stats-count-pending').textContent = pendingCount;
+                document.getElementById('stats-count-available').textContent = availableCount;
+                document.getElementById('stats-count-paid').textContent = paidCount;
+                document.getElementById('stats-count-partial').textContent = partialCount;
+                document.getElementById('stats-count-pending').textContent = pendingCount;
 
-			} catch (error) {
-				console.error("Error al cargar estadísticas:", error);
-				appContainer.innerHTML = '<p>Error al cargar la página de estadísticas.</p>';
-			}
-		} else if (path === '/explore') {
-			const user = firebase.auth().currentUser;
-			if (!user) {
-				appContainer.innerHTML = "<h2>Debes iniciar sesión para ver tus rifas.</h2>";
-				return;
-			}
+                const participantsBtn = document.getElementById('show-participants-list-btn');
+                const container = document.getElementById('participants-list-container');
+                const listContainer = document.getElementById('participants-list');
 
-			try {
-				const rafflesSnapshot = await db.collection('raffles')
-					.where('viewableBy', 'array-contains', user.uid)
-					.orderBy('createdAt', 'desc')
-					.get();
+                if (participantsBtn) {
+                    participantsBtn.addEventListener('click', () => {
+                        if (container.style.display === 'none') {
+                            container.style.display = 'block';
+                            participantsBtn.textContent = 'Ocultar Lista de Participantes';
+                            renderParticipantsList(tickets, listContainer, "all");
+                        } else {
+                            container.style.display = 'none';
+                            participantsBtn.textContent = 'Ver Lista de Participantes';
+                        }
+                    });
+                }
 
-				let rafflesHTML = '';
+                const statCards = document.querySelectorAll('.stat-card.clickable');
+                statCards.forEach(card => {
+                    card.addEventListener('click', () => {
+                        const status = card.dataset.status;
+                        container.style.display = 'block';
+                        participantsBtn.textContent = 'Ocultar Lista de Participantes';
+                        renderParticipantsList(tickets, listContainer, status);
+                    });
+                });
 
-				if (rafflesSnapshot.empty) {
-					rafflesHTML = '<h2>No tienes rifas para administrar.</h2><p>Crea una nueva o pide que te añadan como colaborador.</p>';
-				} else {
-					const raffleCardPromises = rafflesSnapshot.docs.map(async (doc) => {
-						const raffleData = { id: doc.id, ...doc.data() };
-						const ticketsSnapshot = await db.collection('raffles').doc(raffleData.id).collection('tickets').where('status', '!=', 'available').get();
-						raffleData.soldPercentage = ticketsSnapshot.size;
-						return getRaffleCard(raffleData, user); 
-					});
-					const resolvedRaffleCards = await Promise.all(raffleCardPromises);
-					rafflesHTML = resolvedRaffleCards.join('');
-				}
+            } catch (error) {
+                console.error("Error al cargar estadísticas:", error);
+                appContainer.innerHTML = '<p>Error al cargar la página de estadísticas.</p>';
+            }
 
-				// CORRECCIÓN: Llamamos a la función de la vista para construir el HTML
-				appContainer.innerHTML = getExploreView(rafflesHTML);
+        } else if (isParticipantsList) {
+            // ---------------------- LISTA DE PARTICIPANTES ----------------------
+            const raffleId = path.split('/')[2];
+            try {
+                const raffleDoc = await db.collection('raffles').doc(raffleId).get();
+                if (!raffleDoc.exists) {
+                    appContainer.innerHTML = '<h2>Rifa no encontrada</h2>';
+                    return;
+                }
+                const raffleData = { id: raffleDoc.id, ...raffleDoc.data() };
 
-			} catch (error) {
-				console.error("Error al obtener las rifas:", error);
-				appContainer.innerHTML = '<p>Error al cargar las rifas.</p>';
-			}
-		} else if (path === '/statistics') {
-			const user = firebase.auth().currentUser;
-			if (!user) {
-				appContainer.innerHTML = "<h2>Debes iniciar sesión para ver las estadísticas.</h2>";
-				return;
-			}
+                const ticketsSnapshot = await db.collection('raffles')
+                    .doc(raffleId)
+                    .collection('tickets')
+                    .where('buyerName', '!=', '') // Solo boletos con cliente
+                    .get();
 
-			try {
-				// Buscamos las rifas que el usuario puede ver
-				const rafflesSnapshot = await db.collection('raffles')
-					.where('viewableBy', 'array-contains', user.uid)
-					.orderBy('createdAt', 'desc')
-					.get();
+                const participants = [];
+                ticketsSnapshot.forEach(doc => participants.push(doc.data()));
 
-				let rafflesHTML = '';
-				if (rafflesSnapshot.empty) {
-					rafflesHTML = '<h2>No tienes rifas para ver estadísticas.</h2>';
-				} else {
-					// Reutilizamos getRaffleCard, pero cambiando el texto y el enlace del botón
-					rafflesSnapshot.forEach(doc => {
-						const raffle = { id: doc.id, ...doc.data() };
-						rafflesHTML += `
-							<div class="raffle-card" data-id="${raffle.id}">
-								<div class="raffle-card-content">
-									<h3>${raffle.name || 'Rifa sin nombre'}</h3>
-									<p><strong>Premio:</strong> ${raffle.prize || 'No especificado'}</p>
-									<a href="#/statistics/${raffle.id}" class="btn btn-primary">Ver Estadísticas</a>
-								</div>
-							</div>
-						`;
-					});
-				}
+                appContainer.innerHTML = getParticipantsListView(raffleData, participants);
 
-				appContainer.innerHTML = getStatisticsListView(rafflesHTML);
+                document.querySelectorAll('.participant-card').forEach(card => {
+                    card.addEventListener('click', () => {
+                        const ticketNumber = card.dataset.ticket;
+                        const raffleId = card.dataset.raffle;
+                        window.location.hash = `/raffle/${raffleId}?ticket=${ticketNumber}`;
+                    });
+                });
 
-			} catch (error) {
-				console.error("Error al obtener rifas para estadísticas:", error);
-				appContainer.innerHTML = '<p>Error al cargar las rifas.</p>';
-			}
-		} else {
+            } catch (error) {
+                console.error("Error al cargar participantes:", error);
+                appContainer.innerHTML = '<p>Error al cargar la lista de participantes.</p>';
+            }
+
+        } else if (path === '/explore') {
+            // ---------------------- EXPLORAR ----------------------
+            const user = firebase.auth().currentUser;
+            if (!user) {
+                appContainer.innerHTML = "<h2>Debes iniciar sesión para ver tus rifas.</h2>";
+                return;
+            }
+            try {
+                const rafflesSnapshot = await db.collection('raffles')
+                    .where('viewableBy', 'array-contains', user.uid)
+                    .orderBy('createdAt', 'desc')
+                    .get();
+
+                let rafflesHTML = '';
+                if (rafflesSnapshot.empty) {
+                    rafflesHTML = '<h2>No tienes rifas para administrar.</h2><p>Crea una nueva o pide que te añadan como colaborador.</p>';
+                } else {
+                    const raffleCardPromises = rafflesSnapshot.docs.map(async (doc) => {
+                        const raffleData = { id: doc.id, ...doc.data() };
+                        const ticketsSnapshot = await db.collection('raffles').doc(raffleData.id).collection('tickets').where('status', '!=', 'available').get();
+                        raffleData.soldPercentage = ticketsSnapshot.size;
+                        return getRaffleCard(raffleData, user);
+                    });
+                    const resolvedRaffleCards = await Promise.all(raffleCardPromises);
+                    rafflesHTML = resolvedRaffleCards.join('');
+                }
+
+                appContainer.innerHTML = getExploreView(rafflesHTML);
+
+            } catch (error) {
+                console.error("Error al obtener las rifas:", error);
+                appContainer.innerHTML = '<p>Error al cargar las rifas.</p>';
+            }
+
+        } else if (path === '/statistics') {
+            // ---------------------- LISTA DE ESTADÍSTICAS ----------------------
+            const user = firebase.auth().currentUser;
+            if (!user) {
+                appContainer.innerHTML = "<h2>Debes iniciar sesión para ver las estadísticas.</h2>";
+                return;
+            }
+            try {
+                const rafflesSnapshot = await db.collection('raffles')
+                    .where('viewableBy', 'array-contains', user.uid)
+                    .orderBy('createdAt', 'desc')
+                    .get();
+
+                let rafflesHTML = '';
+                if (rafflesSnapshot.empty) {
+                    rafflesHTML = '<h2>No tienes rifas para ver estadísticas.</h2>';
+                } else {
+                    rafflesSnapshot.forEach(doc => {
+                        const raffle = { id: doc.id, ...doc.data() };
+                        rafflesHTML += `
+                            <div class="raffle-card" data-id="${raffle.id}">
+                                <div class="raffle-card-content">
+                                    <h3>${raffle.name || 'Rifa sin nombre'}</h3>
+                                    <p><strong>Premio:</strong> ${raffle.prize || 'No especificado'}</p>
+                                    <a href="#/statistics/${raffle.id}" class="btn btn-primary">Ver Estadísticas</a>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+
+                appContainer.innerHTML = getStatisticsListView(rafflesHTML);
+
+            } catch (error) {
+                console.error("Error al obtener rifas para estadísticas:", error);
+                appContainer.innerHTML = '<p>Error al cargar las rifas.</p>';
+            }
+
+        } else {
+            // ---------------------- VISTAS PLANAS ----------------------
             const user = firebase.auth().currentUser;
             const userName = user ? user.displayName || user.email : 'Invitado';
             appContainer.innerHTML = (path === '/') ? view(userName) : view();
         }
+
         attachEventListeners(path);
+
     } else {
         appContainer.innerHTML = '<h2>Error 404: Página no encontrada</h2>';
     }
 }
+
 
 async function handleTicketFormSubmit(e) {
     e.preventDefault();
@@ -496,6 +529,63 @@ function updateUIForLoggedOutUser() {
 
 function attachEventListeners(path) {
     const isRaffleDetail = path.startsWith('/raffle/');
+    const isStatisticsDetail = path.startsWith('/statistics/');
+    const isParticipantsList = path.startsWith('/participants/');
+	const searchInput = document.getElementById('search-participant');
+	const statusFilter = document.getElementById('status-filter');
+	// 👉 Filtros de participantes
+	  const participantCards = document.querySelectorAll('.participant-card');
+
+	  if (searchInput && statusFilter) {
+		const filterParticipants = () => {
+		  const searchValue = searchInput.value.toLowerCase();
+		  const statusValue = statusFilter.value;
+
+		  participantCards.forEach(card => {
+			const name = card.querySelector('p:nth-child(2)')?.textContent.toLowerCase() || '';
+			const phone = card.querySelector('p:nth-child(3)')?.textContent.toLowerCase() || '';
+			const status = card.querySelector('p:nth-child(4)')?.textContent.toLowerCase() || '';
+
+			const matchesSearch = name.includes(searchValue) || phone.includes(searchValue);
+			const matchesStatus = (statusValue === 'all') || status.includes(statusValue);
+
+			card.style.display = (matchesSearch && matchesStatus) ? 'flex' : 'none';
+		  });
+		};
+
+		searchInput.addEventListener('input', filterParticipants);
+		statusFilter.addEventListener('change', filterParticipants);
+	  }
+	
+	if (searchInput && statusFilter) {
+		const applyFilters = () => {
+			const term = searchInput.value.toLowerCase();
+			const status = statusFilter.value;
+
+			const filtered = tickets.filter(t => {
+				const matchesTerm = 
+					(t.name || t.buyerName || '').toLowerCase().includes(term) || 
+					(t.phone || t.buyerPhone || '').includes(term);
+				const matchesStatus = status === 'all' || t.status === status;
+				return matchesTerm && matchesStatus;
+			});
+
+			const grid = document.querySelector('.participants-grid');
+			grid.innerHTML = filtered.map(t => `
+				<div class="participant-card" data-ticket="${t.number}" data-raffle="${raffle.id}">
+					<div class="card-content">
+						<h3>Boleto #${t.number}</h3>
+						<p><strong>Nombre:</strong> ${t.name || t.buyerName || 'N/A'}</p>
+						<p><strong>Teléfono:</strong> ${t.phone || t.buyerPhone || 'N/A'}</p>
+						<p><strong>Estado:</strong> ${t.status}</p>
+					</div>
+				</div>
+			`).join('');
+		};
+
+		searchInput.addEventListener('input', applyFilters);
+		statusFilter.addEventListener('change', applyFilters);
+	}
 
     if (path === '/login') {
         const authForm = document.getElementById('auth-form');
@@ -515,9 +605,9 @@ function attachEventListeners(path) {
                 }
             });
         }
-        
+
         if (googleLoginBtn) googleLoginBtn.addEventListener('click', Auth.loginWithGoogle);
-        
+
         const toggleAuthMode = e => {
             e.preventDefault();
             isLogin = !isLogin;
@@ -539,23 +629,20 @@ function attachEventListeners(path) {
                 if (!option) return;
 
                 option.classList.toggle('selected');
-                
-                // Elementos de los formularios de detalles
+
                 const bankDetailsWrapper = document.getElementById('bank-account-details');
                 const nequiDetails = document.getElementById('nequi-details');
                 const daviplataDetails = document.getElementById('daviplata-details');
                 const brebDetails = document.getElementById('bre-b-details');
 
                 const traditionalBanks = ['av-villas', 'bancolombia', 'bbva', 'bogota', 'caja-social', 'davivienda', 'falabella', 'finandina', 'itau', 'lulo', 'pibank', 'powwi', 'uala'];
-                
+
                 const selectedOptions = Array.from(document.querySelectorAll('.payment-option.selected')).map(el => el.dataset.value);
 
-                // Muestra u oculta los campos según la selección
                 nequiDetails.style.display = selectedOptions.includes('nequi') ? 'block' : 'none';
                 daviplataDetails.style.display = selectedOptions.includes('daviplata') ? 'block' : 'none';
                 brebDetails.style.display = selectedOptions.includes('bre-b') ? 'block' : 'none';
 
-                // Lógica para el contenedor genérico de bancos
                 const selectedBanks = selectedOptions.filter(val => traditionalBanks.includes(val));
                 if (selectedBanks.length > 0) {
                     bankDetailsWrapper.style.display = 'block';
@@ -599,6 +686,7 @@ function attachEventListeners(path) {
         }
 
     } else if (isStatisticsDetail) {
+        console.log("👉 Estamos en la vista de estadísticas");
         const participantsBtn = document.getElementById('show-participants-list-btn');
         const participantsContainer = document.getElementById('participants-list-container');
         const statCards = document.querySelectorAll('.stat-card.clickable');
@@ -620,6 +708,17 @@ function attachEventListeners(path) {
                 alert(`Filtro aplicado para: ${status}`);
             });
         });
+
+    } else if (isParticipantsList) {
+        console.log("👉 Estamos en la vista de participantes");
+        document.querySelectorAll('.participant-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const ticketNumber = card.dataset.ticket;
+                const raffleId = card.dataset.raffle;
+                window.location.hash = `/raffle/${raffleId}?ticket=${ticketNumber}`;
+            });
+        });
+
     } else if (path === '/explore') {
         const rafflesList = document.getElementById('raffles-list');
         if (rafflesList) {
@@ -636,13 +735,13 @@ function attachEventListeners(path) {
                 if (collaborateButton) {
                     const card = collaborateButton.closest('.raffle-card');
                     const raffleId = card.dataset.id;
-                    // --- ESTA ES LA LÍNEA CORREGIDA ---
                     openCollaboratorModal(raffleId);
                 }
             });
         }
     }
 }
+
 
 async function openTicketModal(ticketNumber) {
     const modal = document.getElementById('ticket-modal');
@@ -1265,3 +1364,137 @@ window.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
+
+async function loadParticipantsList(raffleId, filterStatus = "all", searchQuery = "") {
+    const listContainer = document.getElementById("participants-list");
+    if (!listContainer) return;
+
+    listContainer.innerHTML = "<p>Cargando...</p>";
+
+    try {
+        const ticketsSnap = await db.collection("raffles").doc(raffleId).collection("tickets").get();
+
+        let participants = [];
+        ticketsSnap.forEach(doc => {
+            const data = doc.data();
+            if (!data.buyerName) return; // ignorar boletos vacíos
+
+            participants.push({
+                number: data.number,
+                name: data.buyerName,
+                phone: data.buyerPhone || "N/A",
+                status: data.status || "pending"
+            });
+        });
+
+        // Filtro por estado
+        if (filterStatus !== "all") {
+            participants = participants.filter(p => p.status === filterStatus);
+        }
+
+        // Filtro por búsqueda
+        if (searchQuery) {
+            const queryLower = searchQuery.toLowerCase();
+            participants = participants.filter(p =>
+                p.name.toLowerCase().includes(queryLower) ||
+                String(p.number).includes(queryLower)
+            );
+        }
+
+        // Render lista
+        if (participants.length === 0) {
+            listContainer.innerHTML = "<p>No se encontraron participantes.</p>";
+        } else {
+            listContainer.innerHTML = participants.map(p => `
+                <div class="participant-item">
+                    <strong>#${p.number}</strong> - ${p.name} (${p.phone}) 
+                    <span class="status-tag ${p.status}">${p.status === "paid" ? "Pagado" : p.status === "partial" ? "Parcial" : "Pendiente"}</span>
+                </div>
+            `).join("");
+        }
+    } catch (err) {
+        console.error("Error cargando participantes:", err);
+        listContainer.innerHTML = "<p>Error al cargar los participantes.</p>";
+    }
+}
+
+function setupParticipantsEvents(raffleId) {
+    const container = document.getElementById("participants-list-container");
+    const searchInput = document.getElementById("participant-search");
+    const filterSelect = document.getElementById("status-filter");
+
+    // Botón "Ver Lista de Participantes"
+    const showBtn = document.getElementById("show-participants-list-btn");
+    if (showBtn) {
+        showBtn.addEventListener("click", () => {
+            container.style.display = "block";
+            loadParticipantsList(raffleId);
+        });
+    }
+
+    // Filtro de estado
+    if (filterSelect) {
+        filterSelect.addEventListener("change", () => {
+            loadParticipantsList(raffleId, filterSelect.value, searchInput.value);
+        });
+    }
+
+    // Búsqueda
+    if (searchInput) {
+        searchInput.addEventListener("input", () => {
+            loadParticipantsList(raffleId, filterSelect.value, searchInput.value);
+        });
+    }
+
+    // Botones de "Estado de los Boletos"
+    const statusCards = document.querySelectorAll(".stat-card.clickable");
+    statusCards.forEach(card => {
+        card.addEventListener("click", () => {
+            const status = card.getAttribute("data-status");
+            container.style.display = "block";
+            loadParticipantsList(raffleId, status);
+            if (filterSelect) filterSelect.value = status;
+        });
+    });
+}
+
+function openStatisticsView(raffle) {
+    const main = document.getElementById("main-content"); // o el contenedor principal que uses
+    main.innerHTML = getStatisticsDetailView(raffle);
+    setupStatisticsEvents(raffle); // aquí enganchamos los botones y filtros
+}
+
+function renderParticipantsList(tickets, container, status) {
+    let filtered = tickets;
+    if (status !== "all") {
+        filtered = tickets.filter(t => t.status === status);
+    }
+
+    if (filtered.length === 0) {
+        container.innerHTML = "<p>No hay participantes en este estado.</p>";
+        return;
+    }
+
+    container.innerHTML = `
+        <table class="participants-table">
+            <thead>
+                <tr>
+                    <th>Boleto</th>
+                    <th>Nombre</th>
+                    <th>Teléfono</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${filtered.map(t => `
+                    <tr>
+                        <td>${t.number}</td>
+                        <td>${t.buyerName || 'N/A'}</td>
+                        <td>${t.buyerPhone || 'N/A'}</td>
+                        <td>${t.status}</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
+}
