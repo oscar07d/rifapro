@@ -1,6 +1,6 @@
 // js/main.js
 
-// Importamos la configuración de Firebase y los módulos necesarios
+// Importamos la configuraciÃ³n de Firebase y los mÃ³dulos necesarios
 import { firebaseConfig } from './firebase-config.js';
 import * as Auth from './auth.js';
 import { 
@@ -14,12 +14,12 @@ import {
 	getCollaboratorModal,
 	getStatisticsListView,  
     getStatisticsDetailView,
-    getParticipantsListView   // <-- Aquí lo agregamos
+    getParticipantsListView   // <-- AquÃ­ lo agregamos
 } from './components.js';
 
 document.body.insertAdjacentHTML("beforeend", getCollaboratorModal());
 
-// Inicializamos Firebase con nuestra configuración
+// Inicializamos Firebase con nuestra configuraciÃ³n
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
@@ -54,7 +54,7 @@ async function createTicketsForRaffle(raffleId) {
     }
 
     await batch.commit();
-    console.log("✅ 100 boletos creados para la rifa:", raffleId);
+    console.log("âœ… 100 boletos creados para la rifa:", raffleId);
 }
 
 async function router() {
@@ -75,15 +75,25 @@ async function router() {
         ? getRaffleDetailView
         : (isStatisticsDetail ? getStatisticsDetailView : routes[path]);
 
-    // 👇 Ajuste importante: añadimos isParticipantsList a la condición
     if (isRaffleDetail || isStatisticsDetail || isParticipantsList || view) {
 
         if (isRaffleDetail) {
             // ---------------------- DETALLE DE RIFA ----------------------
-            const raffleId = path.split('/')[2];
+            const raffleId = path.split('/')[2].split('?')[0]; 
+            const urlParams = new URLSearchParams(path.split('?')[1] || '');
+            const ticketNumber = urlParams.get('ticket');
+
+            const user = firebase.auth().currentUser; // ✅ Se declara ANTES de usar
+            console.log("RaffleId limpio:", raffleId, "Ticket:", ticketNumber, "Usuario:", user?.uid);
+
             try {
-				console.log("RaffleId que intento abrir:", raffleId, "Usuario:", user.uid);
-				
+                if (!user) {
+                    appContainer.innerHTML = '<h2>Debes iniciar sesión para administrar rifas.</h2>';
+                    return;
+                }
+
+                console.log("RaffleId que intento abrir:", raffleId, "Usuario:", user.uid);
+
                 const raffleDoc = await db.collection('raffles').doc(raffleId).get();
                 if (!raffleDoc.exists) {
                     appContainer.innerHTML = '<h2>Error: Rifa no encontrada</h2>';
@@ -92,28 +102,34 @@ async function router() {
                 const raffleData = { id: raffleDoc.id, ...raffleDoc.data() };
 
                 appContainer.innerHTML = view(raffleData);
-                const ticketsGrid = document.getElementById('tickets-grid');
-                ticketsGrid.innerHTML = 'Cargando boletos...';
 
-                unsubscribeFromTickets = db.collection('raffles').doc(raffleId).collection('tickets').orderBy('number')
-                    .onSnapshot(snapshot => {
-                        ticketsGrid.innerHTML = ''; 
-                        if (snapshot.empty) {
-                            ticketsGrid.innerHTML = '<p>No se encontraron boletos para esta rifa.</p>';
-                            return;
-                        }
-                        snapshot.forEach(doc => {
-                            const ticketData = doc.data();
-                            const ticketElement = document.createElement('div');
-                            ticketElement.className = `ticket ${ticketData.status}`;
-                            ticketElement.textContent = ticketData.number;
-                            ticketElement.dataset.id = ticketData.number;
-                            ticketsGrid.appendChild(ticketElement);
+                const ticketsGrid = document.getElementById('tickets-grid');
+                if (ticketsGrid) {
+                    ticketsGrid.innerHTML = 'Cargando boletos...';
+
+                    unsubscribeFromTickets = db.collection('raffles')
+                        .doc(raffleId)
+                        .collection('tickets')
+                        .orderBy('number')
+                        .onSnapshot(snapshot => {
+                            ticketsGrid.innerHTML = '';
+                            if (snapshot.empty) {
+                                ticketsGrid.innerHTML = '<p>No se encontraron boletos para esta rifa.</p>';
+                                return;
+                            }
+                            snapshot.forEach(doc => {
+                                const ticketData = doc.data();
+                                const ticketElement = document.createElement('div');
+                                ticketElement.className = `ticket ${ticketData.status}`;
+                                ticketElement.textContent = ticketData.number;
+                                ticketElement.dataset.id = ticketData.number;
+                                ticketsGrid.appendChild(ticketElement);
+                            });
+                        }, error => {
+                            console.error("Error al suscribirse a los boletos:", error);
+                            ticketsGrid.innerHTML = '<p style="color: red; text-align: center;">Error al cargar los boletos. Revisa las reglas de seguridad de Firestore.</p>';
                         });
-                    }, error => {
-                        console.error("Error al suscribirse a los boletos:", error);
-                        ticketsGrid.innerHTML = '<p style="color: red; text-align: center;">Error al cargar los boletos. Revisa las reglas de seguridad de Firestore.</p>';
-                    });
+                }
 
                 const shareStatusBtn = document.getElementById('share-status-btn');
                 if (shareStatusBtn) {
@@ -127,7 +143,10 @@ async function router() {
 
         } else if (isStatisticsDetail) {
             // ---------------------- DETALLE DE ESTADÍSTICAS ----------------------
-            const raffleId = path.split('/')[2];
+            const raffleId = path.split('/')[2].split('?')[0];
+            const urlParams = new URLSearchParams(path.split('?')[1] || '');
+            const ticketNumber = urlParams.get('ticket');
+
             try {
                 const raffleDoc = await db.collection('raffles').doc(raffleId).get();
                 if (!raffleDoc.exists) {
@@ -172,7 +191,7 @@ async function router() {
                 const container = document.getElementById('participants-list-container');
                 const listContainer = document.getElementById('participants-list');
 
-                if (participantsBtn) {
+                if (participantsBtn && container && listContainer) {
                     participantsBtn.addEventListener('click', () => {
                         if (container.style.display === 'none') {
                             container.style.display = 'block';
@@ -188,10 +207,12 @@ async function router() {
                 const statCards = document.querySelectorAll('.stat-card.clickable');
                 statCards.forEach(card => {
                     card.addEventListener('click', () => {
-                        const status = card.dataset.status;
-                        container.style.display = 'block';
-                        participantsBtn.textContent = 'Ocultar Lista de Participantes';
-                        renderParticipantsList(tickets, listContainer, status);
+                        if (container && participantsBtn && listContainer) {
+                            const status = card.dataset.status;
+                            container.style.display = 'block';
+                            participantsBtn.textContent = 'Ocultar Lista de Participantes';
+                            renderParticipantsList(tickets, listContainer, status);
+                        }
                     });
                 });
 
@@ -270,44 +291,49 @@ async function router() {
             }
 
         } else if (path === '/statistics') {
-            // ---------------------- LISTA DE ESTADÍSTICAS ----------------------
-            const user = firebase.auth().currentUser;
-            if (!user) {
-                appContainer.innerHTML = "<h2>Debes iniciar sesión para ver las estadísticas.</h2>";
-                return;
-            }
-            try {
-                const rafflesSnapshot = await db.collection('raffles')
-                    .where('viewableBy', 'array-contains', user.uid)
-                    .orderBy('createdAt', 'desc')
-                    .get();
+			// ---------------------- LISTA DE ESTADÍSTICAS ----------------------
+			const user = firebase.auth().currentUser;
+			if (!user) {
+				appContainer.innerHTML = "<h2>Debes iniciar sesión para ver las estadísticas.</h2>";
+				return;
+			}
+			try {
+				const rafflesSnapshot = await db.collection('raffles')
+					.where('viewableBy', 'array-contains', user.uid)
+					.orderBy('createdAt', 'desc')
+					.get();
 
-                let rafflesHTML = '';
-                if (rafflesSnapshot.empty) {
-                    rafflesHTML = '<h2>No tienes rifas para ver estadísticas.</h2>';
-                } else {
-                    rafflesSnapshot.forEach(doc => {
-                        const raffle = { id: doc.id, ...doc.data() };
-                        rafflesHTML += `
-                            <div class="raffle-card" data-id="${raffle.id}">
-                                <div class="raffle-card-content">
-                                    <h3>${raffle.name || 'Rifa sin nombre'}</h3>
-                                    <p><strong>Premio:</strong> ${raffle.prize || 'No especificado'}</p>
-                                    <a href="#/statistics/${raffle.id}" class="btn btn-primary">Ver Estadísticas</a>
-                                </div>
-                            </div>
-                        `;
-                    });
-                }
+				let rafflesHTML = '';
+				if (rafflesSnapshot.empty) {
+					rafflesHTML = '<h2>No tienes rifas para ver estadísticas.</h2>';
+				} else {
+					rafflesHTML = `<div class="raffles-grid">`;
+					rafflesSnapshot.forEach(doc => {
+						const raffle = { id: doc.id, ...doc.data() };
+						rafflesHTML += `
+							<div class="raffle-card">
+								<h3>${raffle.name || 'Rifa sin nombre'}</h3>
+								<p><strong>Premio:</strong> ${raffle.prize || 'No especificado'}</p>
+								<a href="#/statistics/${raffle.id}" class="btn-stats">Ver Estadísticas</a>
+							</div>
+						`;
+					});
+					rafflesHTML += `</div>`;
+				}
 
-                appContainer.innerHTML = getStatisticsListView(rafflesHTML);
+				appContainer.innerHTML = `
+					<div class="statistics-list">
+						<h2>Estadísticas de Rifas</h2>
+						<p>Selecciona una rifa para ver sus detalles y estadísticas.</p>
+						${rafflesHTML}
+					</div>
+				`;
 
-            } catch (error) {
-                console.error("Error al obtener rifas para estadísticas:", error);
-                appContainer.innerHTML = '<p>Error al cargar las rifas.</p>';
-            }
-
-        } else {
+			} catch (error) {
+				console.error("Error al obtener rifas para estadísticas:", error);
+				appContainer.innerHTML = '<p>Error al cargar las rifas.</p>';
+			}
+		} else {
             // ---------------------- VISTAS PLANAS ----------------------
             const user = firebase.auth().currentUser;
             const userName = user ? user.displayName || user.email : 'Invitado';
@@ -357,7 +383,7 @@ async function handleTicketFormSubmit(e) {
 async function handleClearTicket() {
     const isFormVisible = document.getElementById('ticket-form').style.display !== 'none';
     
-    // Leemos el número desde el título que esté visible actualmente
+    // Leemos el nÃºmero desde el tÃ­tulo que estÃ© visible actualmente
     const ticketNumberId = isFormVisible 
         ? 'modal-ticket-number-form' 
         : 'modal-ticket-number-info';
@@ -365,7 +391,7 @@ async function handleClearTicket() {
     const ticketNumber = document.getElementById(ticketNumberId).textContent.replace('Boleto #', '');
     const raffleId = window.location.hash.slice(1).split('/')[2];
 
-    const isConfirmed = confirm(`¿Estás seguro de que quieres limpiar el boleto #${ticketNumber}? Se borrarán los datos del comprador y quedará disponible.`);
+    const isConfirmed = confirm(`Â¿EstÃ¡s seguro de que quieres limpiar el boleto #${ticketNumber}? Se borrarÃ¡n los datos del comprador y quedarÃ¡ disponible.`);
 
     if (!isConfirmed) {
         return;
@@ -381,7 +407,7 @@ async function handleClearTicket() {
         const ticketRef = db.collection('raffles').doc(raffleId).collection('tickets').doc(ticketNumber);
         await ticketRef.update(dataToClear);
         
-        closeAndResetModal(); // Usamos la función de reseteo
+        closeAndResetModal(); // Usamos la funciÃ³n de reseteo
 
     } catch (error) {
         console.error("Error al limpiar el boleto:", error);
@@ -457,16 +483,16 @@ async function handleShare(type) {
         const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
         const fileName = `boleto-${ticketData.number}-${raffleData.name.replace(/\s+/g, '-')}.png`;
         const file = new File([blob], fileName, { type: 'image/png' });
-        const shareText = `¡Hola ${ticketData.buyerName}! Aquí está tu boleto #${ticketData.number} para la rifa. ¡Mucha suerte!`;
+        const shareText = `Â¡Hola ${ticketData.buyerName}! AquÃ­ estÃ¡ tu boleto #${ticketData.number} para la rifa. Â¡Mucha suerte!`;
 
         if (type === 'whatsapp') {
             const viewContainer = document.getElementById('modal-view-container');
             const imageUrl = URL.createObjectURL(blob);
             viewContainer.innerHTML = `
                 <div class="ticket-preview-wrapper">
-                    <h4>¡Boleto listo para WhatsApp!</h4>
-                    <p>1. Mantén presionada la imagen y elige "Copiar imagen".</p>
-                    <p>2. Haz clic en el botón para abrir WhatsApp y pega la imagen en el chat.</p>
+                    <h4>Â¡Boleto listo para WhatsApp!</h4>
+                    <p>1. MantÃ©n presionada la imagen y elige "Copiar imagen".</p>
+                    <p>2. Haz clic en el botÃ³n para abrir WhatsApp y pega la imagen en el chat.</p>
                     <a href="https://wa.me/?text=${encodeURIComponent(shareText)}" target="_blank" class="btn btn-whatsapp" style="margin-top:1rem; width: auto;">Abrir WhatsApp</a>
                     <img src="${imageUrl}" alt="Boleto de Rifa">
                 </div>
@@ -492,7 +518,7 @@ async function handleShare(type) {
     }
 }
 
-// --- MANEJO DE ESTADO DE AUTENTICACIÓN ---
+// --- MANEJO DE ESTADO DE AUTENTICACIÃ“N ---
 
 Auth.onAuthStateChanged(user => {
     if (user) {
@@ -510,12 +536,12 @@ Auth.onAuthStateChanged(user => {
 });
 
 function updateUIForLoggedInUser(user) {
-    mainNav.style.display = 'block'; // Muestra el contenedor de navegación
+    mainNav.style.display = 'block'; // Muestra el contenedor de navegaciÃ³n
     
-    // ESTA LÍNEA ES LA QUE "RELLENA" EL HEADER
+    // ESTA LÃNEA ES LA QUE "RELLENA" EL HEADER
     userInfoContainer.innerHTML = `
         <span>${user.displayName || user.email}</span>
-        <button id="logout-btn" class="btn">Cerrar Sesión</button>
+        <button id="logout-btn" class="btn">Cerrar SesiÃ³n</button>
     `;
     document.getElementById('logout-btn').addEventListener('click', () => Auth.logout());
 }
@@ -531,62 +557,34 @@ function attachEventListeners(path) {
     const isRaffleDetail = path.startsWith('/raffle/');
     const isStatisticsDetail = path.startsWith('/statistics/');
     const isParticipantsList = path.startsWith('/participants/');
-	const searchInput = document.getElementById('search-participant');
-	const statusFilter = document.getElementById('status-filter');
-	// 👉 Filtros de participantes
-	  const participantCards = document.querySelectorAll('.participant-card');
 
-	  if (searchInput && statusFilter) {
-		const filterParticipants = () => {
-		  const searchValue = searchInput.value.toLowerCase();
-		  const statusValue = statusFilter.value;
+    // ---------------------- FILTROS PARTICIPANTES ----------------------
+    const searchInput = document.getElementById('search-participant');
+    const statusFilter = document.getElementById('status-filter');
+    const participantCards = document.querySelectorAll('.participant-card');
 
-		  participantCards.forEach(card => {
-			const name = card.querySelector('p:nth-child(2)')?.textContent.toLowerCase() || '';
-			const phone = card.querySelector('p:nth-child(3)')?.textContent.toLowerCase() || '';
-			const status = card.querySelector('p:nth-child(4)')?.textContent.toLowerCase() || '';
+    if (searchInput && statusFilter && participantCards.length > 0) {
+        const filterParticipants = () => {
+            const searchValue = searchInput.value.toLowerCase();
+            const statusValue = statusFilter.value;
 
-			const matchesSearch = name.includes(searchValue) || phone.includes(searchValue);
-			const matchesStatus = (statusValue === 'all') || status.includes(statusValue);
+            participantCards.forEach(card => {
+                const name = card.querySelector('p:nth-child(2)')?.textContent.toLowerCase() || '';
+                const phone = card.querySelector('p:nth-child(3)')?.textContent.toLowerCase() || '';
+                const status = card.querySelector('p:nth-child(4)')?.textContent.toLowerCase() || '';
 
-			card.style.display = (matchesSearch && matchesStatus) ? 'flex' : 'none';
-		  });
-		};
+                const matchesSearch = name.includes(searchValue) || phone.includes(searchValue);
+                const matchesStatus = (statusValue === 'all') || status.includes(statusValue);
 
-		searchInput.addEventListener('input', filterParticipants);
-		statusFilter.addEventListener('change', filterParticipants);
-	  }
-	
-	if (searchInput && statusFilter) {
-		const applyFilters = () => {
-			const term = searchInput.value.toLowerCase();
-			const status = statusFilter.value;
+                card.style.display = (matchesSearch && matchesStatus) ? 'flex' : 'none';
+            });
+        };
 
-			const filtered = tickets.filter(t => {
-				const matchesTerm = 
-					(t.name || t.buyerName || '').toLowerCase().includes(term) || 
-					(t.phone || t.buyerPhone || '').includes(term);
-				const matchesStatus = status === 'all' || t.status === status;
-				return matchesTerm && matchesStatus;
-			});
+        searchInput.addEventListener('input', filterParticipants);
+        statusFilter.addEventListener('change', filterParticipants);
+    }
 
-			const grid = document.querySelector('.participants-grid');
-			grid.innerHTML = filtered.map(t => `
-				<div class="participant-card" data-ticket="${t.number}" data-raffle="${raffle.id}">
-					<div class="card-content">
-						<h3>Boleto #${t.number}</h3>
-						<p><strong>Nombre:</strong> ${t.name || t.buyerName || 'N/A'}</p>
-						<p><strong>Teléfono:</strong> ${t.phone || t.buyerPhone || 'N/A'}</p>
-						<p><strong>Estado:</strong> ${t.status}</p>
-					</div>
-				</div>
-			`).join('');
-		};
-
-		searchInput.addEventListener('input', applyFilters);
-		statusFilter.addEventListener('change', applyFilters);
-	}
-
+    // ---------------------- LOGIN ----------------------
     if (path === '/login') {
         const authForm = document.getElementById('auth-form');
         const googleLoginBtn = document.getElementById('google-login-btn');
@@ -608,16 +606,21 @@ function attachEventListeners(path) {
 
         if (googleLoginBtn) googleLoginBtn.addEventListener('click', Auth.loginWithGoogle);
 
-        const toggleAuthMode = e => {
-            e.preventDefault();
-            isLogin = !isLogin;
-            document.getElementById('auth-title').innerText = isLogin ? 'Iniciar Sesión' : 'Registrarse';
-            document.getElementById('auth-action-btn').innerText = isLogin ? 'Iniciar Sesión' : 'Crear Cuenta';
-            document.getElementById('auth-toggle-text').innerHTML = isLogin ? '¿No tienes cuenta? <a href="#" id="auth-toggle-link">Regístrate</a>' : '¿Ya tienes cuenta? <a href="#" id="auth-toggle-link">Inicia Sesión</a>';
-            document.getElementById('auth-toggle-link').addEventListener('click', toggleAuthMode);
-        };
-        if (toggleLink) toggleLink.addEventListener('click', toggleAuthMode);
+        if (toggleLink) {
+            const toggleAuthMode = e => {
+                e.preventDefault();
+                isLogin = !isLogin;
+                document.getElementById('auth-title').innerText = isLogin ? 'Iniciar Sesión' : 'Registrarse';
+                document.getElementById('auth-action-btn').innerText = isLogin ? 'Iniciar Sesión' : 'Crear Cuenta';
+                document.getElementById('auth-toggle-text').innerHTML = isLogin 
+                    ? '¿No tienes cuenta? <a href="#" id="auth-toggle-link">Regístrate</a>' 
+                    : '¿Ya tienes cuenta? <a href="#" id="auth-toggle-link">Inicia Sesión</a>';
+                document.getElementById('auth-toggle-link').addEventListener('click', toggleAuthMode);
+            };
+            toggleLink.addEventListener('click', toggleAuthMode);
+        }
 
+    // ---------------------- CREAR RAFFLE ----------------------
     } else if (path === '/create') {
         const createRaffleForm = document.getElementById('create-raffle-form');
         if (createRaffleForm) createRaffleForm.addEventListener('submit', handleCreateRaffle);
@@ -639,16 +642,18 @@ function attachEventListeners(path) {
 
                 const selectedOptions = Array.from(document.querySelectorAll('.payment-option.selected')).map(el => el.dataset.value);
 
-                nequiDetails.style.display = selectedOptions.includes('nequi') ? 'block' : 'none';
-                daviplataDetails.style.display = selectedOptions.includes('daviplata') ? 'block' : 'none';
-                brebDetails.style.display = selectedOptions.includes('bre-b') ? 'block' : 'none';
+                if (nequiDetails) nequiDetails.style.display = selectedOptions.includes('nequi') ? 'block' : 'none';
+                if (daviplataDetails) daviplataDetails.style.display = selectedOptions.includes('daviplata') ? 'block' : 'none';
+                if (brebDetails) brebDetails.style.display = selectedOptions.includes('bre-b') ? 'block' : 'none';
 
                 const selectedBanks = selectedOptions.filter(val => traditionalBanks.includes(val));
-                if (selectedBanks.length > 0) {
-                    bankDetailsWrapper.style.display = 'block';
-                    document.getElementById('bank-list').textContent = selectedBanks.map(b => paymentMethods.find(p => p.value === b).name).join(', ');
-                } else {
-                    bankDetailsWrapper.style.display = 'none';
+                if (bankDetailsWrapper) {
+                    if (selectedBanks.length > 0) {
+                        bankDetailsWrapper.style.display = 'block';
+                        document.getElementById('bank-list').textContent = selectedBanks.join(', ');
+                    } else {
+                        bankDetailsWrapper.style.display = 'none';
+                    }
                 }
             });
         }
@@ -663,10 +668,11 @@ function attachEventListeners(path) {
             });
         }
 
+    // ---------------------- DETALLE DE RAFFLE ----------------------
     } else if (isRaffleDetail) {
         const ticketsGrid = document.getElementById('tickets-grid');
         const modal = document.getElementById('ticket-modal');
-        const closeModalBtn = modal.querySelector('.close-modal');
+        const closeModalBtn = modal ? modal.querySelector('.close-modal') : null;
 
         if (ticketsGrid) {
             ticketsGrid.addEventListener('click', (e) => {
@@ -676,22 +682,21 @@ function attachEventListeners(path) {
             });
         }
 
-        if (modal) {
+        if (modal && closeModalBtn) {
             closeModalBtn.addEventListener('click', () => closeAndResetModal());
             modal.addEventListener('click', (e) => {
-                if (e.target.id === 'ticket-modal') {
-                    closeAndResetModal();
-                }
+                if (e.target.id === 'ticket-modal') closeAndResetModal();
             });
         }
 
+    // ---------------------- ESTADÍSTICAS ----------------------
     } else if (isStatisticsDetail) {
         console.log("👉 Estamos en la vista de estadísticas");
         const participantsBtn = document.getElementById('show-participants-list-btn');
         const participantsContainer = document.getElementById('participants-list-container');
         const statCards = document.querySelectorAll('.stat-card.clickable');
 
-        if (participantsBtn) {
+        if (participantsBtn && participantsContainer) {
             participantsBtn.addEventListener('click', () => {
                 const isHidden = participantsContainer.style.display === 'none';
                 participantsContainer.style.display = isHidden ? 'block' : 'none';
@@ -701,14 +706,17 @@ function attachEventListeners(path) {
 
         statCards.forEach(card => {
             card.addEventListener('click', () => {
-                const status = card.dataset.status;
-                participantsContainer.style.display = 'block';
-                participantsBtn.textContent = 'Ocultar Lista';
-                document.getElementById('status-filter').value = status;
-                alert(`Filtro aplicado para: ${status}`);
+                if (participantsContainer && participantsBtn) {
+                    const status = card.dataset.status;
+                    participantsContainer.style.display = 'block';
+                    participantsBtn.textContent = 'Ocultar Lista';
+                    const filterEl = document.getElementById('status-filter');
+                    if (filterEl) filterEl.value = status;
+                }
             });
         });
 
+    // ---------------------- PARTICIPANTES ----------------------
     } else if (isParticipantsList) {
         console.log("👉 Estamos en la vista de participantes");
         document.querySelectorAll('.participant-card').forEach(card => {
@@ -716,9 +724,11 @@ function attachEventListeners(path) {
                 const ticketNumber = card.dataset.ticket;
                 const raffleId = card.dataset.raffle;
                 window.location.hash = `/raffle/${raffleId}?ticket=${ticketNumber}`;
+
             });
         });
 
+    // ---------------------- EXPLORAR ----------------------
     } else if (path === '/explore') {
         const rafflesList = document.getElementById('raffles-list');
         if (rafflesList) {
@@ -728,20 +738,17 @@ function attachEventListeners(path) {
 
                 if (deleteButton) {
                     const card = deleteButton.closest('.raffle-card');
-                    const raffleId = card.dataset.id;
-                    handleDeleteRaffle(raffleId, card);
+                    if (card) handleDeleteRaffle(card.dataset.id, card);
                 }
 
                 if (collaborateButton) {
                     const card = collaborateButton.closest('.raffle-card');
-                    const raffleId = card.dataset.id;
-                    openCollaboratorModal(raffleId);
+                    if (card) openCollaboratorModal(card.dataset.id);
                 }
             });
         }
     }
 }
-
 
 async function openTicketModal(ticketNumber) {
     const modal = document.getElementById('ticket-modal');
@@ -761,17 +768,17 @@ async function openTicketModal(ticketNumber) {
         const doc = await ticketRef.get();
 
         if (!doc.exists) {
-            alert("Error: No se encontró el boleto.");
+            alert("Error: No se encontrÃ³ el boleto.");
             return;
         }
 
         const data = doc.data();
 
-        // --- Actualizar títulos ---
+        // --- Actualizar tÃ­tulos ---
         if (modalTitleForm) modalTitleForm.textContent = `Boleto #${data.number}`;
         if (modalTitleInfo) modalTitleInfo.textContent = `Boleto #${data.number}`;
 
-        // --- Llenar siempre el form (aunque esté oculto) ---
+        // --- Llenar siempre el form (aunque estÃ© oculto) ---
         const buyerNameInput = formView?.querySelector('#buyer-name');
         const buyerPhoneInput = formView?.querySelector('#buyer-phone');
         const paymentStatusInput = formView?.querySelector('#payment-status');
@@ -832,7 +839,7 @@ async function openTicketModal(ticketNumber) {
             };
         }
 
-        // --- Cancelar edición ---
+        // --- Cancelar ediciÃ³n ---
         if (cancelEditBtn) {
             cancelEditBtn.onclick = () => {
                 formView.style.display = 'none';
@@ -879,7 +886,7 @@ async function openTicketModal(ticketNumber) {
 			whatsappBtnForm.onclick = () => handleShare("whatsapp");
 		}
 
-        // --- Compartir genérico (INFO) ---
+        // --- Compartir genÃ©rico (INFO) ---
         if (shareBtnInfo) {
 			shareBtnInfo.onclick = () => handleShare("generic");
 		}
@@ -899,18 +906,18 @@ async function handleCreateRaffle(e) {
     e.preventDefault();
     const user = firebase.auth().currentUser;
     if (!user) {
-        alert('Debes iniciar sesión para crear una rifa.');
+        alert('Debes iniciar sesiÃ³n para crear una rifa.');
         return;
     }
 
     const selectedOptions = document.querySelectorAll('.payment-option.selected');
     if (selectedOptions.length === 0) {
-        alert('Por favor, selecciona al menos un método de pago.');
+        alert('Por favor, selecciona al menos un mÃ©todo de pago.');
         return;
     }
 
     const paymentMethodsData = [];
-    // Lista de bancos que usan la plantilla genérica de cuenta
+    // Lista de bancos que usan la plantilla genÃ©rica de cuenta
     const traditionalBanks = ['av-villas', 'bancolombia', 'bbva', 'bogota', 'caja-social', 'davivienda', 'falabella', 'finandina', 'itau', 'lulo', 'pibank', 'powwi', 'uala'];
     
     // Usamos un bucle para poder hacer validaciones y detener el proceso si algo falla
@@ -924,14 +931,14 @@ async function handleCreateRaffle(e) {
             methodInfo.phoneNumber = document.getElementById('daviplata-phone-number').value;
         } else if (methodValue === 'bre-b') {
             const brebKey = document.getElementById('bre-b-key').value;
-            // Validación específica para Bre-B
+            // ValidaciÃ³n especÃ­fica para Bre-B
             if (!brebKey.startsWith('@')) {
-                alert('La llave de Bre-B debe empezar con "@". Por favor, corrígela.');
-                return; // Detenemos el envío del formulario
+                alert('La llave de Bre-B debe empezar con "@". Por favor, corrÃ­gela.');
+                return; // Detenemos el envÃ­o del formulario
             }
             methodInfo.key = brebKey;
         } else if (traditionalBanks.includes(methodValue)) {
-            // Todos los bancos tradicionales comparten los mismos datos del formulario genérico
+            // Todos los bancos tradicionales comparten los mismos datos del formulario genÃ©rico
             methodInfo.accountType = document.getElementById('bank-account-type').value;
             methodInfo.accountNumber = document.getElementById('bank-account-number').value;
         }
@@ -968,7 +975,7 @@ async function handleCreateRaffle(e) {
             });
         }
         await batch.commit();
-        alert('¡Rifa creada con éxito!');
+        alert('Â¡Rifa creada con Ã©xito!');
         window.location.hash = `#/raffle/${raffleRef.id}`;
     } catch (error) {
         console.error("Error al crear la rifa: ", error);
@@ -976,28 +983,28 @@ async function handleCreateRaffle(e) {
     }
 }
 
-// --- INICIALIZACIÓN ---
+// --- INICIALIZACIÃ“N ---
 window.addEventListener('hashchange', router);
 
 window.addEventListener('load', router);
 
 async function handleDeleteRaffle(raffleId, cardElement) {
     const raffleName = cardElement.querySelector('h3').textContent;
-    const isConfirmed = confirm(`¿Estás seguro de que quieres eliminar la rifa "${raffleName}"?\n\n¡Esta acción es irreversible y borrará todos los boletos asociados!`);
+    const isConfirmed = confirm(`Â¿EstÃ¡s seguro de que quieres eliminar la rifa "${raffleName}"?\n\nÂ¡Esta acciÃ³n es irreversible y borrarÃ¡ todos los boletos asociados!`);
 
     if (!isConfirmed) {
         return;
     }
 
     try {
-        // Paso 1: Borrar todos los boletos de la subcolección
+        // Paso 1: Borrar todos los boletos de la subcolecciÃ³n
         const ticketsSnapshot = await db.collection('raffles').doc(raffleId).collection('tickets').get();
         const batch = db.batch();
         ticketsSnapshot.forEach(doc => {
             batch.delete(doc.ref);
         });
         await batch.commit();
-        console.log('Todos los boletos de la subcolección han sido eliminados.');
+        console.log('Todos los boletos de la subcolecciÃ³n han sido eliminados.');
 
         // Paso 2: Borrar el documento principal de la rifa
         await db.collection('raffles').doc(raffleId).delete();
@@ -1008,7 +1015,7 @@ async function handleDeleteRaffle(raffleId, cardElement) {
         cardElement.style.opacity = '0';
         setTimeout(() => cardElement.remove(), 500);
 
-        alert(`La rifa "${raffleName}" ha sido eliminada con éxito.`);
+        alert(`La rifa "${raffleName}" ha sido eliminada con Ã©xito.`);
 
     } catch (error) {
         console.error("Error al eliminar la rifa:", error);
@@ -1040,7 +1047,7 @@ function closeAndResetModal() {
     if (paymentStatus) paymentStatus.value = 'pending';
 }
 
-// Dejaremos esta función preparada para el siguiente paso
+// Dejaremos esta funciÃ³n preparada para el siguiente paso
 
 function openSimpleStatusModal(raffleData) {
     const modal = document.getElementById('status-modal');
@@ -1076,7 +1083,7 @@ async function generateFinalStatusImage(raffleData, settings) {
     shareBtn.disabled = true;
 
     try {
-        // 1. Crear el lienzo HTML dinámico
+        // 1. Crear el lienzo HTML dinÃ¡mico
         const statusTemplate = document.createElement('div');
         statusTemplate.id = 'status-template-generator';
         statusTemplate.style.cssText = `
@@ -1089,7 +1096,7 @@ async function generateFinalStatusImage(raffleData, settings) {
             background:linear-gradient(160deg,#4A00E0 0%,#8E2DE2 100%);
         `;
 
-        // 2. Título
+        // 2. TÃ­tulo
         let titleHTML = '';
         if (settings.titleType === 'prize') {
             titleHTML = settings.prizePrefix.replace(
@@ -1124,7 +1131,7 @@ async function generateFinalStatusImage(raffleData, settings) {
                 ">${content}</div>`;
         });
 
-        // 4. Métodos de pago
+        // 4. MÃ©todos de pago
         let paymentHTML = raffleData.paymentMethods.map(pm => {
 			const methodDetails = paymentMethods.find(m => m.value === pm.method);
 			if (!methodDetails) return '';
@@ -1155,7 +1162,7 @@ async function generateFinalStatusImage(raffleData, settings) {
         statusTemplate.innerHTML = `
             <div style="flex:1;display:flex;flex-direction:column;">
                 <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:40px;">
-                    <!-- LOGO SVG más grande -->
+                    <!-- LOGO SVG mÃ¡s grande -->
                     <svg xmlns="http://www.w3.org/2000/svg"
 						 viewBox="0 0 1010.84 231.45"
 						 preserveAspectRatio="xMidYMid meet"
@@ -1203,7 +1210,7 @@ async function generateFinalStatusImage(raffleData, settings) {
 
                 <div style="flex-grow:1;display:flex;flex-direction:column;justify-content:center;padding:40px 0;">
                     <h3 style="text-align:center;margin:0 0 40px 0;font-weight:600;font-size:2.5rem;color:white;">
-                        ¡Números disponibles!
+                        Â¡NÃºmeros disponibles!
                     </h3>
                     <div style="display:grid;grid-template-columns:repeat(10,1fr);gap:15px;">
                         ${ticketsHTML}
@@ -1297,7 +1304,7 @@ function openCollaboratorModal(raffleId) {
     if (!modal) return;
 
     const form = document.getElementById('collaborator-form');
-    // CORRECCIÓN: Quitamos el punto antes de la clase
+    // CORRECCIÃ“N: Quitamos el punto antes de la clase
     const closeModalBtn = modal.querySelector('close-collaborator-modal');
 
     form.querySelector('#collaborator-email').value = '';
@@ -1316,7 +1323,7 @@ async function handleCollaboratorInvite(e, raffleId) {
     const currentUser = firebase.auth().currentUser;
 
     if (!email) {
-        alert('Por favor, ingresa un correo electrónico.');
+        alert('Por favor, ingresa un correo electrÃ³nico.');
         return;
     }
 
@@ -1326,32 +1333,32 @@ async function handleCollaboratorInvite(e, raffleId) {
         const snapshot = await usersRef.get();
 
         if (snapshot.empty) {
-            alert('Error: No se encontró ningún usuario con ese correo electrónico en RifaPro.');
+            alert('Error: No se encontrÃ³ ningÃºn usuario con ese correo electrÃ³nico en RifaPro.');
             return;
         }
 
         const collaborator = snapshot.docs[0];
         const collaboratorId = collaborator.id;
         
-        // 2. Evita que el dueño se añada a sí mismo
+        // 2. Evita que el dueÃ±o se aÃ±ada a sÃ­ mismo
         if (collaboratorId === currentUser.uid) {
-            alert('No puedes añadirte a ti mismo como colaborador.');
+            alert('No puedes aÃ±adirte a ti mismo como colaborador.');
             return;
         }
         
-        // 3. Añade el ID del colaborador a las listas de la rifa
+        // 3. AÃ±ade el ID del colaborador a las listas de la rifa
         const raffleRef = db.collection('raffles').doc(raffleId);
         await raffleRef.update({
             collaborators: firebase.firestore.FieldValue.arrayUnion(collaboratorId),
             viewableBy: firebase.firestore.FieldValue.arrayUnion(collaboratorId)
         });
 
-        alert(`¡${email} ha sido añadido como colaborador!`);
+        alert(`Â¡${email} ha sido aÃ±adido como colaborador!`);
         document.getElementById('collaborator-modal').style.display = 'none';
 
     } catch (error) {
-        console.error("Error al añadir colaborador: ", error);
-        alert('Hubo un error al intentar añadir al colaborador.');
+        console.error("Error al aÃ±adir colaborador: ", error);
+        alert('Hubo un error al intentar aÃ±adir al colaborador.');
     }
 }
 
@@ -1377,7 +1384,7 @@ async function loadParticipantsList(raffleId, filterStatus = "all", searchQuery 
         let participants = [];
         ticketsSnap.forEach(doc => {
             const data = doc.data();
-            if (!data.buyerName) return; // ignorar boletos vacíos
+            if (!data.buyerName) return; // ignorar boletos vacÃ­os
 
             participants.push({
                 number: data.number,
@@ -1392,7 +1399,7 @@ async function loadParticipantsList(raffleId, filterStatus = "all", searchQuery 
             participants = participants.filter(p => p.status === filterStatus);
         }
 
-        // Filtro por búsqueda
+        // Filtro por bÃºsqueda
         if (searchQuery) {
             const queryLower = searchQuery.toLowerCase();
             participants = participants.filter(p =>
@@ -1423,7 +1430,7 @@ function setupParticipantsEvents(raffleId) {
     const searchInput = document.getElementById("participant-search");
     const filterSelect = document.getElementById("status-filter");
 
-    // Botón "Ver Lista de Participantes"
+    // BotÃ³n "Ver Lista de Participantes"
     const showBtn = document.getElementById("show-participants-list-btn");
     if (showBtn) {
         showBtn.addEventListener("click", () => {
@@ -1439,7 +1446,7 @@ function setupParticipantsEvents(raffleId) {
         });
     }
 
-    // Búsqueda
+    // BÃºsqueda
     if (searchInput) {
         searchInput.addEventListener("input", () => {
             loadParticipantsList(raffleId, filterSelect.value, searchInput.value);
@@ -1461,7 +1468,7 @@ function setupParticipantsEvents(raffleId) {
 function openStatisticsView(raffle) {
     const main = document.getElementById("main-content"); // o el contenedor principal que uses
     main.innerHTML = getStatisticsDetailView(raffle);
-    setupStatisticsEvents(raffle); // aquí enganchamos los botones y filtros
+    setupStatisticsEvents(raffle); // aquÃ­ enganchamos los botones y filtros
 }
 
 function renderParticipantsList(tickets, container, status) {
@@ -1481,7 +1488,7 @@ function renderParticipantsList(tickets, container, status) {
                 <tr>
                     <th>Boleto</th>
                     <th>Nombre</th>
-                    <th>Teléfono</th>
+                    <th>TelÃ©fono</th>
                     <th>Estado</th>
                 </tr>
             </thead>
