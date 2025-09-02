@@ -541,7 +541,7 @@ function updateUIForLoggedInUser(user) {
     // ESTA LÃNEA ES LA QUE "RELLENA" EL HEADER
     userInfoContainer.innerHTML = `
         <span>${user.displayName || user.email}</span>
-        <button id="logout-btn" class="btn">Cerrar SesiÃ³n</button>
+        <button id="logout-btn" class="btn">Cerrar Sesión</button>
     `;
     document.getElementById('logout-btn').addEventListener('click', () => Auth.logout());
 }
@@ -1505,3 +1505,4 @@ function renderParticipantsList(tickets, container, status) {
         </table>
     `;
 }
+
