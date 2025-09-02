@@ -726,74 +726,132 @@ input[type="color"]::-moz-color-swatch {
     padding: 0;
 }
 
-/* --- ESTILOS PARA LA PÁGINA DE ESTADÍSTICAS --- */
-
-.stats-raffle-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 1.5rem;
-    margin-top: 1.5rem;
-}
+/* === NUEVO ESTILO PARA LA PÁGINA DE ESTADÍSTICAS === */
 
 .statistics-container {
-    background-color: var(--card-bg-color);
-    padding: 2rem;
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow-sm);
+    background: #fff;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    max-width: 1100px;
+    margin: 20px auto;
 }
 
+/* ====== ENCABEZADO ====== */
 .stats-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 1.5rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
 }
 
-.stats-group {
-    margin-bottom: 2rem;
+.stats-header h2 {
+    font-size: 1.6rem;
+    color: #4a148c;
+    margin: 0;
 }
 
+.header-actions .btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-weight: 600;
+    background: transparent;
+    border: 2px solid #6a11cb;
+    color: #6a11cb;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.header-actions .btn:hover {
+    background: #6a11cb;
+    color: #fff;
+}
+
+.header-actions svg {
+    vertical-align: middle;
+}
+
+/* ====== GRID DE ESTADÍSTICAS ====== */
 .stats-cards-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin-top: 15px;
 }
 
+/* ====== TARJETAS ====== */
 .stat-card {
-    background-color: #f8f9fa;
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
-    padding: 1.5rem;
+    background: #fff;
+    border-radius: 14px;
+    padding: 20px;
     text-align: center;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.06);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .stat-card.clickable {
     cursor: pointer;
-    transition: all 0.2s ease;
-}
-.stat-card.clickable:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-md);
-    border-color: var(--primary-color);
 }
 
-.stat-card h4 {
-    margin: 0.5rem 0;
-    font-size: 1rem;
-    color: var(--text-light-color);
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
 }
 
-.stat-value {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--primary-color);
+/* ====== CONTENIDO DE LAS CARDS ====== */
+.stat-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 8px;
 }
 
 .stat-icon svg {
-    color: var(--primary-color);
-    margin-bottom: 0.5rem;
+    width: 38px;
+    height: 38px;
+}
+
+.stat-card h4 {
+    font-size: 1rem;
+    margin: 8px 0 5px;
+    color: #333;
+    font-weight: 600;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #6a11cb;
+}
+
+.participants-btn {
+  color: #6C2BD9; /* color inicial del texto + icono */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.participants-btn svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor; /* si el svg usa stroke */
+  fill: currentColor;   /* si el svg usa fill */
+  transition: all 0.3s ease;
+}
+
+.participants-btn:hover {
+  background: #6C2BD9;
+  color: #fff; /* texto + icono pasan a blanco */
+}
+
+.participants-btn:hover svg {
+  stroke: #fff;
+  fill: #fff;  /* 👈 aquí forzamos a que el ícono se ponga blanco */
 }
 
 .filters {
@@ -816,61 +874,181 @@ input[type="color"]::-moz-color-swatch {
 /* --- ESTILOS PARA LA PÁGINA DE Ver Lista de Participantes --- */
 
 .participants-grid {
+  margin-top: 20px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 15px;
 }
 
+/* Tarjeta base */
 .participant-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 20px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
   background: #fff;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  transition: background 0.2s ease;
-  cursor: pointer;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px 20px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
 }
-
 .participant-card:hover {
-  background: #f9f9ff;
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
-.participant-card h3 {
-  margin: 0;
+/* Contenido interno */
+.card-content h3 {
+  display: flex;
+  align-items: center;
   font-size: 16px;
-  color: #6c5ce7;
-  display: flex;
-  align-items: center;
-  gap: 5px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #6C2BD9;
 }
 
-.participant-card p {
-  margin: 0 12px;
+.card-content h3 svg {
+  margin-right: 8px;
+}
+
+/* Texto */
+.card-content p {
+  margin: 4px 0;
   font-size: 14px;
+  color: #374151;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
 }
 
-.card-content {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
+/* Resaltar los labels */
+.card-content p strong {
+  color: #111827;
+  min-width: 100px;
 }
+
+/* Estado con badge */
+.card-content p:last-child strong {
+  margin-right: 6px;
+}
+
+.card-content p:last-child {
+  font-weight: 600;
+}
+
+.card-content p:last-child {
+  background: #f3f4f6;
+  padding: 6px 10px;
+  border-radius: 50px;
+  display: inline-block;
+  width: fit-content;
+  margin-top: 8px;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 50px;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.status-paid {
+  background: #d1fae5; /* verde suave */
+  color: #065f46;
+}
+
+.status-partial {
+  background: #fef3c7; /* amarillo */
+  color: #92400e;
+}
+
+.status-pending {
+  background: #fee2e2; /* rojo claro */
+  color: #991b1b;
+}
+
+.status-available {
+  background: #e0e7ff; /* azul suave */
+  color: #3730a3;
+}
+
+
+
+
+.raffles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.raffle-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    text-align: center;
+}
+
+.raffle-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+}
+
+.raffle-card h3 {
+    font-size: 1.3rem;
+    color: #4a148c;
+    margin-bottom: 10px;
+}
+
+.raffle-card p {
+    margin-bottom: 15px;
+    color: #555;
+}
+
+.btn-stats {
+    display: inline-block;
+    padding: 10px 16px;
+    border-radius: 8px;
+    background: linear-gradient(90deg, #6a11cb, #2575fc);
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    transition: opacity 0.2s ease;
+}
+
+.btn-stats:hover {
+    opacity: 0.85;
+}
+
 
 
 /* 8. Diseño Responsivo */
 @media (max-width: 600px) {
-  .participant-card {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
-  }
-  .card-content {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+	.participant-card .card-content p {
+    	justify-content: space-between;
+    	align-items: center;
+    	margin: 4px 0;
+    	font-size: 0.9rem;
+  	}
+	
+	.card-content p {
+		
+    	align-items: right;
+    	margin: 4px 0;
+    	font-size: 0.9rem;
+  	}
+
+  	.participant-card .card-content p strong {
+    	margin-right: 8px;
+    	white-space: nowrap;
+  	}	
+	.stats-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
 }
 
 @media (max-width: 768px) {
@@ -939,6 +1117,30 @@ input[type="color"]::-moz-color-swatch {
 	.participant-card {
         flex-direction: column;
         align-items: flex-start;
+    }
+	.stats-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+	.stats-header h2 {
+        font-size: 1.3rem;
+    }
+    .stats-cards-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-cards-grid {
+        grid-template-columns: 1fr;
+    }
+    .stat-card {
+        padding: 1rem;
+    }
+    .stat-value {
+        font-size: 1.5rem;
     }
 }
 
