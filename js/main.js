@@ -1210,7 +1210,7 @@ async function generateFinalStatusImage(raffleData, settings) {
 
                 <div style="flex-grow:1;display:flex;flex-direction:column;justify-content:center;padding:40px 0;">
                     <h3 style="text-align:center;margin:0 0 40px 0;font-weight:600;font-size:2.5rem;color:white;">
-                        Â¡NÃºmeros disponibles!
+                        Números disponibles!
                     </h3>
                     <div style="display:grid;grid-template-columns:repeat(10,1fr);gap:15px;">
                         ${ticketsHTML}
@@ -1505,4 +1505,5 @@ function renderParticipantsList(tickets, container, status) {
         </table>
     `;
 }
+
 
