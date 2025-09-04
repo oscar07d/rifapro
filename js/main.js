@@ -3,7 +3,7 @@
 // Importamos la configuraciÃ³n de Firebase y los mÃ³dulos necesarios
 import { firebaseConfig } from './firebase-config.js';
 import * as Auth from './auth.js';
-import { 
+import {
     paymentMethods,
     getAuthView, 
     getHomeView, 
@@ -14,7 +14,7 @@ import {
 	getCollaboratorModal,
 	getStatisticsListView,  
     getStatisticsDetailView,
-    getParticipantsListView   // <-- AquÃ­ lo agregamos
+    getParticipantsListView   // <-- Aquí lo agregamos
 } from './components.js';
 
 document.body.insertAdjacentHTML("beforeend", getCollaboratorModal());
@@ -83,7 +83,7 @@ async function router() {
             const urlParams = new URLSearchParams(path.split('?')[1] || '');
             const ticketNumber = urlParams.get('ticket');
 
-            const user = firebase.auth().currentUser; // ✅ Se declara ANTES de usar
+            const user = firebase.auth().currentUser; // ? Se declara ANTES de usar
             console.log("RaffleId limpio:", raffleId, "Ticket:", ticketNumber, "Usuario:", user?.uid);
 
             try {
@@ -483,7 +483,7 @@ async function handleShare(type) {
         const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
         const fileName = `boleto-${ticketData.number}-${raffleData.name.replace(/\s+/g, '-')}.png`;
         const file = new File([blob], fileName, { type: 'image/png' });
-        const shareText = `Â¡Hola ${ticketData.buyerName}! AquÃ­ estÃ¡ tu boleto #${ticketData.number} para la rifa. Â¡Mucha suerte!`;
+        const shareText = `Â¡Hola ${ticketData.buyerName}! Aquí estÃ¡ tu boleto #${ticketData.number} para la rifa. Â¡Mucha suerte!`;
 
         if (type === 'whatsapp') {
             const viewContainer = document.getElementById('modal-view-container');
@@ -491,7 +491,7 @@ async function handleShare(type) {
             viewContainer.innerHTML = `
                 <div class="ticket-preview-wrapper">
                     <h4>Â¡Boleto listo para WhatsApp!</h4>
-                    <p>1. MantÃ©n presionada la imagen y elige "Copiar imagen".</p>
+                    <p>1. Mantén presionada la imagen y elige "Copiar imagen".</p>
                     <p>2. Haz clic en el botÃ³n para abrir WhatsApp y pega la imagen en el chat.</p>
                     <a href="https://wa.me/?text=${encodeURIComponent(shareText)}" target="_blank" class="btn btn-whatsapp" style="margin-top:1rem; width: auto;">Abrir WhatsApp</a>
                     <img src="${imageUrl}" alt="Boleto de Rifa">
@@ -691,7 +691,7 @@ function attachEventListeners(path) {
 
     // ---------------------- ESTADÍSTICAS ----------------------
     } else if (isStatisticsDetail) {
-        console.log("👉 Estamos en la vista de estadísticas");
+        console.log("?? Estamos en la vista de estadísticas");
         const participantsBtn = document.getElementById('show-participants-list-btn');
         const participantsContainer = document.getElementById('participants-list-container');
         const statCards = document.querySelectorAll('.stat-card.clickable');
@@ -718,7 +718,7 @@ function attachEventListeners(path) {
 
     // ---------------------- PARTICIPANTES ----------------------
     } else if (isParticipantsList) {
-        console.log("👉 Estamos en la vista de participantes");
+        console.log("?? Estamos en la vista de participantes");
         document.querySelectorAll('.participant-card').forEach(card => {
             card.addEventListener('click', () => {
                 const ticketNumber = card.dataset.ticket;
@@ -912,7 +912,7 @@ async function handleCreateRaffle(e) {
 
     const selectedOptions = document.querySelectorAll('.payment-option.selected');
     if (selectedOptions.length === 0) {
-        alert('Por favor, selecciona al menos un mÃ©todo de pago.');
+        alert('Por favor, selecciona al menos un método de pago.');
         return;
     }
 
@@ -933,7 +933,7 @@ async function handleCreateRaffle(e) {
             const brebKey = document.getElementById('bre-b-key').value;
             // ValidaciÃ³n especÃ­fica para Bre-B
             if (!brebKey.startsWith('@')) {
-                alert('La llave de Bre-B debe empezar con "@". Por favor, corrÃ­gela.');
+                alert('La llave de Bre-B debe empezar con "@". Por favor, corrígela.');
                 return; // Detenemos el envÃ­o del formulario
             }
             methodInfo.key = brebKey;
@@ -975,7 +975,7 @@ async function handleCreateRaffle(e) {
             });
         }
         await batch.commit();
-        alert('Â¡Rifa creada con Ã©xito!');
+        alert('Â¡Rifa creada con Éxito!');
         window.location.hash = `#/raffle/${raffleRef.id}`;
     } catch (error) {
         console.error("Error al crear la rifa: ", error);
@@ -1015,7 +1015,7 @@ async function handleDeleteRaffle(raffleId, cardElement) {
         cardElement.style.opacity = '0';
         setTimeout(() => cardElement.remove(), 500);
 
-        alert(`La rifa "${raffleName}" ha sido eliminada con Ã©xito.`);
+        alert(`La rifa "${raffleName}" ha sido eliminada con Éxito.`);
 
     } catch (error) {
         console.error("Error al eliminar la rifa:", error);
@@ -1488,7 +1488,7 @@ function renderParticipantsList(tickets, container, status) {
                 <tr>
                     <th>Boleto</th>
                     <th>Nombre</th>
-                    <th>TelÃ©fono</th>
+                    <th>Teléfono</th>
                     <th>Estado</th>
                 </tr>
             </thead>
@@ -1505,5 +1505,3 @@ function renderParticipantsList(tickets, container, status) {
         </table>
     `;
 }
-
-
