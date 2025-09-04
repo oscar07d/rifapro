@@ -1,5 +1,5 @@
 /* =============================================
-   NUEVO DISEÑO PARA RIFA-PRO (ELEGANTE Y MODERNO)
+   NUEVO DISEÃ‘O PARA RIFA-PRO (ELEGANTE Y MODERNO)
    ============================================= */
 
 /* 1. Variables y Estilos Globales */
@@ -173,7 +173,7 @@ input:focus, select:focus {
     color: white;
 }
 
-/* 6. Vistas Específicas (Explore, Home, Detalle, etc.) */
+/* 6. Vistas EspecÃ­ficas (Explore, Home, Detalle, etc.) */
 
 /* Contenedor de botones en el Home */
 .home-buttons {
@@ -202,7 +202,7 @@ input:focus, select:focus {
     box-shadow: var(--shadow-md);
 }
 
-/* Tarjetas de Rifa (REDiseñadas) */
+/* Tarjetas de Rifa (REDiseÃ±adas) */
 #raffles-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -229,6 +229,7 @@ input:focus, select:focus {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
+    text-align: left; /* ?? Alinea el texto a la izquierda */
 }
 
 .raffle-card-content h3 {
@@ -247,7 +248,7 @@ input:focus, select:focus {
 
 .raffle-card .btn-secondary {
     width: 100%;
-    margin-top: auto; /* Empuja el botón al final */
+    margin-top: auto; /* Empuja el botÃ³n al final */
 }
 
 /* Barra de Progreso */
@@ -278,26 +279,26 @@ input:focus, select:focus {
     transition: width 0.5s ease-in-out;
 }
 
-/* Detalle de la Rifa y Cuadrícula de Boletos (ESTILOS RESTAURADOS) */
+/* Detalle de la Rifa y CuadrÃ­cula de Boletos (ESTILOS RESTAURADOS) */
 
 .raffle-detail-container .raffle-info {
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 2rem;
     margin-bottom: 2rem;
-    display: flex; /* Usamos flexbox para el diseño de columnas */
-    flex-wrap: wrap; /* Permitimos que se apile en pantallas pequeñas */
+    display: flex; /* Usamos flexbox para el diseÃ±o de columnas */
+    flex-wrap: wrap; /* Permitimos que se apile en pantallas pequeÃ±as */
     gap: 1rem 2rem; /* Espacio vertical y horizontal entre elementos */
 }
 
 .raffle-info h2 {
-    width: 100%; /* El título ocupa todo el ancho */
+    width: 100%; /* El tÃ­tulo ocupa todo el ancho */
     text-align: center;
     margin-bottom: 1rem;
 }
 
 .info-block {
     flex: 1; /* Permite que los bloques crezcan y ocupen el espacio */
-    min-width: 250px; /* Ancho mínimo antes de que se apilen */
+    min-width: 250px; /* Ancho mÃ­nimo antes de que se apilen */
     background-color: #f8f9fa;
     padding: 1rem;
     border-radius: var(--border-radius);
@@ -314,19 +315,19 @@ input:focus, select:focus {
     color: var(--text-color);
 }
 
-/* NUEVA REGLA para controlar el tamaño total de la cuadrícula */
+/* NUEVA REGLA para controlar el tamaÃ±o total de la cuadrÃ­cula */
 .tickets-grid-container {
     max-width: 700px;
-    /* Limita el ancho máximo de la cuadrícula */
+    /* Limita el ancho mÃ¡ximo de la cuadrÃ­cula */
     margin: 1.5rem auto 0 auto;
-    /* La centra horizontalmente y añade margen superior */
+    /* La centra horizontalmente y aÃ±ade margen superior */
 }
 
 #tickets-grid {
     display: grid;
     grid-template-columns: repeat(10, 1fr);
     gap: 0.5rem;
-    /* Reducimos el espacio entre números */
+    /* Reducimos el espacio entre nÃºmeros */
 }
 
 .ticket {
@@ -341,7 +342,7 @@ input:focus, select:focus {
     border: 1px solid transparent;
     user-select: none;
     font-size: 1rem;
-    /* Ajustamos el tamaño de la fuente si es necesario */
+    /* Ajustamos el tamaÃ±o de la fuente si es necesario */
 }
 
 .ticket:hover {
@@ -459,7 +460,7 @@ input:focus, select:focus {
 /* Estilos para la vista previa de la imagen en el modal */
 .ticket-preview-wrapper {
     text-align: center;
-    animation: zoom-in 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Reutilizamos la animación del modal */
+    animation: zoom-in 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Reutilizamos la animaciÃ³n del modal */
 }
 
 .ticket-preview-wrapper h4 {
@@ -500,11 +501,11 @@ input:focus, select:focus {
 }
 .close-modal:hover { color: var(--danger-color); }
 
-/* --- ESTILOS PARA LA SELECCIÓN DE MÉTODOS DE PAGO --- */
+/* --- ESTILOS PARA LA SELECCIÃ“N DE MÃ‰TODOS DE PAGO --- */
 
 .payment-options-grid {
     display: grid;
-    /* Reducimos el tamaño mínimo de cada columna para que sean más pequeñas */
+    /* Reducimos el tamaÃ±o mÃ­nimo de cada columna para que sean mÃ¡s pequeÃ±as */
     grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
     gap: 0.75rem; /* Reducimos un poco el espacio */
     margin-top: 0.5rem;
@@ -536,14 +537,14 @@ input:focus, select:focus {
 }
 
 .payment-option img {
-    height: 35px; /* Hacemos el logo un poco más pequeño */
+    height: 35px; /* Hacemos el logo un poco mÃ¡s pequeÃ±o */
     width: 100%;
     margin-bottom: 0.5rem;
     object-fit: contain;
 }
 
 .payment-option span {
-    font-size: 0.75rem; /* Hacemos el texto un poco más pequeño */
+    font-size: 0.75rem; /* Hacemos el texto un poco mÃ¡s pequeÃ±o */
     font-weight: 500;
     color: var(--text-light-color);
     line-height: 1.2;
@@ -556,7 +557,7 @@ input:focus, select:focus {
     align-items: center;
     gap: 0.5rem;
     margin-top: 0.5rem;
-    margin-bottom: 1rem; /* Espacio antes del botón de participar */
+    margin-bottom: 1rem; /* Espacio antes del botÃ³n de participar */
 }
 
 .payment-icons-list.detail-view {
@@ -577,7 +578,7 @@ input:focus, select:focus {
     border-radius: var(--border-radius);
     padding: 1.5rem;
     margin-top: 1.5rem;
-    margin-bottom: 1.5rem; /* <-- ESTA LÍNEA ES LA SOLUCIÓN */
+    margin-bottom: 1.5rem; /* <-- ESTA LÃNEA ES LA SOLUCIÃ“N */
     background-color: #f8f9fa;
 }
 
@@ -625,7 +626,7 @@ input:focus, select:focus {
 }
 
 .raffle-card-actions .btn-secondary {
-    flex-grow: 1; /* Hace que el botón 'Administrar' ocupe el espacio disponible */
+    flex-grow: 1; /* Hace que el botÃ³n 'Administrar' ocupe el espacio disponible */
 }
 
 .btn-icon {
@@ -652,7 +653,7 @@ input:focus, select:focus {
     background-color: #f8f5ff;
 }
 
-/* --- ESTILOS PARA EL BOTÓN Y MODAL DE COMPARTIR ESTADO --- */
+/* --- ESTILOS PARA EL BOTÃ“N Y MODAL DE COMPARTIR ESTADO --- */
 
 .grid-actions {
     text-align: center;
@@ -686,7 +687,7 @@ input:focus, select:focus {
 
 /* --- ESTILOS MEJORADOS PARA SELECTORES DE COLOR --- */
 
-/* Contenedor para alinear la etiqueta y el círculo */
+/* Contenedor para alinear la etiqueta y el cÃ­rculo */
 .form-group label[for^="color-"] {
     display: block;
     margin-bottom: 0.5rem;
@@ -696,10 +697,10 @@ input:focus, select:focus {
 input[type="color"] {
     -webkit-appearance: none; /* Quita el estilo por defecto en Chrome/Safari */
     -moz-appearance: none;    /* Quita el estilo por defecto en Firefox */
-    appearance: none;         /* Quita el estilo por defecto estándar */
+    appearance: none;         /* Quita el estilo por defecto estÃ¡ndar */
     
-    width: 40px;      /* Ancho del círculo */
-    height: 40px;     /* Alto del círculo */
+    width: 40px;      /* Ancho del cÃ­rculo */
+    height: 40px;     /* Alto del cÃ­rculo */
     padding: 0;       /* Quitamos cualquier padding */
     border: 3px solid var(--border-color); /* Borde exterior */
     border-radius: 50%; /* Lo hace perfectamente redondo */
@@ -712,21 +713,21 @@ input[type="color"]:hover {
     border-color: var(--primary-color); /* Resalta el borde al pasar el mouse */
 }
 
-/* Estilo del círculo de color interior (para Chrome/Safari) */
+/* Estilo del cÃ­rculo de color interior (para Chrome/Safari) */
 input[type="color"]::-webkit-color-swatch {
     border: none;
     border-radius: 50%;
     padding: 0;
 }
 
-/* Estilo del círculo de color interior (para Firefox) */
+/* Estilo del cÃ­rculo de color interior (para Firefox) */
 input[type="color"]::-moz-color-swatch {
     border: none;
     border-radius: 50%;
     padding: 0;
 }
 
-/* === NUEVO ESTILO PARA LA PÁGINA DE ESTADÍSTICAS === */
+/* === NUEVO ESTILO PARA LA PÃGINA DE ESTADÃSTICAS === */
 
 .statistics-container {
     background: #fff;
@@ -775,7 +776,7 @@ input[type="color"]::-moz-color-swatch {
     vertical-align: middle;
 }
 
-/* ====== GRID DE ESTADÍSTICAS ====== */
+/* ====== GRID DE ESTADÃSTICAS ====== */
 .stats-cards-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -851,7 +852,7 @@ input[type="color"]::-moz-color-swatch {
 
 .participants-btn:hover svg {
   stroke: #fff;
-  fill: #fff;  /* 👈 aquí forzamos a que el ícono se ponga blanco */
+  fill: #fff;  /* ðŸ‘ˆ aquÃ­ forzamos a que el Ã­cono se ponga blanco */ 
 }
 
 .filters {
@@ -871,7 +872,7 @@ input[type="color"]::-moz-color-swatch {
     background-color: #f8f9fa;
 }
 
-/* --- ESTILOS PARA LA PÁGINA DE Ver Lista de Participantes --- */
+/* --- ESTILOS PARA LA PÃGINA DE Ver Lista de Participantes --- */
 
 .participants-grid {
   margin-top: 20px;
@@ -985,7 +986,6 @@ input[type="color"]::-moz-color-swatch {
 .raffle-card {
     background: #fff;
     border-radius: 12px;
-    padding: 20px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     text-align: center;
@@ -1024,7 +1024,7 @@ input[type="color"]::-moz-color-swatch {
 
 
 
-/* 8. Diseño Responsivo */
+/* 8. DiseÃ±o Responsivo */
 @media (max-width: 600px) {
 	.participant-card .card-content p {
     	justify-content: space-between;
@@ -1052,7 +1052,7 @@ input[type="color"]::-moz-color-swatch {
 }
 
 @media (max-width: 768px) {
-    /* Ajustes generales para pantallas pequeñas */
+    /* Ajustes generales para pantallas pequeÃ±as */
     body {
         font-size: 15px;
     }
@@ -1082,20 +1082,20 @@ input[type="color"]::-moz-color-swatch {
         font-size: 1.5rem;
     }
 
-    /* --- INICIO DE LOS CAMBIOS PARA LA CUADRÍCULA --- */
+    /* --- INICIO DE LOS CAMBIOS PARA LA CUADRÃCULA --- */
 
-    /* 1. Reducimos el padding del contenedor para dar más espacio */
+    /* 1. Reducimos el padding del contenedor para dar mÃ¡s espacio */
     .raffle-detail-container {
         padding: 1.5rem 0.5rem;
     }
 
-    /* 2. Mantenemos 10 columnas pero con un espacio mínimo */
+    /* 2. Mantenemos 10 columnas pero con un espacio mÃ­nimo */
     #tickets-grid {
         grid-template-columns: repeat(10, 1fr);
-        gap: 2px; /* Un espacio muy pequeño entre números */
+        gap: 2px; /* Un espacio muy pequeÃ±o entre nÃºmeros */
     }
     
-    /* 3. Hacemos los números un poco más pequeños */
+    /* 3. Hacemos los nÃºmeros un poco mÃ¡s pequeÃ±os */
     .ticket {
         font-size: 0.7rem; 
         border-radius: 4px;
@@ -1111,7 +1111,7 @@ input[type="color"]::-moz-color-swatch {
         padding: 0 1rem;
     }
    .predefined-options {
-        flex-wrap: wrap; /* Permite que los botones pasen a la siguiente línea */
+        flex-wrap: wrap; /* Permite que los botones pasen a la siguiente lÃ­nea */
         gap: 0.5rem;
     }
 	.participant-card {
@@ -1146,7 +1146,7 @@ input[type="color"]::-moz-color-swatch {
 
 /* 9. Ajustes Finos para Pantallas Muy Estrechas */
 @media (max-width: 375px) {
-    /* Hacemos la información de la rifa un poco más compacta */
+    /* Hacemos la informaciÃ³n de la rifa un poco mÃ¡s compacta */
     .raffle-info h2 {
         font-size: 1.3rem;
     }
@@ -1154,12 +1154,12 @@ input[type="color"]::-moz-color-swatch {
         font-size: 0.9rem;
     }
 
-    /* Reducimos aún más el padding de la tarjeta */
+    /* Reducimos aÃºn mÃ¡s el padding de la tarjeta */
     .raffle-detail-container {
         padding: 1.5rem 0.25rem;
     }
 
-    /* Hacemos la cuadrícula y los números lo más pequeños posible */
+    /* Hacemos la cuadrÃ­cula y los nÃºmeros lo mÃ¡s pequeÃ±os posible */
     #tickets-grid {
         gap: 1px;
     }
@@ -1169,15 +1169,8 @@ input[type="color"]::-moz-color-swatch {
         border-radius: 3px;
     }
 
-    /* Ajustamos el tamaño del logo en el header */
+    /* Ajustamos el tamaÃ±o del logo en el header */
     .header-logo-img {
         height: 30px;
     }
 }
-
-
-
-
-
-
-
