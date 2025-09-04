@@ -1,10 +1,10 @@
 // js/components.js
 
-// LISTA CENTRAL DE MÉTODOS DE PAGO
+// LISTA CENTRAL DE MÃ‰TODOS DE PAGO
 export const paymentMethods = [
     { name: 'Efectivo', value: 'efectivo', icon: 'assets/banks/efectivo.svg' },
     { name: 'Nequi', value: 'nequi', icon: 'assets/banks/nequi.svg' },
-    { name: 'Bre-B', value: 'bre-b', icon: 'assets/banks/bre-b.svg' }, // <-- AÑADIDO DE VUELTA
+    { name: 'Bre-B', value: 'bre-b', icon: 'assets/banks/bre-b.svg' }, // <-- AÃ‘ADIDO DE VUELTA
     { name: 'Daviplata', value: 'daviplata', icon: 'assets/banks/daviplata.svg' },
     { name: 'Nu', value: 'nu', icon: 'assets/banks/nu.svg' },
     { name: 'Bancolombia', value: 'bancolombia', icon: 'assets/banks/bancolombia.svg' },
@@ -23,7 +23,7 @@ export const paymentMethods = [
     { name: 'Ualá', value: 'uala', icon: 'assets/banks/uala.svg' }
 ];
 
-// Vista para el inicio de sesión y registro
+// Vista para el inicio de sesiÃ³n y registro
 export const getAuthView = () => `
     <div class="auth-container">
         <h2 id="auth-title">Iniciar Sesión</h2>
@@ -46,8 +46,8 @@ export const getAuthView = () => `
 // Vista del panel principal (Home)
 export const getHomeView = (userName) => `
     <div class="home-container">
-        <h2>¡Bienvenido, ${userName}!</h2>
-        <p>¿Qué te gustaría hacer hoy?</p>
+        <h2>Â¡Bienvenido, ${userName}!</h2>
+        <p>Â¿Que te gustaría hacer hoy?</p>
         <div class="home-buttons">
             <a href="#/create" class="btn btn-primary">Crear Rifa</a>
             <a href="#/explore" class="btn btn-primary">Administrar Rifas</a>
@@ -97,7 +97,7 @@ export const getCreateRaffleView = () => {
             
             <div class="form-group">
                 <label for="raffle-lottery">Juega con la lotería de</label>
-                <input type="text" id="raffle-lottery" placeholder="Ej: Lotería de Bogotá" required>
+                <input type="text" id="raffle-lottery" placeholder="Ej: Lotería de Bogotá¡" required>
             </div>
 
             <div class="form-group">
@@ -176,7 +176,7 @@ export const getCreateRaffleView = () => {
     `;
 };
 
-// Vista para la página de "Explorar Rifas"
+// Vista para la pÃ¡gina de "Explorar Rifas"
 export const getExploreView = (rafflesHTML) => `
     <div class="explore-container">
         <h2>Administrar Mis Rifas</h2>
@@ -226,16 +226,7 @@ export const getRaffleCard = (raffle, currentUser) => {
 
             <div class="raffle-card-actions">
                 <button type="button" class="btn-icon btn-collaborate" title="Añadir Colaborador">
-					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 492.22 292.02" width="24" height="24" fill="currentColor">
-						<path d="M259.13,277.82c-.08-.15-.16-.3-.25-.44-18.3-31.63-46.49-54.31-79.39-65.06,41.05-24.43,54.51-77.51,30.08-118.55-20.59-34.57-61.5-49.58-98.42-38.84-.18,10.85-9.06,19.63-19.96,19.63h-14.73c-.65,.6-1.28,1.2-1.91,1.83v14.8c0,11.02-8.96,19.98-19.97,19.98-.51,0-1.01-.02-1.51-.06-7.5,22.91-5.42,48.81,7.87,71.14,7.37,12.37,17.7,22.71,30.07,30.07-32.9,10.74-61.09,33.42-79.38,65.06-2.78,4.52-1.36,10.44,3.17,13.21,4.52,2.78,10.44,1.36,13.21-3.16,.09-.15,.17-.29,.26-.44,22.63-39.11,62.62-62.46,106.98-62.46s84.36,23.35,106.99,62.46c2.53,4.66,8.37,6.39,13.03,3.86,4.67-2.54,6.39-8.37,3.86-13.03ZM67.99,138.04c0-37.15,30.11-67.26,67.26-67.26s67.27,30.11,67.27,67.26-30.12,67.27-67.27,67.27c-37.13-.04-67.22-30.13-67.26-67.27Z"/>
-						<path d="M243.22,282.32c0-.84,.11-1.65,.3-2.43-1.1,4.01,.52,8.42,4.24,10.7,1.45,.88,3.04,1.35,4.62,1.41-5.1-.28-9.16-4.51-9.16-9.68Zm248.24,5.63s-.04,.06-.06,.08c.01-.01,.02-.03,.03-.04,.11-.14,.21-.29,.31-.44,.14-.2,.26-.4,.36-.61,.04-.08,.08-.16,.12-.24-.07,.14-.15,.28-.23,.42-.16,.29-.34,.56-.53,.83Zm-6.9,4.01c1.26-.11,2.51-.47,3.68-1.11,1.3-.71,2.36-1.69,3.16-2.82-.29,.4-.62,.79-.97,1.14-1.54,1.54-3.59,2.56-5.87,2.79Z"/>
-						<path d="M244.99,276.72c-.13,.22-.26,.44-.39,.66-.24,.39-.45,.79-.63,1.2,.27-.66,.61-1.28,1.02-1.86Z"/>
-						<g>
-							<path d="M394.69,284.98c-.01,.13-.03,.26-.04,.39l-.1,.6c-.11,.55-.29,1.08-.51,1.58-.04,.1-.09,.19-.14,.28,0,0-.01,.02-.01,.03-.06,.11-.12,.22-.18,.33-.14,.23-.29,.46-.44,.68-.24,.33-.5,.64-.79,.92-1.2,1.21-2.81,2.01-4.6,2.19-.26,.02-.52,.04-.77,.04h-112.7c2.77-6.85,2.58-14.85-1.22-21.83-.17-.33-.36-.65-.55-.97-7.07-12.19-15.56-23.28-25.21-33.05,8.63-4.65,14.57-6.62,14.57-6.62,2.24-.74,4.44-1.39,6.63-1.95,8.45,4.24,17.98,6.64,28.05,6.65h.02c10.09,0,19.62-2.39,28.08-6.63,2.84,.73,5.06,1.43,6.58,1.93,38.7,12.73,57.32,42.58,61.82,50.3,.01,0,.02,.02,.02,.02,.13,.23,.26,.45,.4,.68,.06,.11,.13,.23,.19,.35,.71,1.29,.99,2.71,.9,4.08Z"/>
-							<path d="M243.97,171.32c0-29.12,23.6-52.72,52.72-52.72s52.73,23.6,52.73,52.72-23.61,52.73-52.73,52.73c-29.11-.03-52.69-23.62-52.72-52.73Z"/>
-						</g>
-						<path d="M95.16,47.59c0,6.06-4.92,10.97-10.97,10.97h-25.64v25.63c0,6.06-4.91,10.98-10.97,10.98s-10.97-4.92-10.97-10.98v-25.63H10.97c-6.05,0-10.97-4.91-10.97-10.97s4.92-10.98,10.97-10.98h25.64V10.98c0-6.06,4.91-10.98,10.97-10.98s10.97,4.92,10.97,10.98v25.63h25.64c6.05,0,10.97,4.91,10.97,10.98Z"/>
-					</svg>
+					<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000"><path d="M502.39-486.54q31.15-33.92 47.37-76.95t16.22-88.83q0-45.79-16.7-89.18-16.69-43.39-47.37-76.35 63.83 9.91 103.95 57.43 40.12 47.51 40.12 108.22 0 61.68-40.36 108.95t-103.23 56.71ZM725.98-147.8v-127.18q0-39.35-15.76-73.04-15.76-33.7-43.2-60.13 55.55 16.8 99.16 48.17 43.62 31.37 43.62 85v127.18h-83.82Zm83.11-298.18v-80.72h-80.72v-80h80.72v-80.71h80v80.71h80.71v80h-80.71v80.72h-80Zm-491-38.09q-69.59 0-118.86-49.27-49.27-49.27-49.27-118.86 0-69.58 49.27-118.74 49.27-49.15 118.86-49.15 69.58 0 118.74 49.15 49.15 49.16 49.15 118.74 0 69.59-49.15 118.86-49.16 49.27-118.74 49.27ZM-10.04-147.8v-120.61q0-36.24 18.57-66.61 18.58-30.37 49.73-46.33 62.96-31.24 128.03-46.98 65.08-15.74 131.8-15.74 67.43 0 132.39 15.62 64.95 15.62 127.19 46.86 31.16 15.96 49.73 46.25 18.58 30.3 18.58 66.91v120.63H-10.04Zm328.12-427.27q31.81 0 54.35-22.65 22.55-22.65 22.55-54.47 0-31.81-22.59-54.35-22.59-22.55-54.3-22.55-31.82 0-54.48 22.59-22.65 22.59-22.65 54.3 0 31.82 22.65 54.48 22.66 22.65 54.47 22.65ZM80.96-238.8h474.02v-28.42q0-10.77-5.5-19.58-5.5-8.81-14.5-13.7-52.57-26.28-106.85-39.42-54.28-13.15-109.98-13.15t-110.4 13.27q-54.71 13.26-106.79 39.3-9 4.89-14.5 13.7-5.5 8.81-5.5 19.58v28.42Zm237.13-413.4Zm0 413.4Z"/></svg>
 				</button>
 
                 <a href="#/raffle/${raffle.id}" class="btn btn-secondary">Administrar</a>
@@ -293,7 +284,7 @@ export const getRaffleDetailView = (raffle) => {
 	${getCollaboratorModal()} `;
 };
 
-// AHORA, DEFINIMOS LA SEGUNDA FUNCIÓN POR SEPARADO
+// AHORA, DEFINIMOS LA SEGUNDA FUNCIÃ“N POR SEPARADO
 export const getTicketModal = () => `
     <div id="ticket-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
@@ -379,12 +370,12 @@ export const getTicketModal = () => `
                     </div>
                 </div>
                 <div style="width: 45%; background: linear-gradient(45deg, #6a11cb, #2575fc); color: white; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                    <p style="margin: 0; font-size: 1.5rem; font-weight: 500;">TU NÚMERO</p>
+                    <p style="margin: 0; font-size: 1.5rem; font-weight: 500;">TU NÃšMERO</p>
                     <p id="template-number" style="margin: 0; font-size: 8rem; font-weight: 700; line-height: 1;"></p>
                 </div>
             </div>
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 20px; padding-top: 15px; border-top: 2px solid #f0f2f5;">
-                 <p style="margin: 0 0 5px 0; font-size: 0.9rem; color: #777; font-weight: 600;">¡Mucha Suerte!</p>
+                 <p style="margin: 0 0 5px 0; font-size: 0.9rem; color: #777; font-weight: 600;">Â¡Mucha Suerte!</p>
                  <div style="display: flex; align-items: center; gap: 5px;">
                     <p style="margin: 0; font-size: 0.75rem; color: #999;">Desarrollado por</p>
                     <svg id="Capa_2" data-name="Capa 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 879.14 85.62" style="height: 16px; opacity: 0.6;">
@@ -530,7 +521,7 @@ export const getParticipantsListView = (raffle, tickets) => {
         `;
     }
 
-    // 🔹 Traducción de estados
+    // ðŸ”¹ TraducciÃ³n de estados
     const statusLabels = {
         paid: "Pagado",
         partial: "Parcial",
@@ -538,7 +529,7 @@ export const getParticipantsListView = (raffle, tickets) => {
         available: "Disponible"
     };
 
-    // ✅ Primero generamos los cards
+    // âœ… Primero generamos los cards
     const cardsHTML = tickets.map(ticket => {
         const statusKey = ticket.status || "available";
         const statusLabel = statusLabels[statusKey] || statusKey;
@@ -561,7 +552,7 @@ export const getParticipantsListView = (raffle, tickets) => {
     `;
     }).join('');
 
-    // ✅ Después lo retornamos
+    // âœ… DespuÃ©s lo retornamos
     return `
         <section class="participants-list">
             <h2>Lista de Participantes - ${raffle.name || 'Rifa'}</h2>
