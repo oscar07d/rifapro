@@ -1143,6 +1143,10 @@ input[type="color"]::-moz-color-swatch {
     .stat-value {
         font-size: 1.5rem;
     }
+	.raffle-card-actions {
+		display: flex;
+    	align-items: center; /* Empuja los botones al final de la tarjeta */
+	}
 }
 
 /* 9. Ajustes Finos para Pantallas Muy Estrechas */
