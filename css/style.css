@@ -973,9 +973,6 @@ input[type="color"]::-moz-color-swatch {
   color: #3730a3;
 }
 
-
-
-
 .raffles-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -984,6 +981,10 @@ input[type="color"]::-moz-color-swatch {
 }
 
 .raffle-card {
+	padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
     background: #fff;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
@@ -1174,3 +1175,10 @@ input[type="color"]::-moz-color-swatch {
         height: 30px;
     }
 }
+
+
+
+
+
+
+
