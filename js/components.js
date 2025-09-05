@@ -46,8 +46,8 @@ export const getAuthView = () => `
 // Vista del panel principal (Home)
 export const getHomeView = (userName) => `
     <div class="home-container">
-        <h2>Â¡Bienvenido, ${userName}!</h2>
-        <p>Â¿Que te gustaría hacer hoy?</p>
+        <h2>¡Bienvenido, ${userName}!</h2>
+        <p>¿Que te gustaría hacer hoy?</p>
         <div class="home-buttons">
             <a href="#/create" class="btn btn-primary">Crear Rifa</a>
             <a href="#/explore" class="btn btn-primary">Administrar Rifas</a>
@@ -574,3 +574,4 @@ export const getParticipantsListView = (raffle, tickets) => {
         </section>
     `;
 };
+
