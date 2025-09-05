@@ -225,7 +225,7 @@ input:focus, select:focus {
 }
 
 .raffle-card-content {
-    padding: 1.5rem;
+    padding: 0s.5rem;
     display: flex;
     flex-direction: column;
     flex-grow: 1;
