@@ -36,10 +36,15 @@ export const getAuthView = () => `
                 <label for="password">Contraseña</label>
                 <input type="password" id="password" required>
             </div>
-            <button type="submit" class="btn btn-primary" id="auth-action-btn">Iniciar Sesión</button>
+            <button type="submit" id="auth-action-btn" class="btn btn-primary">Iniciar Sesión</button>
         </form>
-        <button class="btn btn-google" id="google-login-btn">Iniciar Sesión con Google</button>
-        <p id="auth-toggle-text">¿No tienes cuenta? <a href="#" id="auth-toggle-link">Regístrate</a></p>
+        
+        <div class="auth-extras" style="text-align: center; margin-top: 1rem;">
+            <a href="#" id="forgot-password-link">¿Olvidaste tu contraseña?</a>
+            <p id="auth-toggle-text" style="margin-top: 0.5rem;">¿No tienes cuenta? <a href="#" id="auth-toggle-link">Regístrate</a></p>
+        </div>
+        
+        <button id="google-login-btn" class="btn btn-secondary">Iniciar con Google</button>
     </div>
 `;
 
@@ -521,7 +526,7 @@ export const getParticipantsListView = (raffle, tickets) => {
         `;
     }
 
-    // ðŸ”¹ TraducciÃ³n de estados
+    // Traducción de estados (clave en inglés, etiqueta en español)
     const statusLabels = {
         paid: "Pagado",
         partial: "Parcial",
@@ -529,12 +534,12 @@ export const getParticipantsListView = (raffle, tickets) => {
         available: "Disponible"
     };
 
-    // âœ… Primero generamos los cards
     const cardsHTML = tickets.map(ticket => {
         const statusKey = ticket.status || "available";
         const statusLabel = statusLabels[statusKey] || statusKey;
+
         return `
-        <div class="participant-card" data-ticket="${ticket.number}" data-raffle="${raffle.id}">
+        <div class="participant-card" data-ticket="${ticket.number}" data-raffle="${raffle.id}" data-status="${statusKey}">
             <div class="card-content">
                 <h3>
                     <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#6c5ce7">
@@ -542,17 +547,28 @@ export const getParticipantsListView = (raffle, tickets) => {
                     </svg>
                     Boleto #${ticket.number}
                 </h3>
-                <p><strong>Nombre:</strong> ${ticket.name || ticket.buyerName || 'N/A'}</p>
-                <p><strong>Teléfono:</strong> ${ticket.phone || ticket.buyerPhone || 'N/A'}</p>
-                <p><strong>Estado:</strong> 
-                    <span class="status-badge status-${statusKey}">${statusLabel}</span>
-                </p>
+
+                <div class="participant-row">
+                    <div class="participant-label">Nombre:</div>
+                    <div class="participant-value participant-name">${ticket.name || ticket.buyerName || 'N/A'}</div>
+                </div>
+
+                <div class="participant-row">
+                    <div class="participant-label">Teléfono:</div>
+                    <div class="participant-value participant-phone">${ticket.phone || ticket.buyerPhone || 'N/A'}</div>
+                </div>
+
+                <div class="participant-row">
+                    <div class="participant-label">Estado:</div>
+                    <div class="participant-value">
+                        <span class="status-badge status-${statusKey} participant-status">${statusLabel}</span>
+                    </div>
+                </div>
             </div>
         </div>
-    `;
+        `;
     }).join('');
 
-    // âœ… DespuÃ©s lo retornamos
     return `
         <section class="participants-list">
             <h2>Lista de Participantes - ${raffle.name || 'Rifa'}</h2>
@@ -574,4 +590,5 @@ export const getParticipantsListView = (raffle, tickets) => {
         </section>
     `;
 };
+
 
