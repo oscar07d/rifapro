@@ -65,7 +65,18 @@ header h1 {
     margin: 0 auto;
 }
 
-.auth-container, .form-container, .home-container, .explore-container, .raffle-detail-container {
+.auth-container, .form-container, .home-container, .raffle-detail-container {
+    background-color: var(--card-bg-color);
+    padding: 2.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    width: 100%;
+    max-width: 650px;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+.explore-container {
     background-color: var(--card-bg-color);
     padding: 2.5rem;
     border-radius: var(--border-radius);
@@ -77,7 +88,7 @@ header h1 {
 }
 
 .explore-container, .home-container, .raffle-detail-container {
-    max-width: 1200px;
+    max-width: 1200px !important;
 }
 
 h2, h3 {
@@ -947,31 +958,15 @@ input[type="color"]::-moz-color-swatch {
 
 .status-badge {
   display: inline-block;
-  padding: 6px 12px;
-  border-radius: 50px;
-  font-weight: bold;
+  padding: 6px 10px;
+  border-radius: 12px;
+  font-weight: 600;
   font-size: 0.9rem;
 }
-
-.status-paid {
-  background: #d1fae5; /* verde suave */
-  color: #065f46;
-}
-
-.status-partial {
-  background: #fef3c7; /* amarillo */
-  color: #92400e;
-}
-
-.status-pending {
-  background: #fee2e2; /* rojo claro */
-  color: #991b1b;
-}
-
-.status-available {
-  background: #e0e7ff; /* azul suave */
-  color: #3730a3;
-}
+.status-paid { background: #d1fae5; color: #065f46; }
+.status-partial { background: #fef3c7; color: #92400e; }
+.status-pending { background: #fee2e2; color: #991b1b; }
+.status-available { background: #e0e7ff; color: #3730a3; }
 
 .raffles-grid {
     display: grid;
@@ -1023,6 +1018,27 @@ input[type="color"]::-moz-color-swatch {
     opacity: 0.85;
 }
 
+.participant-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    margin-top: 8px;
+    width: 100%;
+}
+.participant-label {
+    min-width: 110px;
+    color: var(--text-light-color);
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+.participant-value {
+    flex: 1;
+    text-align: right;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
 
 
 /* 8. DiseÃ±o Responsivo */
@@ -1049,6 +1065,19 @@ input[type="color"]::-moz-color-swatch {
         flex-direction: column;
         align-items: flex-start;
         gap: 15px;
+    }
+	
+	.participant-row {
+        flex-direction: row;
+        align-items: center;
+    }
+    .participant-label {
+        min-width: 95px;
+        font-size: 0.9rem;
+    }
+    .participant-value {
+        text-align: right;
+        font-size: 0.95rem;
     }
 }
 
@@ -1116,8 +1145,8 @@ input[type="color"]::-moz-color-swatch {
         gap: 0.5rem;
     }
 	.participant-card {
-        flex-direction: column;
         align-items: flex-start;
+		display: block;
     }
 	.stats-header {
         flex-direction: column;
@@ -1179,10 +1208,3 @@ input[type="color"]::-moz-color-swatch {
         height: 30px;
     }
 }
-
-
-
-
-
-
-
