@@ -222,41 +222,93 @@ async function router() {
             }
 
         } else if (isParticipantsList) {
-            // ---------------------- LISTA DE PARTICIPANTES ----------------------
-            const raffleId = path.split('/')[2];
-            try {
-                const raffleDoc = await db.collection('raffles').doc(raffleId).get();
-                if (!raffleDoc.exists) {
-                    appContainer.innerHTML = '<h2>Rifa no encontrada</h2>';
-                    return;
-                }
-                const raffleData = { id: raffleDoc.id, ...raffleDoc.data() };
+			// ---------------------- LISTA DE PARTICIPANTES ----------------------
+			const raffleId = path.split('/')[2];
+			try {
+				const raffleDoc = await db.collection('raffles').doc(raffleId).get();
+				if (!raffleDoc.exists) {
+					appContainer.innerHTML = '<h2>Rifa no encontrada</h2>';
+					return;
+				}
+				const raffleData = { id: raffleDoc.id, ...raffleDoc.data() };
 
-                const ticketsSnapshot = await db.collection('raffles')
-                    .doc(raffleId)
-                    .collection('tickets')
-                    .where('buyerName', '!=', '') // Solo boletos con cliente
-                    .get();
+				const ticketsSnapshot = await db.collection('raffles')
+					.doc(raffleId)
+					.collection('tickets')
+					.where('buyerName', '!=', '') // Solo boletos con cliente
+					.get();
 
-                const participants = [];
-                ticketsSnapshot.forEach(doc => participants.push(doc.data()));
+				const participants = [];
+				ticketsSnapshot.forEach(doc => participants.push(doc.data()));
 
-                appContainer.innerHTML = getParticipantsListView(raffleData, participants);
+				// ✅ Renderizamos la vista de participantes
+				appContainer.innerHTML = getParticipantsListView(raffleData, participants);
 
-                document.querySelectorAll('.participant-card').forEach(card => {
-                    card.addEventListener('click', () => {
-                        const ticketNumber = card.dataset.ticket;
-                        const raffleId = card.dataset.raffle;
-                        window.location.hash = `/raffle/${raffleId}?ticket=${ticketNumber}`;
-                    });
-                });
+				// ---------- Click en tarjeta para abrir detalle ----------
+				document.querySelectorAll('.participant-card').forEach(card => {
+					card.addEventListener('click', () => {
+						const ticketNumber = card.dataset.ticket;
+						const raffleId = card.dataset.raffle;
+						window.location.hash = `/raffle/${raffleId}?ticket=${ticketNumber}`;
+					});
+				});
 
-            } catch (error) {
-                console.error("Error al cargar participantes:", error);
-                appContainer.innerHTML = '<p>Error al cargar la lista de participantes.</p>';
-            }
+				// ---------- Filtro único y robusto (nombre, teléfono, boleto y estado) ----------
+				(() => {
+					const searchInput = document.getElementById('search-participant');
+					const statusFilter = document.getElementById('status-filter');
 
-        } else if (path === '/explore') {
+					if (!searchInput || !statusFilter) return;
+
+					// 🔄 Mapear estados en español/inglés a clave interna
+					const statusLabelsRev = {
+						'pagado': 'paid', 'pagados': 'paid', 'pagado(s)': 'paid',
+						'parcial': 'partial', 'parciales': 'partial',
+						'pendiente': 'pending', 'pendientes': 'pending',
+						'disponible': 'available', 'disponibles': 'available',
+						'todos': 'all', 'all': 'all',
+						'paid': 'paid', 'partial': 'partial', 'pending': 'pending', 'available': 'available'
+					};
+
+					// Normalizar texto (sin tildes y minúsculas)
+					const normalize = str => (str || '')
+						.toString()
+						.normalize('NFD')
+						.replace(/[\u0300-\u036f]/g, '')
+						.toLowerCase();
+
+					const getCards = () => Array.from(document.querySelectorAll('.participant-card'));
+
+					const applyFilter = () => {
+						const q = normalize(searchInput.value.trim());
+						const selRaw = normalize(statusFilter.value.trim());
+						const selectedKey = statusLabelsRev[selRaw] || selRaw || 'all';
+
+						getCards().forEach(card => {
+							const name = normalize(card.querySelector('.participant-name')?.textContent || '');
+							const phone = normalize(card.querySelector('.participant-phone')?.textContent || '');
+							const ticket = normalize(card.dataset.ticket || '');
+							const status = normalize(card.dataset.status || '');
+
+							const matchesSearch = !q || name.includes(q) || phone.includes(q) || ticket.includes(q);
+							const matchesStatus = (selectedKey === 'all') || (status === selectedKey);
+
+							card.style.display = (matchesSearch && matchesStatus) ? '' : 'none';
+						});
+					};
+
+					searchInput.addEventListener('input', applyFilter);
+					statusFilter.addEventListener('change', applyFilter);
+
+					// Ejecutar filtro inicial
+					applyFilter();
+				})();
+
+			} catch (error) {
+				console.error("Error al cargar participantes:", error);
+				appContainer.innerHTML = '<p>Error al cargar la lista de participantes.</p>';
+			}
+		} else if (path === '/explore') {
             // ---------------------- EXPLORAR ----------------------
             const user = firebase.auth().currentUser;
             if (!user) {
@@ -557,32 +609,10 @@ function attachEventListeners(path) {
     const isRaffleDetail = path.startsWith('/raffle/');
     const isStatisticsDetail = path.startsWith('/statistics/');
     const isParticipantsList = path.startsWith('/participants/');
+	const forgotPasswordLink = document.getElementById('forgot-password-link');
 
-    // ---------------------- FILTROS PARTICIPANTES ----------------------
-    const searchInput = document.getElementById('search-participant');
-    const statusFilter = document.getElementById('status-filter');
-    const participantCards = document.querySelectorAll('.participant-card');
-
-    if (searchInput && statusFilter && participantCards.length > 0) {
-        const filterParticipants = () => {
-            const searchValue = searchInput.value.toLowerCase();
-            const statusValue = statusFilter.value;
-
-            participantCards.forEach(card => {
-                const name = card.querySelector('p:nth-child(2)')?.textContent.toLowerCase() || '';
-                const phone = card.querySelector('p:nth-child(3)')?.textContent.toLowerCase() || '';
-                const status = card.querySelector('p:nth-child(4)')?.textContent.toLowerCase() || '';
-
-                const matchesSearch = name.includes(searchValue) || phone.includes(searchValue);
-                const matchesStatus = (statusValue === 'all') || status.includes(statusValue);
-
-                card.style.display = (matchesSearch && matchesStatus) ? 'flex' : 'none';
-            });
-        };
-
-        searchInput.addEventListener('input', filterParticipants);
-        statusFilter.addEventListener('change', filterParticipants);
-    }
+    // Normaliza texto (quita tildes y pasa a minúsculas)
+    const normalize = str => (str || '').toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 
     // ---------------------- LOGIN ----------------------
     if (path === '/login') {
@@ -619,6 +649,22 @@ function attachEventListeners(path) {
             };
             toggleLink.addEventListener('click', toggleAuthMode);
         }
+		
+		if (forgotPasswordLink) {
+			forgotPasswordLink.addEventListener('click', (e) => {
+				e.preventDefault();
+				const email = prompt("Por favor, ingresa tu correo electrónico para enviarte el enlace de recuperación:");
+				if (email) {
+					firebase.auth().sendPasswordResetEmail(email)
+						.then(() => {
+							alert('¡Correo de recuperación enviado! Revisa tu bandeja de entrada.');
+						})
+						.catch((error) => {
+							alert('Error: ' + error.message);
+						});
+				}
+			});
+		}
 
     // ---------------------- CREAR RAFFLE ----------------------
     } else if (path === '/create') {
@@ -689,9 +735,8 @@ function attachEventListeners(path) {
             });
         }
 
-    // ---------------------- ESTADÍSTICAS ----------------------
+    // ---------------------- ESTADÍSTICAS (detalle) ----------------------
     } else if (isStatisticsDetail) {
-        console.log("?? Estamos en la vista de estadísticas");
         const participantsBtn = document.getElementById('show-participants-list-btn');
         const participantsContainer = document.getElementById('participants-list-container');
         const statCards = document.querySelectorAll('.stat-card.clickable');
@@ -716,17 +761,52 @@ function attachEventListeners(path) {
             });
         });
 
-    // ---------------------- PARTICIPANTES ----------------------
+    // ---------------------- PARTICIPANTES (listeners y filtros) ----------------------
     } else if (isParticipantsList) {
-        console.log("?? Estamos en la vista de participantes");
+        // Click sobre tarjeta -> ir al detalle de la rifa y abrir ticket
         document.querySelectorAll('.participant-card').forEach(card => {
             card.addEventListener('click', () => {
                 const ticketNumber = card.dataset.ticket;
                 const raffleId = card.dataset.raffle;
                 window.location.hash = `/raffle/${raffleId}?ticket=${ticketNumber}`;
-
             });
         });
+
+        // Filtro robusto: busca por nombre, teléfono, número de boleto y filtra por estado
+        const searchInput = document.getElementById('search-participant');
+        const statusFilter = document.getElementById('status-filter');
+
+        if (searchInput && statusFilter) {
+            const applyFilter = () => {
+                const q = normalize(searchInput.value.trim());
+                const selected = (statusFilter.value || 'all').toString().toLowerCase();
+
+                document.querySelectorAll('.participant-card').forEach(card => {
+                    const ticketNum = normalize(card.dataset.ticket || '');
+                    const fullText = normalize(card.textContent || '');
+
+                    // extraer estado desde la span.status-badge (clase status-paid / status-partial / etc.)
+                    let statusKey = '';
+                    const statusSpan = card.querySelector('.status-badge');
+                    if (statusSpan) {
+                        const statusClass = Array.from(statusSpan.classList).find(c => c.startsWith('status-') && c !== 'status-badge');
+                        if (statusClass) statusKey = statusClass.replace('status-', '').toLowerCase();
+                        else statusKey = normalize(statusSpan.textContent);
+                    }
+
+                    const matchesSearch = !q || fullText.includes(q) || ticketNum.includes(q);
+                    const matchesStatus = (selected === 'all') || (statusKey === selected);
+
+                    card.style.display = (matchesSearch && matchesStatus) ? '' : 'none';
+                });
+            };
+
+            searchInput.addEventListener('input', applyFilter);
+            statusFilter.addEventListener('change', applyFilter);
+
+            // aplicar filtro inicial por si viene con valor
+            applyFilter();
+        }
 
     // ---------------------- EXPLORAR ----------------------
     } else if (path === '/explore') {
@@ -749,6 +829,7 @@ function attachEventListeners(path) {
         }
     }
 }
+
 
 async function openTicketModal(ticketNumber) {
     const modal = document.getElementById('ticket-modal');
