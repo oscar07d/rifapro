@@ -202,8 +202,10 @@ input:focus, select:focus {
     padding: 1.25rem;
     font-size: 1.1rem;
     box-shadow: var(--shadow-sm);
+    /* --- Nuevas propiedades para alinear el ícono --- */
     display: flex;
     align-items: center;
+    gap: 0.75rem; /* Espacio entre el ícono y el texto */
 }
 
 .home-buttons .btn:hover {
@@ -1039,7 +1041,264 @@ input[type="color"]::-moz-color-swatch {
     color: var(--text-color);
 }
 
+/* 10. Vista de Configuración */
+.settings-container {
+    max-width: 700px;
+    margin: 2rem auto;
+    background-color: var(--card-bg-color);
+    padding: 2.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+}
 
+.settings-section {
+    margin-bottom: 2.5rem;
+}
+
+.settings-section h3 {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-light-color);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.settings-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem 0.5rem;
+    cursor: pointer;
+}
+
+.item-content {
+    flex-grow: 1;
+    font-weight: 500;
+}
+
+.item-action span {
+    font-size: 1.5rem;
+    color: var(--text-light-color);
+}
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 28px;
+}
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+    position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #ccc; transition: .4s; border-radius: 28px;
+}
+.slider:before {
+    position: absolute; content: ""; height: 20px; width: 20px; left: 4px;
+    bottom: 4px; background-color: white; transition: .4s; border-radius: 50%;
+}
+input:checked + .slider { background-color: var(--primary-color); }
+input:checked + .slider:before { transform: translateX(22px); }
+
+.btn-danger-outline {
+    width: 100%;
+    background-color: transparent;
+    border: 1px solid var(--danger-color);
+    color: var(--danger-color);
+    margin-top: 1rem;
+}
+.btn-danger-outline:hover {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+.item-icon {
+    margin-right: 1rem;
+    color: var(--text-light-color);
+    display: flex;
+    align-items: center;
+}
+
+/* Estilo para el botón de logout con ícono */
+#settings-logout-btn.btn-danger-outline {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem; /* Espacio entre el ícono y el texto */
+}
+
+/* 11. Vista de Editar Perfil */
+.edit-profile-container {
+    max-width: 500px;
+    margin: 0 auto;
+    background-color: var(--card-bg-color);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.profile-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+.back-arrow {
+    color: var(--text-color);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+}
+
+.profile-avatar-wrapper {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 1rem auto;
+}
+
+.profile-avatar-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid white;
+    box-shadow: var(--shadow-sm);
+}
+
+.edit-avatar-btn {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    background: var(--secondary-color);
+    border: 2px solid white;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+}
+
+.profile-user-details {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+.profile-user-details h3 {
+    margin: 0;
+}
+.profile-user-details p {
+    margin: 0.25rem 0 0 0;
+    color: var(--text-light-color);
+}
+
+#edit-profile-form input {
+    background-color: #f0f2f5; /* Color de fondo gris claro */
+    border: none;
+    font-weight: 500;
+}
+
+#edit-profile-form input:focus {
+    box-shadow: 0 0 0 3px rgba(106, 17, 203, 0.25); /* Sombra de foco más pronunciada */
+}
+
+#edit-profile-form input[readonly] {
+    background-color: #e9ecef; /* Un gris ligeramente más oscuro para campos bloqueados */
+    color: var(--text-light-color);
+    cursor: not-allowed;
+}
+
+#edit-profile-form .btn-primary {
+    margin-top: 1rem;
+}
+
+/* 12. Estilos para el Modal de Croppie */
+#cropper-container {
+    width: 250px;
+    height: 250px;
+    margin: 1rem auto;
+}
+
+/* Asegura que el modal de Croppie tenga un z-index alto */
+#cropper-modal {
+    z-index: 2000;
+}
+
+/* 13. Vista de Seguridad */
+.security-container {
+    max-width: 500px;
+    margin: 0 auto;
+    background-color: var(--card-bg-color);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+}
+
+.security-container form {
+    margin-top: 2rem;
+}
+
+/* Estilos para el Acordeón */
+.accordion {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+.accordion-header {
+    padding: 1rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 500;
+}
+.accordion-icon {
+    font-size: 1.5rem;
+    transition: transform 0.3s ease;
+}
+.accordion-header.active .accordion-icon {
+    transform: rotate(90deg);
+}
+.accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    padding: 0 1rem;
+}
+.accordion-content p {
+    margin-top: 0;
+    color: var(--text-light-color);
+    font-size: 0.9rem;
+}
+.accordion-content .btn {
+    width: auto;
+    margin-bottom: 1rem;
+}
+
+/* Estilos para el nuevo botón */
+.btn-secondary-outline {
+    display: block; /* Para que ocupe todo el ancho */
+    text-align: center;
+    padding: 0.9rem 1.5rem;
+    border: 1px solid var(--secondary-color);
+    color: var(--secondary-color);
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+.btn-secondary-outline:hover {
+    background-color: var(--secondary-color);
+    color: white;
+}
 
 /* 8. DiseÃ±o Responsivo */
 @media (max-width: 600px) {
