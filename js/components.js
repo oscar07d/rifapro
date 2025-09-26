@@ -52,12 +52,24 @@ export const getAuthView = () => `
 export const getHomeView = (userName) => `
     <div class="home-container">
         <h2>¡Bienvenido, ${userName}!</h2>
-        <p>¿Que te gustaría hacer hoy?</p>
+        <p>¿Qué te gustaría hacer hoy?</p>
         <div class="home-buttons">
-            <a href="#/create" class="btn btn-primary">Crear Rifa</a>
-            <a href="#/explore" class="btn btn-primary">Administrar Rifas</a>
-            <a href="#/statistics" class="btn btn-primary">Estadísticas</a> 
-            <a href="#/settings" class="btn btn-primary">Configuración</a>
+            <a href="#/create" class="btn btn-primary">
+                	<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m368-320 112-84 110 84-42-136 112-88H524l-44-136-44 136H300l110 88-42 136ZM160-160q-33 0-56.5-23.5T80-240v-135q0-11 7-19t18-10q24-8 39.5-29t15.5-47q0-26-15.5-47T105-556q-11-2-18-10t-7-19v-135q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v135q0 11-7 19t-18 10q-24 8-39.5 29T800-480q0 26 15.5 47t39.5 29q11 2 18 10t7 19v135q0 33-23.5 56.5T800-160H160Zm0-80h640v-102q-37-22-58.5-58.5T720-480q0-43 21.5-79.5T800-618v-102H160v102q37 22 58.5 58.5T240-480q0 43-21.5 79.5T160-342v102Zm320-240Z"/></svg>
+                <span>Crear Rifa</span>
+            </a>
+            <a href="#/explore" class="btn btn-primary">
+                	<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m363-310 117-71 117 71-31-133 104-90-137-11-53-126-53 126-137 11 104 90-31 133ZM480-28 346-160H160v-186L28-480l132-134v-186h186l134-132 134 132h186v186l132 134-132 134v186H614L480-28Zm0-112 100-100h140v-140l100-100-100-100v-140H580L480-820 380-720H240v140L140-480l100 100v140h140l100 100Zm0-340Z"/></svg>
+                <span>Administrar Rifas</span>
+            </a>
+            <a href="#/statistics" class="btn btn-primary">
+                	<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M200-120q-33 0-56.5-23.5T120-200v-640h80v640h640v80H200Zm40-120v-360h160v360H240Zm200 0v-560h160v560H440Zm200 0v-200h160v200H640Z"/></svg>
+                <span>Estadísticas</span>
+            </a>
+            <a href="#/settings" class="btn btn-primary">
+                	<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m370-80-16-128q-13-5-24.5-12T307-235l-119 50L78-375l103-78q-1-7-1-13.5v-27q0-6.5 1-13.5L78-585l110-190 119 50q11-8 23-15t24-12l16-128h220l16 128q13 5 24.5 12t22.5 15l119-50 110 190-103 78q1 7 1 13.5v27q0 6.5-2 13.5l103 78-110 190-118-50q-11 8-23 15t-24 12L590-80H370Zm70-80h79l14-106q31-8 57.5-23.5T639-327l99 41 39-68-86-65q5-14 7-29.5t2-31.5q0-16-2-31.5t-7-29.5l86-65-39-68-99 42q-22-23-48.5-38.5T533-694l-13-106h-79l-14 106q-31 8-57.5 23.5T321-633l-99-41-39 68 86 64q-5 15-7 30t-2 32q0 16 2 31t7 30l-86 65 39 68 99-42q22 23 48.5 38.5T427-266l13 106Zm42-180q58 0 99-41t41-99q0-58-41-99t-99-41q-59 0-99.5 41T342-480q0 58 40.5 99t99.5 41Zm-2-140Z"/></svg>
+                <span>Configuración</span>
+            </a>
         </div>
     </div>
 `;
@@ -591,4 +603,166 @@ export const getParticipantsListView = (raffle, tickets) => {
     `;
 };
 
+export const getSettingsView = () => `
+    <div class="settings-container">
+        <h2>Configuración</h2>
 
+        <div class="settings-section">
+            <h3>Cuenta</h3>
+            <div id="go-to-edit-profile" class="settings-item">
+                <div class="item-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M400-489.61q-74.48 0-126.85-52.37-52.37-52.37-52.37-126.85 0-74.48 52.37-126.56 52.37-52.09 126.85-52.09 74.48 0 126.85 52.09 52.37 52.08 52.37 126.56t-52.37 126.85Q474.48-489.61 400-489.61ZM60.78-131.17v-132.35q0-41.48 22.37-74.44 22.37-32.95 52.37-47.95 51-26 119.24-44.85T400-449.61h18.8q10.81 0 19.07 2-9.13 18-18.87 48.81-9.74 30.8-13.87 55.19h-3.76q-66.72 0-122.65 16.59-55.94 16.59-91.94 34.14-9 4.88-14.5 13.03-5.5 8.15-5.5 19.15v23.53h244.09q7.13 27.21 22.5 56.19 15.37 28.98 31.33 49.81H60.78Zm587.7 30.39-12.57-62.83q-9.74-3.87-19.11-9.08-9.36-5.22-18.67-11.53l-60.83 19.13-46.78-80.43 48.26-41.7q-2.56-11.17-2.28-22.32.28-11.16 2.28-22.33l-48.26-42.26L537.3-454l60.83 19.13q9.31-6.3 18.67-11.52 9.37-5.22 19.11-9.09l12.57-62.82h94.13l12.57 62.82q9.73 3.87 19.39 9.31 9.65 5.43 18.95 13.3L853.78-454l47.35 81.87-48.82 42.26q2.56 9.74 2.28 21.33-.28 11.58-2.28 21.32l48.82 41.7-47.35 80.43-60.26-19.13q-9.3 6.31-18.95 11.53-9.66 5.21-19.39 9.08l-12.57 62.83h-94.13Zm47.35-133q30.74 0 53.11-22.65 22.36-22.66 22.36-53.4 0-30.73-22.36-53.1-22.37-22.37-53.11-22.37t-53.39 22.37q-22.66 22.37-22.66 53.1 0 30.74 22.66 53.4 22.65 22.65 53.39 22.65ZM399.98-595.61q30.19 0 51.72-21.5 21.52-21.5 21.52-51.7 0-30.19-21.5-51.43-21.51-21.24-51.7-21.24t-51.72 21.34q-21.52 21.34-21.52 51.31 0 30.2 21.5 51.71 21.51 21.51 51.7 21.51Zm.02-73.22Zm10.87 431.66Z"/></svg>
+                </div>
+                <div class="item-content"><span>Editar Perfil</span></div>
+                <div class="item-action"><span>&rsaquo;</span></div>
+            </div>
+            <div id="go-to-security" class="settings-item">
+                <div class="item-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M480-60.22Q332.65-96.8 236.72-226.95 140.78-357.1 140.78-516v-257.26L480-899.78l339.22 126.52V-516q0 158.9-95.94 289.05Q627.35-96.8 480-60.22Zm0-110q93.04-33.39 156.63-118.5 63.59-85.11 74.59-191.35H480v-307.02l-233.22 87.45V-498q0 8.13 1.95 18H480v309.78Z"/></svg>
+                </div>
+                <div class="item-content"><span>Seguridad</span></div>
+                <div class="item-action"><span>&rsaquo;</span></div>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h3>Información</h3>
+            <div class="settings-item">
+                <div class="item-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M140.78-180.78v-106H214v-260.78q0-90.35 53.11-161.92 53.11-71.56 139.89-93.26v-23.48q0-30.41 21.29-51.71 21.29-21.29 51.71-21.29t51.71 21.29Q553-856.63 553-826.22v23.48q87.35 21.7 140.18 92.98Q746-638.48 746-547.56v260.78h73.22v106H140.78ZM480-497.17Zm.57 442.61q-35.8 0-61.3-25.33-25.49-25.33-25.49-60.89h173q0 35.82-25.32 61.02-25.33 25.2-60.89 25.2ZM320-286.78h320v-260.78q0-66-47-113t-113-47q-66 0-113 47t-47 113v260.78Z"/></svg>
+                </div>
+                <div class="item-content">
+                    <p class="item-description">Notificaciones</p>
+                </div>
+                <div class="item-action">
+                    <span>&rsaquo;</span>
+                </div>
+            </div>
+        </div>
+
+         <div class="settings-section">
+            <h3>General</h3>
+             <div class="settings-item">
+                <div class="item-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M479.9-111.52q-153.49 0-260.93-107.45Q111.52-326.41 111.52-479.9t107.47-261.32Q326.47-849.04 480-849.04q12.3 0 24.67.71 12.37.72 24.24 2.72-34.21 31.26-55.04 74.65t-20.83 92.87q0 94.01 66.14 159.81 66.13 65.8 160.6 65.8 49.35 0 92.52-20.54 43.18-20.55 73.87-54.76 1.44 11.87 2.16 23.51.71 11.63.71 23.7 0 153.4-107.82 261.22Q633.39-111.52 479.9-111.52Zm.1-106q73.3 0 134.26-37.2 60.96-37.19 93.52-98.8-14.35 2.74-28.69 4.04-14.35 1.31-28.13.18-120.74-9.61-205.83-93.29-85.09-83.67-95.83-208.93-.56-13.78.46-28.13t4.33-28.13q-61.05 33.13-98.81 94.09-37.76 60.95-37.76 133.69 0 108.74 76.87 185.61 76.87 76.87 185.61 76.87Zm-17.35-245.13Z"/></svg>
+                </div>
+                <div class="item-content"><span>Modo Oscuro</span></div>
+                <div class="item-action">
+                    <label class="toggle-switch">
+                        <input type="checkbox">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <button id="settings-logout-btn" class="btn btn-danger-outline">
+            <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="currentColor"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h280v80H200Zm440-160-55-58 102-102H360v-80h327L585-622l55-58 200 200-200 200Z"/></svg>
+            <span>Cerrar Sesión</span>
+        </button>
+    </div>
+`;
+
+export const getEditProfileView = (user) => {
+    const displayName = user.displayName || 'Sin nombre';
+    const email = user.email || 'Sin correo';
+    const photoURL = user.photoURL || 'assets/default-avatar.png';
+    const username = email.split('@')[0];
+
+    return `
+    <div class="edit-profile-container">
+        <div class="profile-header">
+            <a href="#/settings" class="back-arrow">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M400-80 0-480l400-400 56 57-343 343 343 343-56 57Z"/></svg>
+            </a>
+            <h2>Editar perfil</h2>
+        </div>
+
+        <div class="profile-avatar-wrapper">
+            <img src="${photoURL}" alt="Foto de perfil" class="profile-avatar-img">
+            <button id="edit-avatar-button" class="edit-avatar-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#FFFFFF"><path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/></svg>
+            </button>
+            <input type="file" id="avatar-upload-input" accept="image/*" style="display: none;">
+        </div>
+
+        <div class="profile-user-details">
+            <h3>${displayName}</h3>
+            <p>@${username}</p>
+        </div>
+
+        <form id="edit-profile-form">
+            <div class="form-group">
+                <label for="profile-name">Nombre</label>
+                <input type="text" id="profile-name" value="${displayName}" required>
+            </div>
+            <div class="form-group">
+                <label for="profile-username">Nombre de usuario</label>
+                <input type="text" id="profile-username" value="${username}" readonly>
+            </div>
+            <div class="form-group">
+                <label for="profile-email">Correo electrónico</label>
+                <input type="email" id="profile-email" value="${email}" readonly>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Guardar cambios</button>
+        </form>
+		${getAvatarCropperModal()}
+    </div>
+    `;
+};
+
+export const getAvatarCropperModal = () => `
+    <div id="cropper-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <h4>Ajusta tu foto de perfil</h4>
+            <div id="cropper-container"></div>
+            <div class="modal-buttons">
+                <button id="cancel-crop-btn" class="btn btn-secondary">Cancelar</button>
+                <button id="save-crop-btn" class="btn btn-primary">Guardar Foto</button>
+            </div>
+        </div>
+    </div>
+`;
+
+export const getSecurityView = (user) => {
+    const email = user.email || '';
+    const phoneNumber = user.phoneNumber || ''; // Asumimos que guardaremos el teléfono aquí
+
+    return `
+    <div class="security-container">
+        <div class="profile-header">
+            <a href="#/settings" class="back-arrow">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M400-80 0-480l400-400 56 57-343 343 343 343-56 57Z"/></svg>
+            </a>
+            <h2>Seguridad</h2>
+        </div>
+
+        <div class="accordion">
+            <div class="accordion-header">
+                <span>Cambiar Contraseña</span>
+                <span class="accordion-icon">&rsaquo;</span>
+            </div>
+            <div class="accordion-content">
+                <p>Te enviaremos un correo electrónico con un enlace seguro para que puedas restablecer tu contraseña.</p>
+                <button id="send-reset-password-btn" class="btn btn-secondary">Enviar Solicitud</button>
+            </div>
+        </div>
+
+        <form id="security-form">
+            <div class="form-group">
+                <label for="security-email">Cambiar Correo Electrónico</label>
+                <input type="email" id="security-email" value="${email}">
+            </div>
+            <div class="form-group">
+                <label for="security-phone">Editar Número de Celular</label>
+                <input type="tel" id="security-phone" value="${phoneNumber}" placeholder="Introduce tu número de celular">
+            </div>
+
+            <a href="#/manage-guests" class="btn btn-secondary-outline">Gestionar invitados en mis rifas</a>
+
+            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        </form>
+    </div>
+    `;
+};
