@@ -36,6 +36,15 @@ const storage = firebase.storage();
 
 // Elementos del DOM
 const appContainer = document.getElementById('app-container');
+
+appContainer.addEventListener('click', (e) => {
+    // Si el elemento en el que hiciste clic (o su padre) es el botón de regresar...
+    if (e.target.closest('.app-back-btn')) {
+        e.preventDefault(); // Evita que el enlace "#" recargue la página
+        window.history.back(); // ...simplemente ve a la página anterior.
+    }
+});
+
 const userInfoContainer = document.getElementById('user-info');
 const mainNav = document.getElementById('nav-main');
 
@@ -78,6 +87,13 @@ async function router() {
     }
 
     const path = window.location.hash.slice(1) || '/';
+	
+	if (path === '/login') {
+        document.body.classList.add('login-page');
+    } else {
+        document.body.classList.remove('login-page');
+    }
+	
     const user = firebase.auth().currentUser;
     
     if (!user && path !== '/login') {
@@ -383,23 +399,19 @@ async function router() {
 					rafflesSnapshot.forEach(doc => {
 						const raffle = { id: doc.id, ...doc.data() };
 						rafflesHTML += `
-							<div class="raffle-card">
+							<div class="raffle-card-simple">
 								<h3>${raffle.name || 'Rifa sin nombre'}</h3>
 								<p><strong>Premio:</strong> ${raffle.prize || 'No especificado'}</p>
-								<a href="#/statistics/${raffle.id}" class="btn-stats">Ver Estadísticas</a>
+								<a href="#/statistics/${raffle.id}" class="btn btn-primary">Ver Estadísticas</a>
 							</div>
 						`;
 					});
 					rafflesHTML += `</div>`;
 				}
 
-				appContainer.innerHTML = `
-					<div class="statistics-list">
-						<h2>Estadísticas de Rifas</h2>
-						<p>Selecciona una rifa para ver sus detalles y estadísticas.</p>
-						${rafflesHTML}
-					</div>
-				`;
+				// --- LA CORRECCIÓN CLAVE ESTÁ AQUÍ ---
+				// Ahora le pasamos el contenido a la función que sí sabe dibujar el contenedor blanco.
+				appContainer.innerHTML = getStatisticsListView(rafflesHTML);
 
 			} catch (error) {
 				console.error("Error al obtener rifas para estadísticas:", error);
@@ -628,10 +640,16 @@ onAuthStateChanged(user => {
 });
 
 function updateUIForLoggedInUser(user) {
-    mainNav.style.display = 'block';
     const displayName = user.displayName || user.email;
+    // La lógica ahora es más robusta: usa la foto del usuario si existe, si no, usa la de por defecto.
+    const photoURL = user.photoURL ? user.photoURL : 'assets/default-avatar.png';
+
+    // El HTML para la cabecera, con el contenedor y la clase para la imagen.
     userInfoContainer.innerHTML = `
-        <span>${displayName}</span>
+        <div class="user-profile-info">
+            <img src="${photoURL}" alt="Avatar" class="header-avatar">
+            <span>${displayName}</span>
+        </div>
     `;
 }
 
@@ -868,62 +886,77 @@ function attachEventListeners(path) {
     }
 	
     if (path === '/login') {
-        const authForm = document.getElementById('auth-form');
-        const googleLoginBtn = document.getElementById('google-login-btn');
-        const toggleLink = document.getElementById('auth-toggle-link');
-        let isLogin = true;
+    const authForm = document.getElementById('auth-form');
+    const googleLoginBtn = document.getElementById('google-login-btn');
+    const toggleLink = document.getElementById('auth-toggle-link');
+    const forgotPasswordLink = document.getElementById('forgot-password-link');
+    
+    // CORRECCIÓN: Movemos la variable "isLogin" aquí arriba (al "pasillo")
+    // para que tanto el formulario como el enlace puedan verla y modificarla.
+    let isLogin = true;
 
-        if (authForm) {
-            authForm.addEventListener('submit', e => {
-                e.preventDefault();
-                const email = document.getElementById('email').value;
-                const password = document.getElementById('password').value;
-                // **CORREGIDO**: Se llama a loginUser y registerUser directamente
-                if (document.getElementById('auth-title').innerText === 'Iniciar Sesión') {
-                    loginUser(email, password).catch(err => alert(err.message));
-                } else {
-                    registerUser(email, password).catch(err => alert(err.message));
-                }
-            });
-        }
+    // Lógica para el envío del formulario (login o registro)
+    if (authForm) {
+        authForm.addEventListener('submit', e => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            // Ahora este "if" funcionará correctamente porque puede ver el interruptor
+            if (isLogin) {
+                loginUser(email, password).catch(err => alert(err.message));
+            } else {
+                registerUser(email, password).catch(err => alert(err.message));
+            }
+        });
+    }
 
-        if (googleLoginBtn) {
-            // **CORREGIDO**: Se llama a loginWithGoogle directamente
-            googleLoginBtn.addEventListener('click', loginWithGoogle);
-        }
+    // Lógica para el botón de Google
+    if (googleLoginBtn) {
+        googleLoginBtn.addEventListener('click', loginWithGoogle);
+    }
 
-        if (toggleLink) {
-            const toggleAuthMode = e => {
-                e.preventDefault();
-                isLogin = !isLogin;
-                document.getElementById('auth-title').innerText = isLogin ? 'Iniciar Sesión' : 'Registrarse';
-                document.getElementById('auth-action-btn').innerText = isLogin ? 'Iniciar Sesión' : 'Crear Cuenta';
-                document.getElementById('auth-toggle-text').innerHTML = isLogin 
-                    ? '¿No tienes cuenta? <a href="#" id="auth-toggle-link">Regístrate</a>' 
-                    : '¿Ya tienes cuenta? <a href="#" id="auth-toggle-link">Inicia Sesión</a>';
-                document.getElementById('auth-toggle-link').addEventListener('click', toggleAuthMode);
-            };
-            toggleLink.addEventListener('click', toggleAuthMode);
-        }
-		
-		if (forgotPasswordLink) {
-			forgotPasswordLink.addEventListener('click', (e) => {
-				e.preventDefault();
-				const email = prompt("Por favor, ingresa tu correo electrónico para enviarte el enlace de recuperación:");
-				if (email) {
-					firebase.auth().sendPasswordResetEmail(email)
-						.then(() => {
-							alert('¡Correo de recuperación enviado! Revisa tu bandeja de entrada.');
-						})
-						.catch((error) => {
-							alert('Error: ' + error.message);
-						});
-				}
-			});
-		}
+    // Lógica para el enlace que cambia entre Login y Registro
+    if (toggleLink) {
+        const toggleAuthMode = e => {
+            e.preventDefault();
+            isLogin = !isLogin; // Este código ahora cambia el interruptor que está arriba
+            
+            // Actualizamos el texto de la pantalla
+            document.getElementById('auth-title').innerText = isLogin ? 'Iniciar Sesión' : 'Crear una Cuenta';
+            document.getElementById('auth-subtitle').innerText = isLogin ? '¡Bienvenido de nuevo!' : 'Es rápido y fácil.';
+            document.getElementById('auth-action-btn').innerText = isLogin ? 'Iniciar Sesión' : 'Crear Cuenta';
+            
+            // Ocultamos el enlace de "Olvidé contraseña" en la pantalla de registro
+            forgotPasswordLink.style.display = isLogin ? 'block' : 'none';
 
-    // ---------------------- CREAR RAFFLE ----------------------
-    } else if (path === '/create') {
+            document.getElementById('auth-toggle-text').innerHTML = isLogin 
+                ? '¿No tienes cuenta? <a href="#" id="auth-toggle-link">Regístrate</a>' 
+                : '¿Ya tienes cuenta? <a href="#" id="auth-toggle-link">Inicia Sesión</a>';
+            
+            // Volvemos a añadir el listener al nuevo enlace que acabamos de crear
+            document.getElementById('auth-toggle-link').addEventListener('click', toggleAuthMode);
+        };
+        toggleLink.addEventListener('click', toggleAuthMode);
+    }
+
+    // Lógica del enlace de "Olvidaste tu contraseña"
+    if (forgotPasswordLink) {
+        forgotPasswordLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            const email = prompt("Por favor, ingresa tu correo para enviarte el enlace de recuperación:");
+            if (email) {
+                sendPasswordResetEmail(email)
+                    .then(() => {
+                        alert('¡Correo de recuperación enviado! Revisa tu bandeja de entrada.');
+                    })
+                    .catch((error) => {
+                        alert('Error: ' + error.message);
+                    });
+            }
+        });
+    }
+} else if (path === '/create') {
         const createRaffleForm = document.getElementById('create-raffle-form');
         if (createRaffleForm) createRaffleForm.addEventListener('submit', handleCreateRaffle);
 
@@ -1641,15 +1674,23 @@ function openCollaboratorModal(raffleId) {
     if (!modal) return;
 
     const form = document.getElementById('collaborator-form');
-    // CORRECCIÃ“N: Quitamos el punto antes de la clase
-    const closeModalBtn = modal.querySelector('close-collaborator-modal');
+    // CORRECCIÓN: Se añade el punto "." antes de la clase
+    const closeModalBtn = modal.querySelector('.close-collaborator-modal');
 
     form.querySelector('#collaborator-email').value = '';
     form.onsubmit = (e) => handleCollaboratorInvite(e, raffleId);
     
+    // Le damos la funcionalidad al botón de cerrar
     if (closeModalBtn) {
         closeModalBtn.onclick = () => modal.style.display = 'none';
     }
+    
+    // MEJORA: También cerramos el modal si se hace clic afuera, en el fondo oscuro
+    modal.addEventListener('click', (e) => {
+        if (e.target.id === 'collaborator-modal') {
+            modal.style.display = 'none';
+        }
+    });
 
     modal.style.display = 'flex';
 }
