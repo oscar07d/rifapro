@@ -2,7 +2,14 @@
 
 // Importamos la configuraciÃ³n de Firebase y los mÃ³dulos necesarios
 import { firebaseConfig } from './firebase-config.js';
-import * as Auth from './auth.js';
+import {
+	registerUser,
+	loginUser,
+	loginWithGoogle,
+	logout,
+	onAuthStateChanged,
+	sendPasswordResetEmail
+} from './auth.js';
 import {
     paymentMethods,
     getAuthView, 
@@ -14,7 +21,10 @@ import {
 	getCollaboratorModal,
 	getStatisticsListView,  
     getStatisticsDetailView,
-    getParticipantsListView   // <-- Aquí lo agregamos
+    getParticipantsListView,   // <-- Aquí lo agregamos
+	getSettingsView,
+	getEditProfileView,
+	getSecurityView
 } from './components.js';
 
 document.body.insertAdjacentHTML("beforeend", getCollaboratorModal());
@@ -22,6 +32,7 @@ document.body.insertAdjacentHTML("beforeend", getCollaboratorModal());
 // Inicializamos Firebase con nuestra configuraciÃ³n
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+const storage = firebase.storage();
 
 // Elementos del DOM
 const appContainer = document.getElementById('app-container');
@@ -38,6 +49,9 @@ const routes = {
     '/create': getCreateRaffleView,
     '/explore': getExploreView,
 	'/statistics': getStatisticsListView,
+	'/settings': getSettingsView,
+	'/edit-profile': getEditProfileView,
+	'/security': getSecurityView,
 };
 
 async function createTicketsForRaffle(raffleId) {
@@ -64,6 +78,12 @@ async function router() {
     }
 
     const path = window.location.hash.slice(1) || '/';
+    const user = firebase.auth().currentUser;
+    
+    if (!user && path !== '/login') {
+        window.location.hash = '/login';
+        return;
+    }
 
     // Detectamos rutas dinámicas
     const isRaffleDetail = path.startsWith('/raffle/');
@@ -241,7 +261,7 @@ async function router() {
 				const participants = [];
 				ticketsSnapshot.forEach(doc => participants.push(doc.data()));
 
-				// ✅ Renderizamos la vista de participantes
+				// ? Renderizamos la vista de participantes
 				appContainer.innerHTML = getParticipantsListView(raffleData, participants);
 
 				// ---------- Click en tarjeta para abrir detalle ----------
@@ -260,7 +280,7 @@ async function router() {
 
 					if (!searchInput || !statusFilter) return;
 
-					// 🔄 Mapear estados en español/inglés a clave interna
+					// ?? Mapear estados en español/inglés a clave interna
 					const statusLabelsRev = {
 						'pagado': 'paid', 'pagados': 'paid', 'pagado(s)': 'paid',
 						'parcial': 'partial', 'parciales': 'partial',
@@ -385,7 +405,27 @@ async function router() {
 				console.error("Error al obtener rifas para estadísticas:", error);
 				appContainer.innerHTML = '<p>Error al cargar las rifas.</p>';
 			}
+		} else if (path === '/edit-profile') {
+			// Lógica para cargar los datos de Editar Perfil
+			const userDoc = await db.collection('users').doc(user.uid).get();
+			const userData = userDoc.exists ? userDoc.data() : {};
+			const fullUserData = {
+				uid: user.uid,
+				email: user.email,
+				photoURL: user.photoURL,
+				displayName: userData.name || user.displayName, 
+			};
+			appContainer.innerHTML = getEditProfileView(fullUserData);
+
+		} else if (path === '/security') {
+			// Lógica para cargar los datos de Seguridad
+			const userDoc = await db.collection('users').doc(user.uid).get();
+			const userData = userDoc.exists ? userDoc.data() : {};
+			const fullUserData = { email: user.email, ...userData };
+			appContainer.innerHTML = getSecurityView(fullUserData);
+
 		} else {
+            // CORRECCIÓN CLAVE 2: La estructura if/else ahora es correcta
             // ---------------------- VISTAS PLANAS ----------------------
             const user = firebase.auth().currentUser;
             const userName = user ? user.displayName || user.email : 'Invitado';
@@ -572,7 +612,7 @@ async function handleShare(type) {
 
 // --- MANEJO DE ESTADO DE AUTENTICACIÃ“N ---
 
-Auth.onAuthStateChanged(user => {
+onAuthStateChanged(user => {
     if (user) {
         updateUIForLoggedInUser(user);
         if (window.location.hash === '#/login' || window.location.hash === '') {
@@ -588,20 +628,17 @@ Auth.onAuthStateChanged(user => {
 });
 
 function updateUIForLoggedInUser(user) {
-    mainNav.style.display = 'block'; // Muestra el contenedor de navegaciÃ³n
-    
-    // ESTA LÃNEA ES LA QUE "RELLENA" EL HEADER
+    mainNav.style.display = 'block';
+    const displayName = user.displayName || user.email;
     userInfoContainer.innerHTML = `
-        <span>${user.displayName || user.email}</span>
-        <button id="logout-btn" class="btn">Cerrar Sesión</button>
+        <span>${displayName}</span>
     `;
-    document.getElementById('logout-btn').addEventListener('click', () => Auth.logout());
 }
 
 function updateUIForLoggedOutUser() {
     mainNav.style.display = 'none';
     userInfoContainer.innerHTML = '';
-}
+}	
 
 // --- MANEJO DE EVENTOS ---
 
@@ -610,11 +647,226 @@ function attachEventListeners(path) {
     const isStatisticsDetail = path.startsWith('/statistics/');
     const isParticipantsList = path.startsWith('/participants/');
 	const forgotPasswordLink = document.getElementById('forgot-password-link');
-
     // Normaliza texto (quita tildes y pasa a minúsculas)
     const normalize = str => (str || '').toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 
     // ---------------------- LOGIN ----------------------
+	if (path === '/settings') {
+        const editProfileBtn = document.getElementById('go-to-edit-profile');
+        if (editProfileBtn) {
+            editProfileBtn.addEventListener('click', () => {
+                window.location.hash = '/edit-profile';
+            });
+        }
+		
+		const securityBtn = document.getElementById('go-to-security');
+        if (securityBtn) {
+            securityBtn.addEventListener('click', () => {
+                window.location.hash = '/security';
+            });
+        }
+		
+        // 2. Mantenemos la función del botón de cerrar sesión
+        const logoutBtn = document.getElementById('settings-logout-btn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+                    logout();
+                }
+            });
+        }
+    } else if (path === '/security') {
+        
+        // Lógica del Acordeón
+        const accordionHeader = document.querySelector('.accordion-header');
+        if (accordionHeader) {
+            accordionHeader.addEventListener('click', () => {
+                accordionHeader.classList.toggle('active');
+                const content = accordionHeader.nextElementSibling;
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                    content.style.padding = '0 1rem';
+                } else {
+                    content.style.maxHeight = content.scrollHeight + 32 + "px";
+                    content.style.padding = '0 1rem 1rem 1rem';
+                }
+            });
+        }
+
+        // Lógica para enviar el correo de restablecer contraseña
+        const resetBtn = document.getElementById('send-reset-password-btn');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => {
+                const user = firebase.auth().currentUser;
+                if (user && user.email) {
+                    // **CORREGIDO**: Se llama a sendPasswordResetEmail directamente
+                    sendPasswordResetEmail(user.email)
+                        .then(() => { alert('¡Correo de restablecimiento enviado!'); })
+                        .catch((error) => { alert('Hubo un error: ' + error.message); });
+                }
+            });
+        }
+
+        // Lógica para guardar cambios de correo y celular
+        const securityForm = document.getElementById('security-form');
+        if (securityForm) {
+            securityForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const user = firebase.auth().currentUser;
+                if (!user) return;
+
+                const newEmail = document.getElementById('security-email').value;
+                const newPhone = document.getElementById('security-phone').value;
+
+                const updates = [];
+                // Actualizar correo solo si ha cambiado
+                if (newEmail !== user.email) {
+                    updates.push(user.updateEmail(newEmail).then(() => {
+                        return db.collection('users').doc(user.uid).update({ email: newEmail });
+                    }));
+                }
+                // Actualizar siempre el teléfono
+                updates.push(db.collection('users').doc(user.uid).update({ phoneNumber: newPhone }));
+
+                try {
+                    await Promise.all(updates);
+                    alert('¡Cambios guardados con éxito!');
+                } catch (error) {
+                    console.error("Error al guardar cambios:", error);
+                    alert("Error: " + error.message + "\n\nEs posible que necesites volver a iniciar sesión para cambiar tu correo.");
+                }
+            });
+        }
+    } else if (path === '/edit-profile') {
+		// --- Lógica para guardar el nombre (esta ya la tenías) ---
+		const form = document.getElementById('edit-profile-form');
+		if (form) {
+			form.addEventListener('submit', async (e) => {
+				e.preventDefault();
+
+				const saveButton = form.querySelector('button[type="submit"]');
+				const newName = document.getElementById('profile-name').value;
+				const user = firebase.auth().currentUser;
+
+				if (!user || !newName.trim()) return;
+
+				saveButton.textContent = 'Guardando...';
+				saveButton.disabled = true;
+
+				try {
+					await user.updateProfile({ displayName: newName });
+					await db.collection('users').doc(user.uid).update({ name: newName });
+
+					alert('¡Perfil actualizado con éxito!');
+					document.querySelector('#user-info span').textContent = newName; // Actualiza el nombre en la cabecera
+					window.location.hash = '/settings';
+
+				} catch (error) {
+					console.error("Error al actualizar el perfil:", error);
+					alert("Hubo un error al guardar los cambios.");
+					saveButton.textContent = 'Guardar cambios';
+					saveButton.disabled = false;
+				}
+			});
+		}
+		// --- AÑADIDO: Lógica para que el lápiz de la foto funcione ---
+		const editAvatarBtn = document.getElementById('edit-avatar-button');
+		const avatarUploadInput = document.getElementById('avatar-upload-input');
+		const avatarImg = document.querySelector('.profile-avatar-img');
+		const cropperModal = document.getElementById('cropper-modal');
+		const cropperContainer = document.getElementById('cropper-container');
+		const saveCropBtn = document.getElementById('save-crop-btn');
+		const cancelCropBtn = document.getElementById('cancel-crop-btn');
+		let croppieInstance = null; // Aquí guardaremos la instancia de Croppie
+
+		if (editAvatarBtn && avatarUploadInput) {
+        
+			// 2. Cuando se hace clic en el lápiz, abrimos el selector de archivos
+			editAvatarBtn.addEventListener('click', () => {
+				avatarUploadInput.click();
+			});
+
+			// 3. Cuando el usuario elige un archivo
+			avatarUploadInput.addEventListener('change', (e) => {
+				const file = e.target.files[0];
+				if (!file) return;
+
+				const reader = new FileReader();
+				reader.onload = (event) => {
+					// Destruimos cualquier instancia vieja de Croppie
+					if (croppieInstance) {
+						croppieInstance.destroy();
+					}
+					// Mostramos la ventana emergente
+					cropperModal.style.display = 'flex';
+					// Creamos una nueva instancia de Croppie
+					croppieInstance = new Croppie(cropperContainer, {
+						viewport: { width: 200, height: 200, type: 'circle' },
+						boundary: { width: 250, height: 250 },
+						enableExif: true
+					});
+					// Le cargamos la imagen que el usuario seleccionó
+					croppieInstance.bind({
+						url: event.target.result,
+					});
+				};
+				reader.readAsDataURL(file);
+			});
+
+			// 4. Cuando el usuario hace clic en "Cancelar" en el modal
+			cancelCropBtn.addEventListener('click', () => {
+				cropperModal.style.display = 'none';
+				if (croppieInstance) {
+					croppieInstance.destroy();
+					croppieInstance = null;
+				}
+			});
+
+			// 5. Cuando el usuario hace clic en "Guardar Foto"
+			saveCropBtn.addEventListener('click', async () => {
+				if (!croppieInstance) return;
+
+				// Obtenemos la imagen recortada de Croppie
+				const blob = await croppieInstance.result({ type: 'blob', size: 'viewport', format: 'png' });
+
+				const user = firebase.auth().currentUser;
+				if (!user) return;
+
+				saveCropBtn.textContent = 'Subiendo...';
+				saveCropBtn.disabled = true;
+
+				try {
+					// Subimos el archivo BLOB (la imagen recortada) a Firebase
+					const filePath = `avatars/${user.uid}/profile.png`; // Siempre el mismo nombre para reemplazar
+					const fileRef = storage.ref(filePath);
+					await fileRef.put(blob);
+
+					const photoURL = await fileRef.getDownloadURL();
+
+					// Actualizamos la URL en Auth y Firestore
+					await user.updateProfile({ photoURL: photoURL });
+					await db.collection('users').doc(user.uid).update({ photoURL: photoURL });
+
+					// Mostramos la nueva foto y cerramos todo
+					avatarImg.src = photoURL;
+					cropperModal.style.display = 'none';
+					if (croppieInstance) {
+						croppieInstance.destroy();
+						croppieInstance = null;
+					}
+					alert('¡Foto de perfil actualizada!');
+
+				} catch (error) {
+					console.error("Error al subir la foto:", error);
+					alert("Hubo un error al actualizar la foto.");
+				} finally {
+					saveCropBtn.textContent = 'Guardar Foto';
+					saveCropBtn.disabled = false;
+				}
+			});
+		}
+    }
+	
     if (path === '/login') {
         const authForm = document.getElementById('auth-form');
         const googleLoginBtn = document.getElementById('google-login-btn');
@@ -626,15 +878,19 @@ function attachEventListeners(path) {
                 e.preventDefault();
                 const email = document.getElementById('email').value;
                 const password = document.getElementById('password').value;
-                if (isLogin) {
-                    Auth.loginUser(email, password).catch(err => alert(err.message));
+                // **CORREGIDO**: Se llama a loginUser y registerUser directamente
+                if (document.getElementById('auth-title').innerText === 'Iniciar Sesión') {
+                    loginUser(email, password).catch(err => alert(err.message));
                 } else {
-                    Auth.registerUser(email, password).catch(err => alert(err.message));
+                    registerUser(email, password).catch(err => alert(err.message));
                 }
             });
         }
 
-        if (googleLoginBtn) googleLoginBtn.addEventListener('click', Auth.loginWithGoogle);
+        if (googleLoginBtn) {
+            // **CORREGIDO**: Se llama a loginWithGoogle directamente
+            googleLoginBtn.addEventListener('click', loginWithGoogle);
+        }
 
         if (toggleLink) {
             const toggleAuthMode = e => {
