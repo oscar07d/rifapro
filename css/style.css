@@ -20,6 +20,157 @@
     --border-radius: 12px;
 }
 
+/* --- ESTILOS FINALES Y RESPONSIVOS PARA EL LOGIN --- */
+
+/* Regla global para un mejor manejo de tamaños */
+
+
+body.login-page {
+    /* Fondo degradado */
+    background: #2980B9;  /* fallback for old browsers */
+	background: -webkit-linear-gradient(to top, #FFFFFF, #6DD5FA, #2980B9);  /* Chrome 10-25, Safari 5.1-6 */
+	background: linear-gradient(to top, #FFFFFF, #6DD5FA, #2980B9); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+    
+    /* Centrado de contenido */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    /* Asegura que ocupe toda la pantalla */
+    width: 100%;
+    min-height: 100vh;
+    
+    /* LA CLAVE PARA ELIMINAR EL SCROLL */
+    overflow: hidden;
+
+    /* Estilos adicionales */
+    padding: 1rem;
+    font-family: var(--font-family);
+    box-sizing: border-box;
+}
+
+body.login-page header {
+    background: transparent;
+    box-shadow: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+}
+
+body.login-page .header-logo {
+    display: none;
+}
+
+body.login-page #nav-main { display: none !important; }
+
+/* El nuevo contenedor principal que tendrá las dos columnas */
+.login-wrapper {
+    width: 100%;
+    max-width: 900px;
+    min-height: 600px;
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Dos columnas de igual tamaño */
+    background-color: #fff;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    overflow: hidden; /* Para que los bordes redondeados se apliquen a los hijos */
+}
+
+/* Columna Izquierda: Branding */
+.login-branding-panel {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    color: white;
+    padding: 3rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.login-branding-panel img {
+    height: 65px;
+    width: auto;
+    align-self: flex-start;
+    margin-bottom: 3rem;
+    filter: brightness(0) invert(1); /* Pone el logo en blanco */
+}
+.login-branding-panel h1 {
+    font-size: 2rem;
+    line-height: 1.3;
+    margin: 0;
+}
+.login-branding-panel p {
+    font-size: 1rem;
+    opacity: 0.8;
+    margin-top: 1rem;
+}
+
+/* Columna Derecha: Formulario */
+.login-wrapper .auth-container {
+    padding: 3rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.auth-header {
+    text-align: left;
+    margin-bottom: 2rem;
+}
+.auth-header h2 { font-size: 1.8rem; margin: 0; }
+.auth-header p { margin: 0.25rem 0 0 0; }
+
+/* Corregimos el enlace de "Olvidaste tu contraseña" */
+.forgot-password { text-align: right; }
+.auth-toggle { text-align: center; margin-top: 1.5rem; }
+.auth-toggle a { font-weight: 600; text-decoration: none; }
+
+.separator {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: var(--text-light-color);
+    font-size: 0.8rem;
+    margin: 1rem 0;
+}
+.separator::before, .separator::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--border-color);
+}
+.separator:not(:empty)::before { margin-right: .5em; }
+.separator:not(:empty)::after { margin-left: .5em; }
+
+/* ESTILO DEFINITIVO Y FORZADO PARA EL BOTÓN DE GOOGLE */
+
+body.login-page .btn-google {
+    /* Estas 3 líneas son la clave y !important les da máxima prioridad */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    /* El resto de los estilos */
+    gap: 0.75rem;
+    width: 100%;
+    background-color: #ffffff;
+    color: #444;
+    border: 1px solid var(--border-color);
+    font-weight: 500;
+    padding: 0.8rem 0;
+    transition: background-color 0.2s ease;
+}
+
+body.login-page .btn-google:hover {
+    background-color: #f8f9fa;
+}
+
+body.login-page .btn-google svg {
+    /* Aseguramos que el SVG no tenga estilos extraños que lo afecten */
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0; /* Evita que el SVG se encoja */
+}
+
 body {
     font-family: var(--font-family);
     margin: 0;
@@ -65,30 +216,30 @@ header h1 {
     margin: 0 auto;
 }
 
-.auth-container, .form-container, .home-container, .raffle-detail-container {
+.auth-container,
+.form-container,
+.home-container,
+.explore-container,
+.statistics-container,
+.raffle-detail-container,
+.security-container,
+.edit-profile-container {
     background-color: var(--card-bg-color);
     padding: 2.5rem;
     border-radius: var(--border-radius);
     box-shadow: var(--shadow-md);
     width: 100%;
-    max-width: 650px;
-    margin: 0 auto;
+    max-width: 1200px; /* Un solo ancho máximo para consistencia */
+    margin: 2rem auto; /* Margen arriba/abajo para separar de la cabecera */
     box-sizing: border-box;
 }
 
-.explore-container {
-    background-color: var(--card-bg-color);
-    padding: 2.5rem;
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow-md);
-    width: 100%;
-    max-width: 650px;
-    margin: 0 auto;
-    box-sizing: border-box;
-}
-
-.explore-container, .home-container, .raffle-detail-container {
-    max-width: 1200px !important;
+/* Hacemos que los formularios de login y creación sean más angostos */
+.auth-container,
+.form-container,
+.security-container,
+.edit-profile-container {
+    max-width: 1000px;
 }
 
 h2, h3 {
@@ -189,7 +340,7 @@ input:focus, select:focus {
 /* Contenedor de botones en el Home */
 .home-buttons {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(250px, 2fr));
     gap: 1.5rem;
     margin-top: 2rem;
 }
@@ -972,9 +1123,11 @@ input[type="color"]::-moz-color-swatch {
 
 .raffles-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 20px;
-    margin-top: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+    /* Añadido: Alinea las tarjetas en la parte superior */
+    align-items: stretch; 
 }
 
 .raffle-card {
@@ -987,6 +1140,25 @@ input[type="color"]::-moz-color-swatch {
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     text-align: center;
+}
+
+.raffle-card-simple {
+    background: #f8f9fa;
+    border: 1px solid var(--border-color);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    text-align: center;
+    /* --- LA MAGIA ESTÁ AQUÍ --- */
+    display: flex; /* 1. Convertimos la tarjeta en un contenedor flexible */
+    flex-direction: column; /* 2. Ordenamos su contenido en una columna */
+}
+
+.raffle-card-simple h3 {
+    min-height: 48px; /* Damos una altura mínima al título para alinear */
+}
+
+.raffle-card-simple a.btn-primary {
+    margin-top: auto; /* 3. Empujamos el botón hacia la parte inferior */
 }
 
 .raffle-card:hover {
@@ -1300,6 +1472,91 @@ input:checked + .slider:before { transform: translateX(22px); }
     color: white;
 }
 
+/* La nueva barra de navegación inferior, oculta por defecto */
+.bottom-nav {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #ffffff;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+/* Ocultamos la barra si estamos en la página de inicio */
+body.home-page .bottom-nav {
+    display: none !important;
+}
+
+.nav-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1;
+    padding: 8px 0;
+    color: var(--text-light-color);
+    text-decoration: none;
+    font-size: 0.75rem;
+}
+.nav-link:hover {
+    color: var(--primary-color);
+}
+.nav-icon {
+    margin-bottom: 4px;
+    width: 24px;
+    height: 24px;
+}
+
+/* El avatar en la cabecera, oculto por defecto */
+.header-avatar {
+    display: none;
+}
+
+/* Estilos para el Avatar en la Cabecera */
+.user-profile-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem; /* Espacio entre la foto y el nombre */
+}
+
+.header-avatar {
+    /* Le decimos que se muestre como un bloque */
+    display: block;
+    
+    /* El tamaño y la forma */
+    width: 40px;
+    height: 40px;
+    border-radius: 50%; /* La hace redonda */
+    object-fit: cover; /* Evita que la imagen se deforme */
+    
+    /* Un borde sutil para que resalte */
+    border: 2px solid rgba(255, 255, 255, 0.7);
+}
+
+/* Estilos para el nuevo encabezado de página */
+.app-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.app-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.app-back-btn {
+    color: var(--text-color);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+}
+
 /* 8. DiseÃ±o Responsivo */
 @media (max-width: 600px) {
 	.participant-card .card-content p {
@@ -1337,6 +1594,20 @@ input:checked + .slider:before { transform: translateX(22px); }
     .participant-value {
         text-align: right;
         font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 850px) {
+    .login-wrapper {
+        /* Hacemos que sea una sola columna */
+        grid-template-columns: 1fr;
+        max-width: 450px;
+        min-height: auto;
+    }
+
+    .login-branding-panel {
+        /* Ocultamos el panel de branding en celulares para simplificar */
+        display: none;
     }
 }
 
@@ -1419,6 +1690,84 @@ input:checked + .slider:before { transform: translateX(22px); }
         grid-template-columns: 1fr 1fr;
         gap: 1rem;
     }
+	
+	/* Le decimos al body que se prepare para el modo app */
+    body.login-page {
+        align-items: flex-start;
+        padding: 0;
+        background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); /* Aseguramos el fondo */
+    }
+
+    /* Forzamos el logo de la cabecera a ser blanco */
+    body.login-page .header-logo-img {
+        filter: brightness(0) invert(1);
+    }
+    
+    /* Contenedor principal que ocupa toda la pantalla */
+    body.login-page .login-wrapper {
+        grid-template-columns: 1fr;
+        width: 100%;
+        min-height: 100vh;
+        border-radius: 0;
+        box-shadow: none;
+        background: transparent;
+    }
+
+    /* Ocultamos el panel de bienvenida */
+    body.login-page .login-branding-panel {
+        display: none;
+    }
+
+    /* Contenedor del formulario */
+    body.login-page .auth-container {
+        background: transparent;
+        box-shadow: none;
+        padding: 5rem 1.5rem 2rem 1.5rem;
+        justify-content: flex-start;
+    }
+
+    /* FORZAMOS A QUE TODO EL TEXTO SEA BLANCO */
+    body.login-page .auth-header h2,
+    body.login-page .auth-header p,
+    body.login-page .auth-container label,
+    body.login-page .separator,
+    body.login-page .auth-toggle {
+        color: #fff !important; /* Usamos !important para máxima prioridad */
+    }
+    
+    body.login-page .auth-toggle a,
+    body.login-page .forgot-password {
+        color: #fff !important;
+        font-weight: 700;
+    }
+	
+	body.login-page .auth-container .btn-primary {
+		background: #ffffff; /* Fondo blanco sólido */
+		color: var(--primary-color); /* Texto con el color primario */
+		font-weight: 700; /* Texto más grueso para mayor impacto */
+	}
+	
+	body.login-page .forgot-password {
+		margin-bottom: 2rem; /* Aumentamos el margen inferior */
+		margin-top: 0;
+	}
+
+    /* FORZAMOS EL ESTILO DE LOS CAMPOS DE TEXTO */
+    body.login-page .auth-container input[type="email"],
+    body.login-page .auth-container input[type="password"] {
+        background-color: rgba(255, 255, 255, 0.15) !important;
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+        color: #fff !important;
+    }
+    
+    body.login-page .auth-container input::placeholder {
+        color: rgba(255, 255, 255, 0.6) !important;
+    }
+
+    body.login-page .auth-container input:focus {
+        background-color: rgba(255, 255, 255, 0.25) !important;
+        border-color: #fff !important;
+    }
 }
 
 @media (max-width: 480px) {
@@ -1435,6 +1784,15 @@ input:checked + .slider:before { transform: translateX(22px); }
 		display: flex;
     	align-items: center; /* Empuja los botones al final de la tarjeta */
 	}
+	body.login-page .auth-container {
+        /* Reducimos el padding en pantallas pequeñas */
+        padding: 2rem 1.5rem; 
+    }
+
+    .auth-header h2 {
+        /* Reducimos el tamaño del título en celulares */
+        font-size: 1.6rem;
+    }
 }
 
 /* 9. Ajustes Finos para Pantallas Muy Estrechas */
