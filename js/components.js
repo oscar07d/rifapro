@@ -1,10 +1,10 @@
 // js/components.js
 
-// LISTA CENTRAL DE MÃ‰TODOS DE PAGO
+// LISTA CENTRAL DE MÉTODOS DE PAGO
 export const paymentMethods = [
     { name: 'Efectivo', value: 'efectivo', icon: 'assets/banks/efectivo.svg' },
     { name: 'Nequi', value: 'nequi', icon: 'assets/banks/nequi.svg' },
-    { name: 'Bre-B', value: 'bre-b', icon: 'assets/banks/bre-b.svg' }, // <-- AÃ‘ADIDO DE VUELTA
+    { name: 'Bre-B', value: 'bre-b', icon: 'assets/banks/bre-b.svg' }, // <-- AÑADIDO DE VUELTA
     { name: 'Daviplata', value: 'daviplata', icon: 'assets/banks/daviplata.svg' },
     { name: 'Nu', value: 'nu', icon: 'assets/banks/nu.svg' },
     { name: 'Bancolombia', value: 'bancolombia', icon: 'assets/banks/bancolombia.svg' },
@@ -23,35 +23,57 @@ export const paymentMethods = [
     { name: 'Ualá', value: 'uala', icon: 'assets/banks/uala.svg' }
 ];
 
-// Vista para el inicio de sesiÃ³n y registro
+// Vista para el inicio de sesión y registro
 export const getAuthView = () => `
-    <div class="auth-container">
-        <h2 id="auth-title">Iniciar Sesión</h2>
-        <form id="auth-form">
-            <div class="form-group">
-                <label for="email">Correo Electrónico</label>
-                <input type="email" id="email" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Contraseña</label>
-                <input type="password" id="password" required>
-            </div>
-            <button type="submit" id="auth-action-btn" class="btn btn-primary">Iniciar Sesión</button>
-        </form>
-        
-        <div class="auth-extras" style="text-align: center; margin-top: 1rem;">
-            <a href="#" id="forgot-password-link">¿Olvidaste tu contraseña?</a>
-            <p id="auth-toggle-text" style="margin-top: 0.5rem;">¿No tienes cuenta? <a href="#" id="auth-toggle-link">Regístrate</a></p>
+    <div class="login-wrapper">
+        <div class="login-branding-panel">
+            <img src="assets/logo_rifapro_b.svg" alt="RifaPro Logo">
+            <h1>Gestiona tus rifas de forma fácil y profesional.</h1>
+            <p>Controla tus boletos, pagos y estadísticas en un solo lugar.</p>
         </div>
-        
-        <button id="google-login-btn" class="btn btn-secondary">Iniciar con Google</button>
+
+        <div class="auth-container">
+            <div class="auth-header">
+                <h2 id="auth-title">Iniciar Sesión</h2>
+                <p id="auth-subtitle">¡Bienvenido de nuevo!</p>
+            </div>
+
+            <form id="auth-form">
+                <div class="form-group">
+                    <label for="email">Correo Electrónico</label>
+                    <input type="email" id="email" required placeholder="tu@correo.com">
+                </div>
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <input type="password" id="password" required placeholder="••••••••••">
+                </div>
+                <a href="#" id="forgot-password-link" class="forgot-password">¿Olvidaste tu contraseña?</a>
+                <button type="submit" id="auth-action-btn" class="btn btn-primary">Iniciar Sesión</button>
+            </form>
+            
+            <div class="separator">
+                <span>o</span>
+            </div>
+            
+            <button id="google-login-btn" class="btn btn-google">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 174.29 174.29" width="20px" height="20px">
+                    <path style="fill:#ea4335;" d="M87.14,34.49c12.85,0,24.36,4.43,33.44,13.07l24.87-24.87C130.35,8.64,110.64,0,87.14,0,53.08,0,23.64,19.53,9.3,48l28.98,22.48c6.86-20.66,26.14-35.98,48.87-35.98Z"/>
+                    <path style="fill:#4285f4;" d="M170.58,89.14c0-5.7-.54-11.22-1.38-16.52H87.14v32.75h46.98c-2.11,10.75-8.21,19.9-17.36,26.07l28.07,21.79c16.38-15.18,25.74-37.62,25.74-64.09Z"/>
+                    <path style="fill:#fbbc05;" d="M38.23,103.81c-1.74-5.26-2.76-10.86-2.76-16.67s.98-11.4,2.76-16.67L9.26,48C3.34,59.77,0,73.05,0,87.14s3.34,27.38,9.3,39.14c0,0,28.94-22.48,28.94-22.48Z"/>
+                    <path style="fill:#34a853;" d="M87.14,174.29c23.53,0,43.32-7.73,57.7-21.1l-28.07-21.79c-7.81,5.26-17.86,8.35-29.63,8.35-22.73,0-42.01-15.32-48.91-35.98l-28.98,22.48c14.38,28.5,43.83,48.04,77.88,48.04Z"/>
+                </svg>
+                <span>Iniciar con Google</span>
+            </button>
+
+            <p id="auth-toggle-text" class="auth-toggle">¿No tienes cuenta? <a href="#" id="auth-toggle-link">Regístrate</a></p>
+        </div>
     </div>
 `;
 
 // Vista del panel principal (Home)
 export const getHomeView = (userName) => `
     <div class="home-container">
-        <h2>¡Bienvenido, ${userName}!</h2>
+        <h2> ¡Bienvenido, ${userName}!</h2>
         <p>¿Qué te gustaría hacer hoy?</p>
         <div class="home-buttons">
             <a href="#/create" class="btn btn-primary">
@@ -75,12 +97,10 @@ export const getHomeView = (userName) => `
 `;
 
 export const getStatisticsListView = (rafflesHTML) => `
-    <div class="explore-container">
-        <h2>Estadísticas de Rifas</h2>
+    <div class="statistics-container">
+        ${getPageHeader('Estadísticas de Rifas')}
         <p>Selecciona una rifa para ver sus detalles y estadísticas.</p>
-        <div class="stats-raffle-list">
-            ${rafflesHTML}
-        </div>
+        ${rafflesHTML}
     </div>
 `;
 
@@ -95,7 +115,7 @@ export const getCreateRaffleView = () => {
 
     return `
     <div class="form-container">
-        <h2>Crear Nueva Rifa</h2>
+        ${getPageHeader('Crear Nueva Rifa')}
         <form id="create-raffle-form">
             
             <div class="form-group">
@@ -114,7 +134,7 @@ export const getCreateRaffleView = () => {
             
             <div class="form-group">
                 <label for="raffle-lottery">Juega con la lotería de</label>
-                <input type="text" id="raffle-lottery" placeholder="Ej: Lotería de Bogotá¡" required>
+                <input type="text" id="raffle-lottery" placeholder="Ej: Lotería de Bogotá" required>
             </div>
 
             <div class="form-group">
@@ -193,10 +213,10 @@ export const getCreateRaffleView = () => {
     `;
 };
 
-// Vista para la pÃ¡gina de "Explorar Rifas"
+// Vista para la página de "Explorar Rifas"
 export const getExploreView = (rafflesHTML) => `
     <div class="explore-container">
-        <h2>Administrar Mis Rifas</h2>
+		${getPageHeader('Administrar Mis Rifas')}
         <div id="raffles-list">
             ${rafflesHTML}
         </div>
@@ -269,9 +289,10 @@ export const getRaffleDetailView = (raffle) => {
 
     return `
     <div class="raffle-detail-container">
-        <div class="raffle-info">
-            <h2>${raffle.name}</h2>
-            
+
+        ${getPageHeader(raffle.name)}
+
+        <div class="raffle-info">        
             <div class="info-block">
                 <p><strong>Premio:</strong> ${raffle.prize}</p>
                 <p><strong>Precio del boleto:</strong> $${raffle.ticketPrice.toLocaleString('es-CO')}</p>
@@ -294,14 +315,14 @@ export const getRaffleDetailView = (raffle) => {
             <div class="grid-actions">
                 <button type="button" id="share-status-btn" class="btn btn-primary">Compartir Estado de la Rifa</button>
             </div>
-            </div>
+        </div>
     </div>
     ${getTicketModal()}
     ${getStatusModal()} 
-	${getCollaboratorModal()} `;
+    ${getCollaboratorModal()} `;
 };
 
-// AHORA, DEFINIMOS LA SEGUNDA FUNCIÃ“N POR SEPARADO
+// AHORA, DEFINIMOS LA SEGUNDA FUNCIÓN POR SEPARADO
 export const getTicketModal = () => `
     <div id="ticket-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
@@ -387,12 +408,12 @@ export const getTicketModal = () => `
                     </div>
                 </div>
                 <div style="width: 45%; background: linear-gradient(45deg, #6a11cb, #2575fc); color: white; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                    <p style="margin: 0; font-size: 1.5rem; font-weight: 500;">TU NÃšMERO</p>
+                    <p style="margin: 0; font-size: 1.5rem; font-weight: 500;">TU NÚMERO</p>
                     <p id="template-number" style="margin: 0; font-size: 8rem; font-weight: 700; line-height: 1;"></p>
                 </div>
             </div>
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 20px; padding-top: 15px; border-top: 2px solid #f0f2f5;">
-                 <p style="margin: 0 0 5px 0; font-size: 0.9rem; color: #777; font-weight: 600;">Â¡Mucha Suerte!</p>
+                 <p style="margin: 0 0 5px 0; font-size: 0.9rem; color: #777; font-weight: 600;">¡Mucha Suerte!</p>
                  <div style="display: flex; align-items: center; gap: 5px;">
                     <p style="margin: 0; font-size: 0.75rem; color: #999;">Desarrollado por</p>
                     <svg id="Capa_2" data-name="Capa 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 879.14 85.62" style="height: 16px; opacity: 0.6;">
@@ -436,7 +457,7 @@ export const getStatusModal = () => `
 export const getCollaboratorModal = () => `
     <div id="collaborator-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
-            <span class="close-collaborator-modal">&times;</span>
+            <span class="close-modal close-collaborator-modal">&times;</span>
             <h3>Añadir Colaborador</h3>
             <p>Ingresa el correo del usuario de RifaPro que te ayudará a administrar esta rifa.</p>
             <form id="collaborator-form">
@@ -459,7 +480,7 @@ document.addEventListener("click", (e) => {
 export const getStatisticsDetailView = (raffle) => `
     <div class="statistics-container">
         <div class="stats-header">
-            <h2>Estadísticas: ${raffle.name}</h2>
+            ${getPageHeader(`Estadísticas: ${raffle.name}`)}
             <div class="header-actions">
 				<a href="#/participants/${raffle.id}" class="btn btn-secondary">
 					<svg xmlns="http://www.w3.org/2000/svg" 
@@ -532,13 +553,14 @@ export const getParticipantsListView = (raffle, tickets) => {
     if (!tickets.length) {
         return `
             <section class="participants-list">
+				${getPageHeader('Lista de Participantes')}
                 <h2>Lista de Participantes</h2>
                 <p>No hay participantes con boletos asignados en esta rifa.</p>
             </section>
         `;
     }
 
-    // Traducción de estados (clave en inglés, etiqueta en español)
+    // Traducci�n de estados (clave en ingl�s, etiqueta en espa�ol)
     const statusLabels = {
         paid: "Pagado",
         partial: "Parcial",
@@ -605,8 +627,7 @@ export const getParticipantsListView = (raffle, tickets) => {
 
 export const getSettingsView = () => `
     <div class="settings-container">
-        <h2>Configuración</h2>
-
+		${getPageHeader('Configuración')}
         <div class="settings-section">
             <h3>Cuenta</h3>
             <div id="go-to-edit-profile" class="settings-item">
@@ -727,7 +748,7 @@ export const getAvatarCropperModal = () => `
 
 export const getSecurityView = (user) => {
     const email = user.email || '';
-    const phoneNumber = user.phoneNumber || ''; // Asumimos que guardaremos el teléfono aquí
+    const phoneNumber = user.phoneNumber || ''; // Asumimos que guardaremos el tel�fono aqu�
 
     return `
     <div class="security-container">
@@ -766,3 +787,14 @@ export const getSecurityView = (user) => {
     </div>
     `;
 };
+
+export const getPageHeader = (title) => `
+    <div class="app-header">
+        <a href="#" class="app-back-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" height="28px" viewBox="0 -960 960 960" width="28px" fill="currentColor">
+                <path d="M400-80 0-480l400-400 56 57-343 343 343 343-56 57Z"/>
+            </svg>
+        </a>
+        <h2>${title}</h2>
+    </div>
+`;
