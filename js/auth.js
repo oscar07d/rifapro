@@ -75,3 +75,11 @@ export function logout() {
 export function onAuthStateChanged(callback) {
     return auth.onAuthStateChanged(callback);
 }
+
+/**
+ * Envía un correo de restablecimiento de contraseña.
+ * @param {string} email - Correo del usuario.
+ */
+export function sendPasswordResetEmail(email) {
+    return auth.sendPasswordResetEmail(email);
+}
