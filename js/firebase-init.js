@@ -1,13 +1,17 @@
-// public/js/firebase-init.js
+// js/firebase-init.js
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 
-import { firebaseConfig } from './firebase-config.js';
+// ⚠️ Ojo: storageBucket debe terminar en .appspot.com, no .app
+const firebaseConfig = {
+  apiKey: "AIzaSyCWsjPbPZ2F9kU5fv-A9KCjKMFstjZgJKc",
+  authDomain: "rifapro-6d8e9.firebaseapp.com",
+  projectId: "rifapro-6d8e9",
+  storageBucket: "rifapro-6d8e9.appspot.com",
+  messagingSenderId: "551676822561",
+  appId: "1:551676822561:web:d3c8baa2c3ac1fddf80f60",
+  measurementId: "G-Q5T3K9ZRNF"
+};
 
-// Inicializa Firebase
-firebase.initializeApp(firebaseConfig);
-
-// Inicializa y exporta los servicios que usaremos
-const auth = firebase.auth();
-const db = firebase.firestore();
-const googleProvider = new firebase.auth.GoogleAuthProvider();
-
-export { auth, db, googleProvider };
+// Inicializa Firebase y expórtala
+const app = initializeApp(firebaseConfig);
+export { app };
