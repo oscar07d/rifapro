@@ -1,19 +1,25 @@
 // js/auth.js
 
-// Importa los métodos de Firebase Auth
 import { 
-    getAuth, 
-    createUserWithEmailAndPassword, 
-    signInWithEmailAndPassword, 
-    signOut, 
-    onAuthStateChanged as firebaseOnAuthStateChanged,
-    sendPasswordResetEmail as firebaseSendPasswordResetEmail,
-    GoogleAuthProvider,
-    signInWithRedirect,
-    getRedirectResult
-} from "firebase/auth";
+  getAuth, 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
+  signOut, 
+  onAuthStateChanged as firebaseOnAuthStateChanged,
+  sendPasswordResetEmail as firebaseSendPasswordResetEmail,
+  GoogleAuthProvider,
+  signInWithRedirect,
+  getRedirectResult
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
-import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
+import { 
+  getFirestore, 
+  doc, 
+  setDoc, 
+  getDoc, 
+  serverTimestamp 
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
 import { app } from './firebase-init.js';
 
 // Inicializamos Auth y Firestore
@@ -112,3 +118,4 @@ export function onAuthStateChanged(callback) {
 export function sendPasswordResetEmail(email) {
     return firebaseSendPasswordResetEmail(auth, email);
 }
+
