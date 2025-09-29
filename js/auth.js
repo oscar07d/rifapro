@@ -1,85 +1,114 @@
 // js/auth.js
 
-// Referencia a los servicios de Firebase
-import { auth, db, googleProvider } from './firebase-init.js';
+// Importa los métodos de Firebase Auth
+import { 
+    getAuth, 
+    createUserWithEmailAndPassword, 
+    signInWithEmailAndPassword, 
+    signOut, 
+    onAuthStateChanged as firebaseOnAuthStateChanged,
+    sendPasswordResetEmail as firebaseSendPasswordResetEmail,
+    GoogleAuthProvider,
+    signInWithRedirect,
+    getRedirectResult
+} from "firebase/auth";
+
+import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
+import { app } from './firebase-init.js';
+
+// Inicializamos Auth y Firestore
+const auth = getAuth(app);
+const db = getFirestore(app);
+const googleProvider = new GoogleAuthProvider();
 
 /**
  * Registra un nuevo usuario con correo y contraseña.
- * @param {string} email - Correo del usuario.
- * @param {string} password - Contraseña del usuario.
  */
 export async function registerUser(email, password) {
     try {
-        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
-        
-        // Creamos un documento para el usuario en la colección 'users'
-        await db.collection('users').doc(user.uid).set({
+
+        await setDoc(doc(db, 'users', user.uid), {
             email: user.email,
-            name: user.email.split('@')[0], // Nombre por defecto
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            name: user.email.split('@')[0],
+            createdAt: serverTimestamp()
         });
-        console.log('Usuario registrado y datos guardados:', user.uid);
+
+        console.log('✅ Usuario registrado:', user.uid);
     } catch (error) {
-        console.error("Error al registrar usuario:", error);
+        console.error("❌ Error al registrar:", error);
         alert(error.message);
     }
 }
 
 /**
  * Inicia sesión con correo y contraseña.
- * @param {string} email - Correo del usuario.
- * @param {string} password - Contraseña del usuario.
  */
 export function loginUser(email, password) {
-    return auth.signInWithEmailAndPassword(email, password);
+    return signInWithEmailAndPassword(auth, email, password);
 }
 
 /**
- * Inicia sesión con una ventana emergente de Google.
+ * Inicia sesión con Google (redirección).
  */
 export async function loginWithGoogle() {
     try {
-        const result = await auth.signInWithPopup(googleProvider);
-        const user = result.user;
-        const userRef = db.collection('users').doc(user.uid);
-        const doc = await userRef.get();
-
-        // Si el usuario de Google no existe en nuestra BD, lo creamos
-        if (!doc.exists) {
-            await userRef.set({
-                email: user.email,
-                name: user.displayName,
-                photoURL: user.photoURL,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-        }
-        console.log('Inicio de sesión con Google exitoso.');
+        // Redirige al login de Google
+        await signInWithRedirect(auth, googleProvider);
     } catch (error) {
-        console.error("Error al iniciar sesión con Google:", error);
+        console.error("❌ Error al iniciar sesión con Google:", error);
         alert(error.message);
     }
 }
 
 /**
- * Cierra la sesión del usuario actual.
+ * Maneja el resultado después de la redirección de Google.
+ * Llama a esta función en tu main.js cuando cargue la app.
+ */
+export async function handleGoogleRedirect() {
+    try {
+        const result = await getRedirectResult(auth);
+        if (result) {
+            const user = result.user;
+            const userRef = doc(db, 'users', user.uid);
+            const docSnap = await getDoc(userRef);
+
+            if (!docSnap.exists()) {
+                await setDoc(userRef, {
+                    email: user.email,
+                    name: user.displayName,
+                    photoURL: user.photoURL,
+                    createdAt: serverTimestamp()
+                });
+            }
+
+            console.log("✅ Login con Google exitoso:", user.displayName);
+        }
+    } catch (error) {
+        if (error.code !== "auth/no-auth-event") {
+            console.error("❌ Error procesando redirección:", error);
+        }
+    }
+}
+
+/**
+ * Cierra la sesión.
  */
 export function logout() {
-    return auth.signOut();
+    return signOut(auth);
 }
 
 /**
- * Observador que se ejecuta cuando cambia el estado de autenticación.
- * @param {function} callback - Función a ejecutar con el usuario (o null si no está logueado).
+ * Observador del estado de autenticación.
  */
 export function onAuthStateChanged(callback) {
-    return auth.onAuthStateChanged(callback);
+    return firebaseOnAuthStateChanged(auth, callback);
 }
 
 /**
- * Envía un correo de restablecimiento de contraseña.
- * @param {string} email - Correo del usuario.
+ * Restablecer contraseña.
  */
 export function sendPasswordResetEmail(email) {
-    return auth.sendPasswordResetEmail(email);
+    return firebaseSendPasswordResetEmail(auth, email);
 }
