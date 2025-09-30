@@ -635,16 +635,17 @@ onAuthStateChanged(user => {
     } else {
         updateUIForLoggedOutUser();
         window.location.hash = '/login';
-        router();
     }
 });
 
 function updateUIForLoggedInUser(user) {
     const displayName = user.displayName || user.email;
-    // La lógica ahora es más robusta: usa la foto del usuario si existe, si no, usa la de por defecto.
     const photoURL = user.photoURL ? user.photoURL : 'assets/default-avatar.png';
 
-    // El HTML para la cabecera, con el contenedor y la clase para la imagen.
+    // Mostrar la navegación y la app
+    mainNav.style.display = 'flex';
+    appContainer.style.display = 'block';
+
     userInfoContainer.innerHTML = `
         <div class="user-profile-info">
             <img src="${photoURL}" alt="Avatar" class="header-avatar">
@@ -654,9 +655,14 @@ function updateUIForLoggedInUser(user) {
 }
 
 function updateUIForLoggedOutUser() {
+    // Ocultar navegación y limpiar user-info
     mainNav.style.display = 'none';
     userInfoContainer.innerHTML = '';
-}	
+
+    // Renderizar la vista de login dentro de app-container
+    appContainer.style.display = 'block';
+    appContainer.innerHTML = getAuthView();
+}
 
 // --- MANEJO DE EVENTOS ---
 
