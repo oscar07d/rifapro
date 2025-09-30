@@ -49,6 +49,7 @@ const userInfoContainer = document.getElementById('user-info');
 const mainNav = document.getElementById('nav-main');
 
 // Variable global para cancelar la escucha de tickets en tiempo real
+let currentUser = null;
 let unsubscribeFromTickets = null;
 
 // --- MANEJO DE RUTAS (ROUTING) ---
@@ -94,7 +95,7 @@ async function router() {
         document.body.classList.remove('login-page');
     }
 	
-    const user = firebase.auth().currentUser;
+    const user = currentUser;
     
     if (!user && path !== '/login') {
         window.location.hash = '/login';
@@ -119,7 +120,7 @@ async function router() {
             const urlParams = new URLSearchParams(path.split('?')[1] || '');
             const ticketNumber = urlParams.get('ticket');
 
-            const user = firebase.auth().currentUser; // ? Se declara ANTES de usar
+            const user = currentUser; // ? Se declara ANTES de usar
             console.log("RaffleId limpio:", raffleId, "Ticket:", ticketNumber, "Usuario:", user?.uid);
 
             try {
@@ -346,7 +347,7 @@ async function router() {
 			}
 		} else if (path === '/explore') {
             // ---------------------- EXPLORAR ----------------------
-            const user = firebase.auth().currentUser;
+            const user = currentUser;
             if (!user) {
                 appContainer.innerHTML = "<h2>Debes iniciar sesión para ver tus rifas.</h2>";
                 return;
@@ -380,7 +381,7 @@ async function router() {
 
         } else if (path === '/statistics') {
 			// ---------------------- LISTA DE ESTADÍSTICAS ----------------------
-			const user = firebase.auth().currentUser;
+			const user = currentUser;
 			if (!user) {
 				appContainer.innerHTML = "<h2>Debes iniciar sesión para ver las estadísticas.</h2>";
 				return;
@@ -439,7 +440,7 @@ async function router() {
 		} else {
             // CORRECCIÓN CLAVE 2: La estructura if/else ahora es correcta
             // ---------------------- VISTAS PLANAS ----------------------
-            const user = firebase.auth().currentUser;
+            const user = currentUser;
             const userName = user ? user.displayName || user.email : 'Invitado';
             appContainer.innerHTML = (path === '/') ? view(userName) : view();
         }
@@ -627,27 +628,19 @@ async function handleShare(type) {
 onAuthStateChanged(user => {
     console.log("👤 Estado de autenticación cambió:", user);
 
+    currentUser = user; // <-- guardamos el user globalmente
+
     if (user) {
         updateUIForLoggedInUser(user);
-
-        // Forzamos ir al home cuando se loguea
-        if (window.location.hash === '#/login' || window.location.hash === '' || window.location.hash === '#') {
-            console.log("➡️ Redirigiendo al Home...");
-            window.location.hash = '/';
-        } else {
-            console.log("➡️ Manteniendo ruta:", window.location.hash);
-        }
-
-        // Siempre aseguramos refrescar la vista
+        window.location.hash = '/'; // siempre manda al home
         router();
-
     } else {
         updateUIForLoggedOutUser();
-        console.log("🚪 Usuario salió, yendo a login...");
         window.location.hash = '/login';
         router();
     }
 });
+
 
 function updateUIForLoggedInUser(user) {
     const displayName = user.displayName || user.email;
@@ -1902,4 +1895,3 @@ function renderParticipantsList(tickets, container, status) {
         </table>
     `;
 }
-
