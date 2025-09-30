@@ -20,6 +20,23 @@
     --border-radius: 12px;
 }
 
+/* Estilo para la leyenda de mantenimiento de Google */
+.google-signin-notice {
+    font-size: 0.8rem;
+    text-align: center;
+    color: var(--text-light-color);
+    background-color: #f8f9fa;
+    padding: 0.75rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+}
+
+/* Estilo para el botón de Google cuando está deshabilitado */
+.btn-google:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 /* --- ESTILOS FINALES Y RESPONSIVOS PARA EL LOGIN --- */
 
 /* Regla global para un mejor manejo de tamaños */
@@ -1825,3 +1842,4 @@ body.home-page .bottom-nav {
         height: 30px;
     }
 }
+
