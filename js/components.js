@@ -55,7 +55,7 @@ export const getAuthView = () => `
                 <span>o</span>
             </div>
             
-            <button id="google-login-btn" class="btn btn-google">
+            <button id="google-login-btn" class="btn btn-google" disabled>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 174.29 174.29" width="20px" height="20px">
                     <path style="fill:#ea4335;" d="M87.14,34.49c12.85,0,24.36,4.43,33.44,13.07l24.87-24.87C130.35,8.64,110.64,0,87.14,0,53.08,0,23.64,19.53,9.3,48l28.98,22.48c6.86-20.66,26.14-35.98,48.87-35.98Z"/>
                     <path style="fill:#4285f4;" d="M170.58,89.14c0-5.7-.54-11.22-1.38-16.52H87.14v32.75h46.98c-2.11,10.75-8.21,19.9-17.36,26.07l28.07,21.79c16.38-15.18,25.74-37.62,25.74-64.09Z"/>
@@ -64,6 +64,10 @@ export const getAuthView = () => `
                 </svg>
                 <span>Iniciar con Google</span>
             </button>
+
+			<p class="google-signin-notice">
+                ⚠️ El inicio con Google está en mantenimiento. Por favor, inicia sesión con tu correo y contraseña.
+            </p>
 
             <p id="auth-toggle-text" class="auth-toggle">¿No tienes cuenta? <a href="#" id="auth-toggle-link">Regístrate</a></p>
         </div>
@@ -798,3 +802,4 @@ export const getPageHeader = (title) => `
         <h2>${title}</h2>
     </div>
 `;
+
