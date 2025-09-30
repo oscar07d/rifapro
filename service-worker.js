@@ -80,39 +80,38 @@ function isInStandaloneMode() {
   );
 }
 
-// Instalar Service Worker solo si es PWA
+// Instala el Service Worker y guarda los archivos en caché
 self.addEventListener("install", (event) => {
-  if (isInStandaloneMode()) {
     event.waitUntil(
-      caches.open(CACHE_NAME).then((cache) => cache.addAll(urlsToCache))
+        caches.open(CACHE_NAME).then((cache) => {
+            console.log("Cache abierto, guardando archivos...");
+            return cache.addAll(urlsToCache);
+        })
     );
-  }
 });
 
-// Activar Service Worker solo si es PWA
+// Activa el Service Worker y limpia cachés viejos
 self.addEventListener("activate", (event) => {
-  if (isInStandaloneMode()) {
     event.waitUntil(
-      caches.keys().then((cacheNames) =>
-        Promise.all(
-          cacheNames.map((cacheName) => {
-            if (cacheName !== CACHE_NAME) {
-              return caches.delete(cacheName);
-            }
-          })
+        caches.keys().then((cacheNames) =>
+            Promise.all(
+                cacheNames.map((cacheName) => {
+                    if (cacheName !== CACHE_NAME) {
+                        console.log("Borrando caché antiguo:", cacheName);
+                        return caches.delete(cacheName);
+                    }
+                })
+            )
         )
-      )
     );
-  }
 });
 
-// Interceptar peticiones solo si es PWA
+// Intercepta las peticiones y sirve desde la caché si es posible
 self.addEventListener("fetch", (event) => {
-  if (isInStandaloneMode()) {
     event.respondWith(
-      caches.match(event.request).then((response) => {
-        return response || fetch(event.request);
-      })
+        caches.match(event.request).then((response) => {
+            // Si encontramos el archivo en caché, lo devolvemos. Si no, lo buscamos en la red.
+            return response || fetch(event.request);
+        })
     );
-  }
 });
