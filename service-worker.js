@@ -72,37 +72,47 @@ const urlsToCache = [
   "/rifapro/assets/banks/uala.svg"
 ];
 
-// Instalar Service Worker y guardar en caché
-self.addEventListener("install", event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(urlsToCache);
-    })
+// Detectar si estamos en modo PWA (instalado)
+function isInStandaloneMode() {
+  return (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    window.navigator.standalone === true
   );
+}
+
+// Instalar Service Worker solo si es PWA
+self.addEventListener("install", (event) => {
+  if (isInStandaloneMode()) {
+    event.waitUntil(
+      caches.open(CACHE_NAME).then((cache) => cache.addAll(urlsToCache))
+    );
+  }
 });
 
-// Activar Service Worker y limpiar cachés viejas
-self.addEventListener("activate", event => {
-  event.waitUntil(
-    caches.keys().then(cacheNames =>
-      Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
-          }
-        })
+// Activar Service Worker solo si es PWA
+self.addEventListener("activate", (event) => {
+  if (isInStandaloneMode()) {
+    event.waitUntil(
+      caches.keys().then((cacheNames) =>
+        Promise.all(
+          cacheNames.map((cacheName) => {
+            if (cacheName !== CACHE_NAME) {
+              return caches.delete(cacheName);
+            }
+          })
+        )
       )
-    )
-  );
+    );
+  }
 });
 
-// Interceptar peticiones y responder desde caché
-self.addEventListener("fetch", event => {
-  event.respondWith(
-    caches.match(event.request).then(response => {
-      return response || fetch(event.request);
-    })
-  );
+// Interceptar peticiones solo si es PWA
+self.addEventListener("fetch", (event) => {
+  if (isInStandaloneMode()) {
+    event.respondWith(
+      caches.match(event.request).then((response) => {
+        return response || fetch(event.request);
+      })
+    );
+  }
 });
-
-// JavaScript Document
