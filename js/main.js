@@ -627,14 +627,20 @@ async function handleShare(type) {
 onAuthStateChanged(user => {
     if (user) {
         updateUIForLoggedInUser(user);
+
+        // 👇 Si está en login, lo mandamos a Home inmediatamente
         if (window.location.hash === '#/login' || window.location.hash === '') {
             window.location.hash = '/';
-        } else {
-            router();
+			router();
         }
+
+        // 👇 Siempre forzamos a que se pinte lo que toca
+        router();
+
     } else {
         updateUIForLoggedOutUser();
         window.location.hash = '/login';
+        router();
     }
 });
 
@@ -880,89 +886,91 @@ function attachEventListeners(path) {
 					}
 					alert('¡Foto de perfil actualizada!');
 
-				} catch (error) {
-					console.error("Error al subir la foto:", error);
-					alert("Hubo un error al actualizar la foto.");
-				} finally {
-					saveCropBtn.textContent = 'Guardar Foto';
-					saveCropBtn.disabled = false;
+					} catch (error) {
+						console.error("Error al subir la foto:", error);
+						alert("Hubo un error al actualizar la foto.");
+					} finally {
+						saveCropBtn.textContent = 'Guardar Foto';
+						saveCropBtn.disabled = false;
+					}
+				});
+			}
+		}
+
+		if (path === '/login') {
+		const authForm = document.getElementById('auth-form');
+		const googleLoginBtn = document.getElementById('google-login-btn');
+		const toggleLink = document.getElementById('auth-toggle-link');
+		const forgotPasswordLink = document.getElementById('forgot-password-link');
+
+		// CORRECCIÓN: Movemos la variable "isLogin" aquí arriba (al "pasillo")
+		// para que tanto el formulario como el enlace puedan verla y modificarla.
+		let isLogin = true;
+
+		// Lógica para el envío del formulario (login o registro)
+		if (authForm) {
+			authForm.addEventListener('submit', e => {
+				e.preventDefault();
+				const email = document.getElementById('email').value;
+				const password = document.getElementById('password').value;
+
+				// Ahora este "if" funcionará correctamente porque puede ver el interruptor
+				if (isLogin) {
+					loginUser(email, password)
+					.then(() => router())
+					.catch(err => alert(err.message));
+				} else {
+					registerUser(email, password).catch(err => alert(err.message));
 				}
 			});
 		}
-    }
-	
-    if (path === '/login') {
-    const authForm = document.getElementById('auth-form');
-    const googleLoginBtn = document.getElementById('google-login-btn');
-    const toggleLink = document.getElementById('auth-toggle-link');
-    const forgotPasswordLink = document.getElementById('forgot-password-link');
-    
-    // CORRECCIÓN: Movemos la variable "isLogin" aquí arriba (al "pasillo")
-    // para que tanto el formulario como el enlace puedan verla y modificarla.
-    let isLogin = true;
 
-    // Lógica para el envío del formulario (login o registro)
-    if (authForm) {
-        authForm.addEventListener('submit', e => {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            
-            // Ahora este "if" funcionará correctamente porque puede ver el interruptor
-            if (isLogin) {
-                loginUser(email, password).catch(err => alert(err.message));
-            } else {
-                registerUser(email, password).catch(err => alert(err.message));
-            }
-        });
-    }
+		// Lógica para el botón de Google
+		if (googleLoginBtn) {
+			googleLoginBtn.addEventListener('click', loginWithGoogle);
+		}
 
-    // Lógica para el botón de Google
-    if (googleLoginBtn) {
-        googleLoginBtn.addEventListener('click', loginWithGoogle);
-    }
+		// Lógica para el enlace que cambia entre Login y Registro
+		if (toggleLink) {
+			const toggleAuthMode = e => {
+				e.preventDefault();
+				isLogin = !isLogin; // Este código ahora cambia el interruptor que está arriba
 
-    // Lógica para el enlace que cambia entre Login y Registro
-    if (toggleLink) {
-        const toggleAuthMode = e => {
-            e.preventDefault();
-            isLogin = !isLogin; // Este código ahora cambia el interruptor que está arriba
-            
-            // Actualizamos el texto de la pantalla
-            document.getElementById('auth-title').innerText = isLogin ? 'Iniciar Sesión' : 'Crear una Cuenta';
-            document.getElementById('auth-subtitle').innerText = isLogin ? '¡Bienvenido de nuevo!' : 'Es rápido y fácil.';
-            document.getElementById('auth-action-btn').innerText = isLogin ? 'Iniciar Sesión' : 'Crear Cuenta';
-            
-            // Ocultamos el enlace de "Olvidé contraseña" en la pantalla de registro
-            forgotPasswordLink.style.display = isLogin ? 'block' : 'none';
+				// Actualizamos el texto de la pantalla
+				document.getElementById('auth-title').innerText = isLogin ? 'Iniciar Sesión' : 'Crear una Cuenta';
+				document.getElementById('auth-subtitle').innerText = isLogin ? '¡Bienvenido de nuevo!' : 'Es rápido y fácil.';
+				document.getElementById('auth-action-btn').innerText = isLogin ? 'Iniciar Sesión' : 'Crear Cuenta';
 
-            document.getElementById('auth-toggle-text').innerHTML = isLogin 
-                ? '¿No tienes cuenta? <a href="#" id="auth-toggle-link">Regístrate</a>' 
-                : '¿Ya tienes cuenta? <a href="#" id="auth-toggle-link">Inicia Sesión</a>';
-            
-            // Volvemos a añadir el listener al nuevo enlace que acabamos de crear
-            document.getElementById('auth-toggle-link').addEventListener('click', toggleAuthMode);
-        };
-        toggleLink.addEventListener('click', toggleAuthMode);
-    }
+				// Ocultamos el enlace de "Olvidé contraseña" en la pantalla de registro
+				forgotPasswordLink.style.display = isLogin ? 'block' : 'none';
 
-    // Lógica del enlace de "Olvidaste tu contraseña"
-    if (forgotPasswordLink) {
-        forgotPasswordLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            const email = prompt("Por favor, ingresa tu correo para enviarte el enlace de recuperación:");
-            if (email) {
-                sendPasswordResetEmail(email)
-                    .then(() => {
-                        alert('¡Correo de recuperación enviado! Revisa tu bandeja de entrada.');
-                    })
-                    .catch((error) => {
-                        alert('Error: ' + error.message);
-                    });
-            }
-        });
-    }
-} else if (path === '/create') {
+				document.getElementById('auth-toggle-text').innerHTML = isLogin 
+					? '¿No tienes cuenta? <a href="#" id="auth-toggle-link">Regístrate</a>' 
+					: '¿Ya tienes cuenta? <a href="#" id="auth-toggle-link">Inicia Sesión</a>';
+
+				// Volvemos a añadir el listener al nuevo enlace que acabamos de crear
+				document.getElementById('auth-toggle-link').addEventListener('click', toggleAuthMode);
+			};
+			toggleLink.addEventListener('click', toggleAuthMode);
+		}
+
+		// Lógica del enlace de "Olvidaste tu contraseña"
+		if (forgotPasswordLink) {
+			forgotPasswordLink.addEventListener('click', (e) => {
+				e.preventDefault();
+				const email = prompt("Por favor, ingresa tu correo para enviarte el enlace de recuperación:");
+				if (email) {
+					sendPasswordResetEmail(email)
+						.then(() => {
+							alert('¡Correo de recuperación enviado! Revisa tu bandeja de entrada.');
+						})
+						.catch((error) => {
+							alert('Error: ' + error.message);
+						});
+				}
+			});
+		}
+	} else if (path === '/create') {
         const createRaffleForm = document.getElementById('create-raffle-form');
         if (createRaffleForm) createRaffleForm.addEventListener('submit', handleCreateRaffle);
 
