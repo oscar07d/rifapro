@@ -72,19 +72,34 @@ const urlsToCache = [
   "/rifapro/assets/banks/uala.svg"
 ];
 
-// Instalar Service Worker y guardar en caché
-self.addEventListener("install", (event) => {
+
+// Instalar SW
+self.addEventListener("install", event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(urlsToCache))
+    caches.open(CACHE_NAME).then(cache => {
+      return Promise.all(
+        urlsToCache.map(url =>
+          fetch(url).then(response => {
+            if (response.ok) {
+              return cache.put(url, response);
+            } else {
+              console.warn("⚠️ No se pudo cachear:", url, response.status);
+            }
+          }).catch(err => {
+            console.warn("⚠️ Error al cachear:", url, err);
+          })
+        )
+      );
+    })
   );
 });
 
-// Activar Service Worker y limpiar cachés viejas
-self.addEventListener("activate", (event) => {
+// Activar SW (limpia cachés viejas)
+self.addEventListener("activate", event => {
   event.waitUntil(
-    caches.keys().then((cacheNames) =>
+    caches.keys().then(cacheNames =>
       Promise.all(
-        cacheNames.map((cacheName) => {
+        cacheNames.map(cacheName => {
           if (cacheName !== CACHE_NAME) {
             return caches.delete(cacheName);
           }
@@ -94,11 +109,9 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// Interceptar peticiones y responder desde caché
-self.addEventListener("fetch", (event) => {
+// Interceptar peticiones
+self.addEventListener("fetch", event => {
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
-    })
+    caches.match(event.request).then(response => response || fetch(event.request))
   );
 });
