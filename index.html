@@ -38,10 +38,24 @@
 	      .catch(err => console.log("❌ Error registrando SW:", err));
 	  }
 	</script>
+
+		<script>
+	  function isInStandaloneMode() {
+		return (window.matchMedia("(display-mode: standalone)").matches) ||
+			   (window.navigator.standalone === true);
+	  }
+
+	  if (isInStandaloneMode()) {
+		console.log("📱 App instalada");
+	  } else {
+		console.log("🌐 App en navegador");
+	  }
+	</script>
     
     <script type="module" src="js/main.js"></script>
 </body>
 </html>
+
 
 
 
