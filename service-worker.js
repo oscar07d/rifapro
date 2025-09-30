@@ -37,7 +37,7 @@ const urlsToCache = [
   "/rifapro/assets/banks/png-banks/bre-b.png",
   "/rifapro/assets/banks/png-banks/caja-social.png",
   "/rifapro/assets/banks/png-banks/daviplata.png",
-  "/rifapro/assets/banks/png-banks/dvivienda.png",
+  "/rifapro/assets/banks/png-banks/davivienda.png",
   "/rifapro/assets/banks/png-banks/efectivo.png",
   "/rifapro/assets/banks/png-banks/falabella.png",
   "/rifapro/assets/banks/png-banks/finandina.png",
@@ -116,3 +116,4 @@ self.addEventListener("fetch", (event) => {
     );
   }
 });
+
