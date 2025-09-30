@@ -626,20 +626,21 @@ async function handleShare(type) {
 
 onAuthStateChanged(user => {
     if (user) {
-        // 1. Si hay un usuario, actualizamos la interfaz de logueado.
         updateUIForLoggedInUser(user);
 
-        // 2. Si por alguna razón estamos en la página de login, nos vamos a Home.
-        // Si no, dejamos que el router decida qué mostrar.
+        // 👇 Si está en login, lo mandamos a Home inmediatamente
         if (window.location.hash === '#/login' || window.location.hash === '') {
             window.location.hash = '/';
-        } else {
-            router(); // Forzamos a que se redibuje la página actual si es necesario.
+			router();
         }
+
+        // 👇 Siempre forzamos a que se pinte lo que toca
+        router();
+
     } else {
-        // Si no hay usuario, actualizamos la UI y vamos a login.
         updateUIForLoggedOutUser();
         window.location.hash = '/login';
+        router();
     }
 });
 
