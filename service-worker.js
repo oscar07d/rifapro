@@ -1,4 +1,4 @@
-const CACHE_NAME = "rifapro-cache-v1";
+const CACHE_NAME = "rifapro-cache-v2";
 const urlsToCache = [
   "/rifapro/",
   "/rifapro/index.html",
@@ -116,4 +116,5 @@ self.addEventListener("fetch", (event) => {
     );
   }
 });
+
 
