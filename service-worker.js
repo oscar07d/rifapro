@@ -72,49 +72,33 @@ const urlsToCache = [
   "/rifapro/assets/banks/uala.svg"
 ];
 
-// Detectar si estamos en modo PWA (instalado)
-function isInStandaloneMode() {
-  return (
-    window.matchMedia("(display-mode: standalone)").matches ||
-    window.navigator.standalone === true
-  );
-}
-
-// Instalar Service Worker solo si es PWA
+// Instalar Service Worker y guardar en caché
 self.addEventListener("install", (event) => {
-  if (isInStandaloneMode()) {
-    event.waitUntil(
-      caches.open(CACHE_NAME).then((cache) => cache.addAll(urlsToCache))
-    );
-  }
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(urlsToCache))
+  );
 });
 
-// Activar Service Worker solo si es PWA
+// Activar Service Worker y limpiar cachés viejas
 self.addEventListener("activate", (event) => {
-  if (isInStandaloneMode()) {
-    event.waitUntil(
-      caches.keys().then((cacheNames) =>
-        Promise.all(
-          cacheNames.map((cacheName) => {
-            if (cacheName !== CACHE_NAME) {
-              return caches.delete(cacheName);
-            }
-          })
-        )
+  event.waitUntil(
+    caches.keys().then((cacheNames) =>
+      Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheName !== CACHE_NAME) {
+            return caches.delete(cacheName);
+          }
+        })
       )
-    );
-  }
+    )
+  );
 });
 
-// Interceptar peticiones solo si es PWA
+// Interceptar peticiones y responder desde caché
 self.addEventListener("fetch", (event) => {
-  if (isInStandaloneMode()) {
-    event.respondWith(
-      caches.match(event.request).then((response) => {
-        return response || fetch(event.request);
-      })
-    );
-  }
+  event.respondWith(
+    caches.match(event.request).then((response) => {
+      return response || fetch(event.request);
+    })
+  );
 });
-
-
