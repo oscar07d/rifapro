@@ -625,20 +625,25 @@ async function handleShare(type) {
 // --- MANEJO DE ESTADO DE AUTENTICACIÃ“N ---
 
 onAuthStateChanged(user => {
+    console.log("👤 Estado de autenticación cambió:", user);
+
     if (user) {
         updateUIForLoggedInUser(user);
 
-        // 👇 Si está en login, lo mandamos a Home inmediatamente
-        if (window.location.hash === '#/login' || window.location.hash === '') {
+        // Forzamos ir al home cuando se loguea
+        if (window.location.hash === '#/login' || window.location.hash === '' || window.location.hash === '#') {
+            console.log("➡️ Redirigiendo al Home...");
             window.location.hash = '/';
-			router();
+        } else {
+            console.log("➡️ Manteniendo ruta:", window.location.hash);
         }
 
-        // 👇 Siempre forzamos a que se pinte lo que toca
+        // Siempre aseguramos refrescar la vista
         router();
 
     } else {
         updateUIForLoggedOutUser();
+        console.log("🚪 Usuario salió, yendo a login...");
         window.location.hash = '/login';
         router();
     }
@@ -1897,3 +1902,4 @@ function renderParticipantsList(tickets, container, status) {
         </table>
     `;
 }
+
