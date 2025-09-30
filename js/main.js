@@ -8,6 +8,7 @@ import {
 	loginWithGoogle,
 	logout,
 	onAuthStateChanged,
+	handleGoogleRedirect,
 	sendPasswordResetEmail
 } from './auth.js';
 import {
@@ -632,14 +633,22 @@ onAuthStateChanged(user => {
 
     if (user) {
         updateUIForLoggedInUser(user);
-        window.location.hash = '/'; // siempre manda al home
-        router();
+        if (window.location.hash === '#/login' || window.location.hash === '') {
+            console.log("➡️ Redirigiendo al Home...");
+            window.location.hash = '/';
+        } else {
+            router();
+        }
     } else {
         updateUIForLoggedOutUser();
+        console.log("🚪 Usuario salió, yendo a login...");
         window.location.hash = '/login';
         router();
     }
 });
+
+// 👇 Muy importante: ponlo aquí, después del listener
+handleGoogleRedirect();
 
 
 function updateUIForLoggedInUser(user) {
