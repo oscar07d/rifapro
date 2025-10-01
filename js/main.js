@@ -1,7 +1,9 @@
 // js/main.js
 
 // Importamos la configuraciÃ³n de Firebase y los mÃ³dulos necesarios
-import { firebaseConfig } from './firebase-config.js';
+import { app } from './firebase-init.js';
+import { getAuth } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 import {
 	registerUser,
 	loginUser,
@@ -27,12 +29,30 @@ import {
 	getEditProfileView,
 	getSecurityView
 } from './components.js';
+import {
+	serverTimestamp
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { 
+  collection, 
+  query, 
+  where, 
+  orderBy, 
+  getDocs, 
+  doc, 
+  getDoc 
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+if (localStorage.getItem('darkMode') === 'enabled') {
+    document.body.classList.add('dark-mode');
+}
 
 document.body.insertAdjacentHTML("beforeend", getCollaboratorModal());
 
 // Inicializamos Firebase con nuestra configuraciÃ³n
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+firebase.initializeApp(app);
 const storage = firebase.storage();
 
 // Elementos del DOM
@@ -347,40 +367,53 @@ async function router() {
 				appContainer.innerHTML = '<p>Error al cargar la lista de participantes.</p>';
 			}
 		} else if (path === '/explore') {
-            // ---------------------- EXPLORAR ----------------------
-            const user = currentUser;
-            if (!user) {
-                appContainer.innerHTML = "<h2>Debes iniciar sesión para ver tus rifas.</h2>";
-                return;
-            }
-            try {
-                const rafflesSnapshot = await db.collection('raffles')
-                    .where('viewableBy', 'array-contains', user.uid)
-                    .orderBy('createdAt', 'desc')
-                    .get();
+			// ---------------------- EXPLORAR ----------------------
+			const user = currentUser;
+			if (!user) {
+				appContainer.innerHTML = "<h2>Debes iniciar sesión para ver tus rifas.</h2>";
+				return;
+			}
 
-                let rafflesHTML = '';
-                if (rafflesSnapshot.empty) {
-                    rafflesHTML = '<h2>No tienes rifas para administrar.</h2><p>Crea una nueva o pide que te añadan como colaborador.</p>';
-                } else {
-                    const raffleCardPromises = rafflesSnapshot.docs.map(async (doc) => {
-                        const raffleData = { id: doc.id, ...doc.data() };
-                        const ticketsSnapshot = await db.collection('raffles').doc(raffleData.id).collection('tickets').where('status', '!=', 'available').get();
-                        raffleData.soldPercentage = ticketsSnapshot.size;
-                        return getRaffleCard(raffleData, user);
-                    });
-                    const resolvedRaffleCards = await Promise.all(raffleCardPromises);
-                    rafflesHTML = resolvedRaffleCards.join('');
-                }
+			try {
+				// 🔹 Consultar rifas que puede ver el usuario
+				const rafflesRef = collection(db, "raffles");
+				const q = query(
+					rafflesRef,
+					where("viewableBy", "array-contains", user.uid),
+					orderBy("createdAt", "desc")
+				);
+				const rafflesSnapshot = await getDocs(q);
 
-                appContainer.innerHTML = getExploreView(rafflesHTML);
+				let rafflesHTML = '';
+				if (rafflesSnapshot.empty) {
+					rafflesHTML = '<h2>No tienes rifas para administrar.</h2><p>Crea una nueva o pide que te añadan como colaborador.</p>';
+				} else {
+					// 🔹 Construir las tarjetas de rifas
+					const raffleCardPromises = rafflesSnapshot.docs.map(async (raffleDoc) => {
+						const raffleData = { id: raffleDoc.id, ...raffleDoc.data() };
 
-            } catch (error) {
-                console.error("Error al obtener las rifas:", error);
-                appContainer.innerHTML = '<p>Error al cargar las rifas.</p>';
-            }
+						// Contar boletos vendidos
+						const ticketsRef = collection(db, "raffles", raffleData.id, "tickets");
+						const ticketsSnapshot = await getDocs(
+							query(ticketsRef, where("status", "!=", "available"))
+						);
+						raffleData.soldPercentage = ticketsSnapshot.size;
 
-        } else if (path === '/statistics') {
+						return getRaffleCard(raffleData, user);
+					});
+
+					const resolvedRaffleCards = await Promise.all(raffleCardPromises);
+					rafflesHTML = resolvedRaffleCards.join('');
+				}
+
+				// Mostrar vista
+				appContainer.innerHTML = getExploreView(rafflesHTML);
+
+			} catch (error) {
+				console.error("Error al obtener las rifas:", error);
+				appContainer.innerHTML = '<p>Error al cargar las rifas.</p>';
+			}
+		} else if (path === '/statistics') {
 			// ---------------------- LISTA DE ESTADÍSTICAS ----------------------
 			const user = currentUser;
 			if (!user) {
@@ -626,28 +659,35 @@ async function handleShare(type) {
 
 // --- MANEJO DE ESTADO DE AUTENTICACIÃ“N ---
 
-onAuthStateChanged(user => {
+onAuthStateChanged(async (user) => {
     console.log("👤 Estado de autenticación cambió:", user);
 
-    currentUser = user; // <-- guardamos el user globalmente
+    currentUser = user; // guardamos global
 
-    if (user) {
+    if (user && user.uid) {
         updateUIForLoggedInUser(user);
+
         if (window.location.hash === '#/login' || window.location.hash === '') {
             console.log("➡️ Redirigiendo al Home...");
             window.location.hash = '/';
-        } else {
-            router();
         }
+
+        // 🔐 Solo ejecutamos router si el usuario ya tiene UID
+        await router();
     } else {
         updateUIForLoggedOutUser();
         console.log("🚪 Usuario salió, yendo a login...");
-        window.location.hash = '/login';
-        router();
+
+        // 🔐 Evitamos que router intente cargar rifas si no hay user
+        if (window.location.hash !== '#/login') {
+            window.location.hash = '/login';
+        }
+
+        appContainer.innerHTML = getAuthView(); // ⬅️ solo renderizamos login
     }
 });
 
-// 👇 Muy importante: ponlo aquí, después del listener
+// ?? Muy importante: ponlo aquí, después del listener
 
 
 
@@ -712,6 +752,21 @@ function attachEventListeners(path) {
                 }
             });
         }
+		
+		const darkModeToggle = document.getElementById('dark-mode-toggle');
+		if (darkModeToggle) {
+			darkModeToggle.addEventListener('change', () => {
+				// Añade o quita la clase 'dark-mode' al body
+				document.body.classList.toggle('dark-mode');
+
+				// Guarda la preferencia en la memoria del navegador
+				if (document.body.classList.contains('dark-mode')) {
+					localStorage.setItem('darkMode', 'enabled');
+				} else {
+					localStorage.setItem('darkMode', 'disabled');
+				}
+			});
+		}
     } else if (path === '/security') {
         
         // Lógica del Acordeón
@@ -734,7 +789,7 @@ function attachEventListeners(path) {
         const resetBtn = document.getElementById('send-reset-password-btn');
         if (resetBtn) {
             resetBtn.addEventListener('click', () => {
-                const user = firebase.auth().currentUser;
+                const user = auth.currentUser;
                 if (user && user.email) {
                     // **CORREGIDO**: Se llama a sendPasswordResetEmail directamente
                     sendPasswordResetEmail(user.email)
@@ -749,7 +804,7 @@ function attachEventListeners(path) {
         if (securityForm) {
             securityForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const user = firebase.auth().currentUser;
+                const user = auth.currentUser;
                 if (!user) return;
 
                 const newEmail = document.getElementById('security-email').value;
@@ -783,7 +838,7 @@ function attachEventListeners(path) {
 
 				const saveButton = form.querySelector('button[type="submit"]');
 				const newName = document.getElementById('profile-name').value;
-				const user = firebase.auth().currentUser;
+				const user = auth.currentUser;
 
 				if (!user || !newName.trim()) return;
 
@@ -866,7 +921,7 @@ function attachEventListeners(path) {
 				// Obtenemos la imagen recortada de Croppie
 				const blob = await croppieInstance.result({ type: 'blob', size: 'viewport', format: 'png' });
 
-				const user = firebase.auth().currentUser;
+				const user = auth.currentUser;
 				if (!user) return;
 
 				saveCropBtn.textContent = 'Subiendo...';
@@ -1295,7 +1350,7 @@ async function openTicketModal(ticketNumber) {
 
 async function handleCreateRaffle(e) {
     e.preventDefault();
-    const user = firebase.auth().currentUser;
+    const user = auth.currentUser;
     if (!user) {
         alert('Debes iniciar sesiÃ³n para crear una rifa.');
         return;
@@ -1349,29 +1404,36 @@ async function handleCreateRaffle(e) {
         ownerId: user.uid,
 		collaborators: [],
 		viewableBy: [user.uid],
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        createdAt: serverTimestamp(),
     }
 
     try {
-        const raffleRef = await db.collection('raffles').add(raffle);
-        const batch = db.batch();
-        for (let i = 0; i < 100; i++) {
-            const ticketNumber = i.toString().padStart(2, '0');
-            const ticketRef = db.collection('raffles').doc(raffleRef.id).collection('tickets').doc(ticketNumber);
-            batch.set(ticketRef, {
-                number: ticketNumber,
-                status: 'available',
-                buyerName: null,
-                buyerPhone: null,
-            });
-        }
-        await batch.commit();
-        alert('Â¡Rifa creada con Éxito!');
-        window.location.hash = `#/raffle/${raffleRef.id}`;
-    } catch (error) {
-        console.error("Error al crear la rifa: ", error);
-        alert('Hubo un error al crear la rifa.');
-    }
+		// 1. Crear rifa
+		const raffleRef = await addDoc(collection(db, "raffles"), raffle);
+
+		// 2. Crear batch
+		const batch = writeBatch(db);
+
+		for (let i = 0; i < 100; i++) {
+			const ticketNumber = i.toString().padStart(2, '0');
+			const ticketRef = doc(db, "raffles", raffleRef.id, "tickets", ticketNumber);
+			batch.set(ticketRef, {
+				number: ticketNumber,
+				status: "available",
+				buyerName: null,
+				buyerPhone: null,
+			});
+		}
+
+		// 3. Confirmar batch
+		await batch.commit();
+
+		alert("🎉 ¡Rifa creada con éxito!");
+		window.location.hash = `#/raffle/${raffleRef.id}`;
+	} catch (error) {
+		console.error("❌ Error al crear la rifa:", error.code, error.message);
+		alert(`Hubo un error al crear la rifa:\n\n${error.message}`);
+	}
 }
 
 // --- INICIALIZACIÃ“N ---
@@ -1903,4 +1965,24 @@ function renderParticipantsList(tickets, container, status) {
             </tbody>
         </table>
     `;
+}
+
+async function fixOldRaffles() {
+  const snapshot = await db.collection("raffles").get();
+  snapshot.forEach(async (doc) => {
+    const data = doc.data();
+    let updateData = {};
+    
+    if (!data.viewableBy) {
+      updateData.viewableBy = [data.ownerId || ""];  
+    }
+    if (!data.createdAt) {
+      updateData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+    }
+
+    if (Object.keys(updateData).length > 0) {
+      await doc.ref.update(updateData);
+      console.log(`?? Rifa actualizada: ${doc.id}`);
+    }
+  });
 }
