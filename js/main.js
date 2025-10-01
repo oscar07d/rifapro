@@ -648,7 +648,7 @@ onAuthStateChanged(user => {
 });
 
 // 👇 Muy importante: ponlo aquí, después del listener
-handleGoogleRedirect();
+
 
 
 function updateUIForLoggedInUser(user) {
