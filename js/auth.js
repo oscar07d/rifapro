@@ -9,7 +9,8 @@ import {
   sendPasswordResetEmail as firebaseSendPasswordResetEmail,
   GoogleAuthProvider,
   signInWithRedirect,
-  getRedirectResult
+  getRedirectResult,
+  signInWithPopup
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
 import { 
@@ -60,10 +61,24 @@ export function loginUser(email, password) {
  */
 export async function loginWithGoogle() {
     try {
-        // Redirige al login de Google
-        await signInWithRedirect(auth, googleProvider);
+        const result = await signInWithPopup(auth, googleProvider);
+        const user = result.user;
+        const userRef = doc(db, 'users', user.uid);
+        const docSnap = await getDoc(userRef);
+
+        // Si el usuario de Google no existe en nuestra base de datos, lo creamos.
+        if (!docSnap.exists()) {
+            await setDoc(userRef, {
+                email: user.email,
+                name: user.displayName,
+                photoURL: user.photoURL,
+                createdAt: serverTimestamp()
+            });
+        }
+        console.log("✅ Login con Google (Popup) exitoso:", user.displayName);
+        // No necesitamos redirigir, la ventana se cierra sola y la app continúa.
     } catch (error) {
-        console.error("❌ Error al iniciar sesión con Google:", error);
+        console.error("❌ Error al iniciar sesión con Google (Popup):", error);
         alert(error.message);
     }
 }
@@ -118,4 +133,3 @@ export function onAuthStateChanged(callback) {
 export function sendPasswordResetEmail(email) {
     return firebaseSendPasswordResetEmail(auth, email);
 }
-
