@@ -64,6 +64,7 @@ export const getAuthView = () => `
                 </svg>
                 <span>Iniciar con Google</span>
             </button>
+
             <p id="auth-toggle-text" class="auth-toggle">¿No tienes cuenta? <a href="#" id="auth-toggle-link">Regístrate</a></p>
         </div>
     </div>
@@ -669,7 +670,7 @@ export const getSettingsView = () => `
                 <div class="item-content"><span>Modo Oscuro</span></div>
                 <div class="item-action">
                     <label class="toggle-switch">
-                        <input type="checkbox">
+                        <input type="checkbox" id="dark-mode-toggle" ${localStorage.getItem('darkMode') === 'enabled' ? 'checked' : ''}>
                         <span class="slider"></span>
                     </label>
                 </div>
@@ -797,5 +798,3 @@ export const getPageHeader = (title) => `
         <h2>${title}</h2>
     </div>
 `;
-
-
