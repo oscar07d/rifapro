@@ -1574,6 +1574,94 @@ body.home-page .bottom-nav {
     align-items: center;
 }
 
+/* --- ESTILOS ROBUSTOS Y PERSONALIZADOS PARA EL MODO OSCURO --- */
+
+/* 1. Definimos los colores base del modo oscuro */
+body.dark-mode {
+    --background-color: #121212;
+    --card-bg-color: #1E1E1E;
+    --text-color: #E0E0E0;
+    --text-light-color: #B3B3B3;
+    --border-color: #333333;
+}
+
+/* 2. Aplicamos los colores a los elementos generales */
+body.dark-mode {
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+/* 3. Estilo para el fondo de la pantalla de LOGIN */
+body.dark-mode.login-page {
+    background: #0f0c29;
+    background: -webkit-linear-gradient(to right, #24243e, #302b63, #0f0c29);
+    background: linear-gradient(to right, #24243e, #302b63, #0f0c29);
+}
+
+/* 4. Estilo para la CABECERA (Header) */
+body.dark-mode header {
+    background: #000428;
+    background: -webkit-linear-gradient(to right, #004e92, #000428);
+    background: linear-gradient(to right, #004e92, #000428);
+    border-bottom: none; /* Quitamos el borde ya que el degradado es suficiente */
+}
+
+/* 5. Estilos para los BOTONES DEL HOME */
+body.dark-mode .home-buttons .btn {
+    background-color: #6a11cb26;
+    color: #d1a6ff;
+    border-color: #6a11cb4d; /* Un borde sutil que combine */
+}
+body.dark-mode .home-buttons .btn:hover {
+    color: #fff;
+    background-color: #6a11cb4d;
+    border-color: #d1a6ff;
+}
+
+/* 6. Estilo para el CONTENEDOR DE DETALLES DE PAGO */
+body.dark-mode .payment-details-wrapper {
+    background-color: rgba(0,0,0,0.2);
+    border-color: var(--border-color);
+}
+body.dark-mode .payment-details-wrapper h4 {
+    color: #d1a6ff; /* Usamos el mismo color de los botones del home */
+}
+
+/* 7. Estilo para la OPCIÓN DE PAGO SELECCIONADA */
+body.dark-mode .payment-option.selected {
+    background-color: #8200ff26;
+    border-color: #d1a6ff;
+}
+
+/* --- REGLAS ADICIONALES PARA OTROS ELEMENTOS --- */
+
+/* Tarjetas y contenedores */
+body.dark-mode .auth-container,
+body.dark-mode .form-container,
+body.dark-mode .home-container,
+body.dark-mode .explore-container,
+body.dark-mode .statistics-container,
+body.dark-mode .raffle-detail-container,
+body.dark-mode .security-container,
+body.dark-mode .edit-profile-container,
+body.dark-mode .modal-content,
+body.dark-mode .login-wrapper .auth-container { /* Asegura el login en 2 columnas */
+    background-color: var(--card-bg-color);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+}
+
+/* Campos de formulario */
+body.dark-mode input,
+body.dark-mode select {
+    background-color: #333;
+    border-color: #444;
+    color: var(--text-color);
+}
+body.dark-mode input:focus,
+body.dark-mode select:focus {
+    border-color: var(--primary-color);
+    background-color: #2a2a2a;
+}
 /* 8. DiseÃ±o Responsivo */
 @media (max-width: 600px) {
 	.participant-card .card-content p {
@@ -1842,4 +1930,3 @@ body.home-page .bottom-nav {
         height: 30px;
     }
 }
-
