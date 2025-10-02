@@ -3,44 +3,50 @@
 // Importamos la configuraciÃ³n de Firebase y los mÃ³dulos necesarios
 import { app } from './firebase-init.js';
 import { getAuth } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-import {
-	registerUser,
-	loginUser,
-	loginWithGoogle,
-	logout,
-	onAuthStateChanged,
-	handleGoogleRedirect,
-	sendPasswordResetEmail
-} from './auth.js';
-import {
-    paymentMethods,
-    getAuthView, 
-    getHomeView, 
-    getCreateRaffleView, 
-    getExploreView, 
-    getRaffleCard,
-    getRaffleDetailView,
-	getCollaboratorModal,
-	getStatisticsListView,  
-    getStatisticsDetailView,
-    getParticipantsListView,   // <-- Aquí lo agregamos
-	getSettingsView,
-	getEditProfileView,
-	getSecurityView
-} from './components.js';
-import {
-	serverTimestamp
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 import { 
-  collection, 
-  query, 
-  where, 
-  orderBy, 
-  getDocs, 
-  doc, 
-  getDoc 
+  getFirestore,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+  orderBy,
+  onSnapshot,
+  updateDoc,
+  setDoc,
+  addDoc,
+  deleteDoc,
+  arrayUnion,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+import {
+  registerUser,
+  loginUser,
+  loginWithGoogle,
+  logout,
+  onAuthStateChanged,
+  handleGoogleRedirect,
+  sendPasswordResetEmail
+} from './auth.js';
+
+import {
+  paymentMethods,
+  getAuthView, 
+  getHomeView, 
+  getCreateRaffleView, 
+  getExploreView, 
+  getRaffleCard,
+  getRaffleDetailView,
+  getCollaboratorModal,
+  getStatisticsListView,  
+  getStatisticsDetailView,
+  getParticipantsListView,
+  getSettingsView,
+  getEditProfileView,
+  getSecurityView
+} from './components.js';
 
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -136,70 +142,73 @@ async function router() {
     if (isRaffleDetail || isStatisticsDetail || isParticipantsList || view) {
 
         if (isRaffleDetail) {
-            // ---------------------- DETALLE DE RIFA ----------------------
-            const raffleId = path.split('/')[2].split('?')[0]; 
-            const urlParams = new URLSearchParams(path.split('?')[1] || '');
-            const ticketNumber = urlParams.get('ticket');
+			// ---------------------- DETALLE DE RIFA ----------------------
+			const raffleId = path.split('/')[2].split('?')[0]; 
+			const urlParams = new URLSearchParams(path.split('?')[1] || '');
+			const ticketNumber = urlParams.get('ticket');
 
-            const user = currentUser; // ? Se declara ANTES de usar
-            console.log("RaffleId limpio:", raffleId, "Ticket:", ticketNumber, "Usuario:", user?.uid);
+			const user = currentUser;
+			console.log("RaffleId limpio:", raffleId, "Ticket:", ticketNumber, "Usuario:", user?.uid);
 
-            try {
-                if (!user) {
-                    appContainer.innerHTML = '<h2>Debes iniciar sesión para administrar rifas.</h2>';
-                    return;
-                }
+			try {
+				if (!user) {
+					appContainer.innerHTML = '<h2>Debes iniciar sesión para administrar rifas.</h2>';
+					return;
+				}
 
-                console.log("RaffleId que intento abrir:", raffleId, "Usuario:", user.uid);
+				console.log("RaffleId que intento abrir:", raffleId, "Usuario:", user.uid);
 
-                const raffleDoc = await db.collection('raffles').doc(raffleId).get();
-                if (!raffleDoc.exists) {
-                    appContainer.innerHTML = '<h2>Error: Rifa no encontrada</h2>';
-                    return;
-                }
-                const raffleData = { id: raffleDoc.id, ...raffleDoc.data() };
+				// 🔹 Obtener documento de la rifa (modular)
+				const raffleRef = doc(db, "raffles", raffleId);
+				const raffleSnap = await getDoc(raffleRef);
+				if (!raffleSnap.exists()) {
+					appContainer.innerHTML = '<h2>Error: Rifa no encontrada</h2>';
+					return;
+				}
+				const raffleData = { id: raffleSnap.id, ...raffleSnap.data() };
 
-                appContainer.innerHTML = view(raffleData);
+				// Renderizar vista de detalle
+				appContainer.innerHTML = getRaffleDetailView(raffleData);
 
-                const ticketsGrid = document.getElementById('tickets-grid');
-                if (ticketsGrid) {
-                    ticketsGrid.innerHTML = 'Cargando boletos...';
+				// 🔹 Suscripción en tiempo real a tickets (modular)
+				const ticketsGrid = document.getElementById('tickets-grid');
+				if (ticketsGrid) {
+					ticketsGrid.innerHTML = 'Cargando boletos...';
 
-                    unsubscribeFromTickets = db.collection('raffles')
-                        .doc(raffleId)
-                        .collection('tickets')
-                        .orderBy('number')
-                        .onSnapshot(snapshot => {
-                            ticketsGrid.innerHTML = '';
-                            if (snapshot.empty) {
-                                ticketsGrid.innerHTML = '<p>No se encontraron boletos para esta rifa.</p>';
-                                return;
-                            }
-                            snapshot.forEach(doc => {
-                                const ticketData = doc.data();
-                                const ticketElement = document.createElement('div');
-                                ticketElement.className = `ticket ${ticketData.status}`;
-                                ticketElement.textContent = ticketData.number;
-                                ticketElement.dataset.id = ticketData.number;
-                                ticketsGrid.appendChild(ticketElement);
-                            });
-                        }, error => {
-                            console.error("Error al suscribirse a los boletos:", error);
-                            ticketsGrid.innerHTML = '<p style="color: red; text-align: center;">Error al cargar los boletos. Revisa las reglas de seguridad de Firestore.</p>';
-                        });
-                }
+					const ticketsRef = collection(db, "raffles", raffleId, "tickets");
+					const q = query(ticketsRef, orderBy("number"));
 
-                const shareStatusBtn = document.getElementById('share-status-btn');
-                if (shareStatusBtn) {
-                    shareStatusBtn.addEventListener('click', () => openSimpleStatusModal(raffleData));
-                }
+					unsubscribeFromTickets = onSnapshot(q, snapshot => {
+						ticketsGrid.innerHTML = '';
+						if (snapshot.empty) {
+							ticketsGrid.innerHTML = '<p>No se encontraron boletos para esta rifa.</p>';
+							return;
+						}
+						snapshot.forEach(docSnap => {
+							const ticketData = docSnap.data();
+							const ticketElement = document.createElement('div');
+							ticketElement.className = `ticket ${ticketData.status}`;
+							ticketElement.textContent = ticketData.number;
+							ticketElement.dataset.id = ticketData.number;
+							ticketsGrid.appendChild(ticketElement);
+						});
+					}, error => {
+						console.error("Error al suscribirse a los boletos:", error);
+						ticketsGrid.innerHTML = '<p style="color: red; text-align: center;">Error al cargar los boletos. Revisa las reglas de seguridad de Firestore.</p>';
+					});
+				}
 
-            } catch (error) {
-                console.error("Error al obtener el detalle de la rifa:", error);
-                appContainer.innerHTML = '<h2>Error al cargar la rifa.</h2>';
-            }
+				// Botón compartir estado
+				const shareStatusBtn = document.getElementById('share-status-btn');
+				if (shareStatusBtn) {
+					shareStatusBtn.addEventListener('click', () => openSimpleStatusModal(raffleData));
+				}
 
-        } else if (isStatisticsDetail) {
+			} catch (error) {
+				console.error("Error al obtener el detalle de la rifa:", error);
+				appContainer.innerHTML = '<h2>Error al cargar la rifa.</h2>';
+			}
+		} else if (isStatisticsDetail) {
             // ---------------------- DETALLE DE ESTADÍSTICAS ----------------------
             const raffleId = path.split('/')[2].split('?')[0];
             const urlParams = new URLSearchParams(path.split('?')[1] || '');
@@ -420,19 +429,24 @@ async function router() {
 				appContainer.innerHTML = "<h2>Debes iniciar sesión para ver las estadísticas.</h2>";
 				return;
 			}
+
 			try {
-				const rafflesSnapshot = await db.collection('raffles')
-					.where('viewableBy', 'array-contains', user.uid)
-					.orderBy('createdAt', 'desc')
-					.get();
+				// 🔹 Consultar rifas del usuario
+				const rafflesRef = collection(db, "raffles");
+				const q = query(
+					rafflesRef,
+					where("viewableBy", "array-contains", user.uid),
+					orderBy("createdAt", "desc")
+				);
+				const rafflesSnapshot = await getDocs(q);
 
 				let rafflesHTML = '';
 				if (rafflesSnapshot.empty) {
 					rafflesHTML = '<h2>No tienes rifas para ver estadísticas.</h2>';
 				} else {
 					rafflesHTML = `<div class="raffles-grid">`;
-					rafflesSnapshot.forEach(doc => {
-						const raffle = { id: doc.id, ...doc.data() };
+					rafflesSnapshot.forEach(raffleDoc => {
+						const raffle = { id: raffleDoc.id, ...raffleDoc.data() };
 						rafflesHTML += `
 							<div class="raffle-card-simple">
 								<h3>${raffle.name || 'Rifa sin nombre'}</h3>
@@ -444,8 +458,7 @@ async function router() {
 					rafflesHTML += `</div>`;
 				}
 
-				// --- LA CORRECCIÓN CLAVE ESTÁ AQUÍ ---
-				// Ahora le pasamos el contenido a la función que sí sabe dibujar el contenedor blanco.
+				// Usamos la función que arma el layout correcto
 				appContainer.innerHTML = getStatisticsListView(rafflesHTML);
 
 			} catch (error) {
@@ -519,78 +532,57 @@ async function handleTicketFormSubmit(e) {
 }
 
 
-async function handleClearTicket() {
-    const isFormVisible = document.getElementById('ticket-form').style.display !== 'none';
-    
-    // Leemos el nÃºmero desde el tÃ­tulo que estÃ© visible actualmente
-    const ticketNumberId = isFormVisible 
-        ? 'modal-ticket-number-form' 
-        : 'modal-ticket-number-info';
-    
-    const ticketNumber = document.getElementById(ticketNumberId).textContent.replace('Boleto #', '');
-    const raffleId = window.location.hash.slice(1).split('/')[2];
-
-    const isConfirmed = confirm(`Â¿EstÃ¡s seguro de que quieres limpiar el boleto #${ticketNumber}? Se borrarÃ¡n los datos del comprador y quedarÃ¡ disponible.`);
-
-    if (!isConfirmed) {
+async function handleClearTicket(ticketRef) {
+    const ticketSnap = await getDoc(ticketRef);
+    if (!ticketSnap.exists()) {
+        alert("Error: No se encontró el boleto.");
         return;
     }
-
-    const dataToClear = {
-        buyerName: null,
-        buyerPhone: null,
-        status: 'available'
-    };
+    const ticketData = ticketSnap.data();
+    const isConfirmed = confirm(`¿Estás seguro de que quieres limpiar el boleto #${ticketData.number}? Se borrarán los datos del comprador y quedará disponible.`);
+    if (!isConfirmed) return;
 
     try {
-        const ticketRef = db.collection('raffles').doc(raffleId).collection('tickets').doc(ticketNumber);
-        await ticketRef.update(dataToClear);
-        
-        closeAndResetModal(); // Usamos la funciÃ³n de reseteo
-
+        await updateDoc(ticketRef, {
+            buyerName: '',
+            buyerPhone: '',
+            status: 'available'
+        });
+        alert("✅ Boleto limpiado correctamente.");
+        closeAndResetModal();
     } catch (error) {
-        console.error("Error al limpiar el boleto:", error);
+        console.error("❌ Error al limpiar el boleto:", error);
         alert("Hubo un error al limpiar el boleto.");
     }
 }
 
-async function handleShare(type) {
-    const isFormVisible = document.getElementById('ticket-form').style.display !== 'none';
-    
-    const shareBtnId = type === 'whatsapp' 
-        ? (isFormVisible ? 'whatsapp-share-btn' : 'whatsapp-share-btn-info')
-        : (isFormVisible ? 'generic-share-btn' : 'generic-share-btn-info');
-    
-    const shareBtn = document.getElementById(shareBtnId);
-    if (!shareBtn) return;
-    
-    const originalText = shareBtn.textContent;
-    shareBtn.textContent = 'Generando...';
-    shareBtn.disabled = true;
 
+async function handleShare(type, raffleId, ticketNumber) {
     try {
-        const raffleId = window.location.hash.slice(1).split('/')[2];
-        const ticketNumberId = isFormVisible ? 'modal-ticket-number-form' : 'modal-ticket-number-info';
-        const ticketNumber = document.getElementById(ticketNumberId).textContent.replace('Boleto #', '');
-        
-        const raffleDoc = await db.collection('raffles').doc(raffleId).get();
-        const ticketDoc = await db.collection('raffles').doc(raffleId).collection('tickets').doc(ticketNumber).get();
-        if (!raffleDoc.exists || !ticketDoc.exists) throw new Error("Datos no encontrados");
-        
-        const raffleData = raffleDoc.data();
-        const ticketData = ticketDoc.data();
+        // 🔹 Obtener datos de Firestore (modular)
+        const raffleRef = doc(db, "raffles", raffleId);
+        const ticketRef = doc(db, "raffles", raffleId, "tickets", ticketNumber);
 
-        // Rellenar la plantilla completa
-        document.getElementById('template-prize').textContent = raffleData.prize;
-        document.getElementById('template-buyer').textContent = ticketData.buyerName;
-        document.getElementById('template-manager').textContent = raffleData.manager;
-        document.getElementById('template-lottery').textContent = raffleData.lottery;
-        document.getElementById('template-draw-date').textContent = new Date(raffleData.drawDate).toLocaleDateString('es-CO');
+        const [raffleSnap, ticketSnap] = await Promise.all([getDoc(raffleRef), getDoc(ticketRef)]);
+        if (!raffleSnap.exists() || !ticketSnap.exists()) throw new Error("Datos no encontrados");
+
+        const raffleData = raffleSnap.data();
+        const ticketData = ticketSnap.data();
+
+        // 🔹 Rellenar plantilla con los datos
+        document.getElementById('template-prize').textContent = raffleData.prize || '';
+        document.getElementById('template-buyer').textContent = ticketData.buyerName || '';
+        document.getElementById('template-manager').textContent = raffleData.manager || '';
+        document.getElementById('template-lottery').textContent = raffleData.lottery || '';
+        document.getElementById('template-draw-date').textContent = raffleData.drawDate
+            ? new Date(raffleData.drawDate).toLocaleDateString('es-CO')
+            : '';
         document.getElementById('template-number').textContent = ticketData.number;
-		
+
+        // 🔹 Métodos de pago
         const paymentMethodsContainer = document.getElementById('template-payment-methods');
         let paymentHTML = '';
-        raffleData.paymentMethods.forEach(pm => {
+        (raffleData.paymentMethods || []).forEach(pm => {
             const methodDetails = paymentMethods.find(m => m.value === pm.method);
             if (methodDetails) {
                 let detailsText = '';
@@ -599,40 +591,45 @@ async function handleShare(type) {
                 } else if (pm.method === 'bre-b') {
                     detailsText = `Llave: ${pm.key}`;
                 } else if (pm.accountNumber) {
-                    detailsText = `${pm.accountType.charAt(0).toUpperCase() + pm.accountType.slice(1)}: ${pm.accountNumber}`;
+                    detailsText = `${pm.accountType?.charAt(0).toUpperCase() + pm.accountType?.slice(1)}: ${pm.accountNumber}`;
                 } else {
                     detailsText = methodDetails.name;
                 }
 
-                // Convertimos la ruta del SVG a la ruta del PNG
-                const pngPath = methodDetails.icon.replace('/banks/', '/banks/png-banks/').replace('.svg', '.png');
-                
+                const pngPath = methodDetails.icon
+                    .replace('/banks/', '/banks/png-banks/')
+                    .replace('.svg', '.png');
+
                 paymentHTML += `
-                    <div style="display: flex; align-items: center; height: 28px; line-height: 28px; margin-bottom: 8px;">
-                        <img src="${pngPath}" alt="${methodDetails.name}" style="height: 22px; max-height: 22px; width: auto; margin-right: 10px; vertical-align: middle;">
-                        <span style="font-weight: 500; font-size: 1rem; vertical-align: middle;">${detailsText}</span>
+                    <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                        <img src="${pngPath}" alt="${methodDetails.name}" 
+                             style="height: 22px; margin-right: 10px;">
+                        <span style="font-weight: 500;">${detailsText}</span>
                     </div>
                 `;
             }
         });
         paymentMethodsContainer.innerHTML = paymentHTML;
 
+        // 🔹 Generar imagen con html2canvas
         const templateElement = document.getElementById('ticket-template');
         const canvas = await html2canvas(templateElement, { useCORS: true, scale: 2 });
         const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-        const fileName = `boleto-${ticketData.number}-${raffleData.name.replace(/\s+/g, '-')}.png`;
+        const fileName = `boleto-${ticketData.number}-${(raffleData.name || '').replace(/\s+/g, '-')}.png`;
         const file = new File([blob], fileName, { type: 'image/png' });
-        const shareText = `Â¡Hola ${ticketData.buyerName}! Aquí estÃ¡ tu boleto #${ticketData.number} para la rifa. Â¡Mucha suerte!`;
 
+        const shareText = `🎟️ Hola ${ticketData.buyerName || ''}! Aquí está tu boleto #${ticketData.number} para la rifa "${raffleData.name}". ¡Mucha suerte!`;
+
+        // 🔹 Compartir
         if (type === 'whatsapp') {
-            const viewContainer = document.getElementById('modal-view-container');
             const imageUrl = URL.createObjectURL(blob);
+            const viewContainer = document.getElementById('modal-view-container');
             viewContainer.innerHTML = `
                 <div class="ticket-preview-wrapper">
-                    <h4>Â¡Boleto listo para WhatsApp!</h4>
-                    <p>1. Mantén presionada la imagen y elige "Copiar imagen".</p>
-                    <p>2. Haz clic en el botÃ³n para abrir WhatsApp y pega la imagen en el chat.</p>
-                    <a href="https://wa.me/?text=${encodeURIComponent(shareText)}" target="_blank" class="btn btn-whatsapp" style="margin-top:1rem; width: auto;">Abrir WhatsApp</a>
+                    <h4>✅ ¡Boleto listo para WhatsApp!</h4>
+                    <a href="https://wa.me/?text=${encodeURIComponent(shareText)}" 
+                       target="_blank" class="btn btn-whatsapp" 
+                       style="margin-top:1rem;">Abrir WhatsApp</a>
                     <img src="${imageUrl}" alt="Boleto de Rifa">
                 </div>
             `;
@@ -649,11 +646,8 @@ async function handleShare(type) {
             }
         }
     } catch (error) {
-        console.error("Error al generar/compartir imagen:", error);
+        console.error("❌ Error al generar/compartir imagen:", error);
         alert("Hubo un error al procesar la imagen.");
-    } finally {
-        shareBtn.textContent = originalText;
-        shareBtn.disabled = false;
     }
 }
 
@@ -1200,7 +1194,6 @@ async function openTicketModal(ticketNumber) {
     const modal = document.getElementById('ticket-modal');
     if (!modal) return;
 
-    // Elementos principales
     const modalTitleForm = document.getElementById('modal-ticket-number-form');
     const modalTitleInfo = document.getElementById('modal-ticket-number-info');
     const formView = document.getElementById('ticket-form');
@@ -1210,141 +1203,66 @@ async function openTicketModal(ticketNumber) {
     if (!raffleId) return;
 
     try {
-        const ticketRef = db.collection('raffles').doc(raffleId).collection('tickets').doc(ticketNumber);
-        const doc = await ticketRef.get();
+        const ticketRef = doc(db, "raffles", raffleId, "tickets", ticketNumber);
+        const ticketSnap = await getDoc(ticketRef);
 
-        if (!doc.exists) {
-            alert("Error: No se encontrÃ³ el boleto.");
+        if (!ticketSnap.exists()) {
+            alert("Error: No se encontró el boleto.");
             return;
         }
+        const data = ticketSnap.data();
 
-        const data = doc.data();
+        // --- títulos ---
+        modalTitleForm.textContent = `Boleto #${data.number}`;
+        modalTitleInfo.textContent = `Boleto #${data.number}`;
 
-        // --- Actualizar tÃ­tulos ---
-        if (modalTitleForm) modalTitleForm.textContent = `Boleto #${data.number}`;
-        if (modalTitleInfo) modalTitleInfo.textContent = `Boleto #${data.number}`;
+        // --- llenar form ---
+        formView.querySelector('#buyer-name').value = data.buyerName || '';
+        formView.querySelector('#buyer-phone').value = data.buyerPhone || '';
+        formView.querySelector('#payment-status').value = data.status || 'pending';
 
-        // --- Llenar siempre el form (aunque estÃ© oculto) ---
-        const buyerNameInput = formView?.querySelector('#buyer-name');
-        const buyerPhoneInput = formView?.querySelector('#buyer-phone');
-        const paymentStatusInput = formView?.querySelector('#payment-status');
-
-        if (buyerNameInput) buyerNameInput.value = data.buyerName || '';
-        if (buyerPhoneInput) buyerPhoneInput.value = data.buyerPhone || '';
-        if (paymentStatusInput) paymentStatusInput.value = data.status || 'pending';
-
-        // --- Llenar vista info ---
-        infoView.querySelector('#info-buyer-name').textContent = data.buyerName || 'Usa el boton "Editar Boleto"';
-        infoView.querySelector('#info-buyer-phone').textContent = data.buyerPhone || 'Usa el boton "Editar Boleto"';
-        const statusMap = { 'pending': 'Pendiente', 'partial': 'Pago Parcial', 'paid': 'Pagado Total' };
+        // --- llenar info ---
+        infoView.querySelector('#info-buyer-name').textContent = data.buyerName || 'Usa el botón "Editar Boleto"';
+        infoView.querySelector('#info-buyer-phone').textContent = data.buyerPhone || 'Usa el botón "Editar Boleto"';
+        const statusMap = { 'pending': 'Pendiente', 'partial': 'Pago Parcial', 'paid': 'Pagado Total', 'available': 'Disponible' };
         infoView.querySelector('#info-payment-status').textContent = statusMap[data.status] || data.status;
 
-        // --- Estado inicial ---
-        if (formView) formView.style.display = 'none';
-        if (infoView) infoView.style.display = 'block';
+        // --- estado inicial ---
+        formView.style.display = 'none';
+        infoView.style.display = 'block';
         modal.style.display = 'flex';
 
-        // --- Botones ---
-        const editBtnInfo = document.getElementById('edit-ticket-btn-info');
-        const cancelEditBtn = document.getElementById('cancel-edit-btn');
-        const closeBtn = modal.querySelector('.close-modal');
+        // --- botones ---
+        document.getElementById('edit-ticket-btn-info').onclick = () => {
+            infoView.style.display = 'none';
+            formView.style.display = 'block';
+            document.getElementById('cancel-edit-btn').style.display = 'inline-block';
+        };
+        document.getElementById('cancel-edit-btn').onclick = () => {
+            formView.style.display = 'none';
+            infoView.style.display = 'block';
+            document.getElementById('cancel-edit-btn').style.display = 'none';
+        };
+        modal.querySelector('.close-modal').onclick = () => {
+            modal.style.display = 'none';
+        };
 
-        const clearBtnInfo = document.getElementById('clear-ticket-btn-info');
-        const whatsappBtnInfo = document.getElementById('whatsapp-share-btn-info');
-        const shareBtnInfo = document.getElementById('generic-share-btn-info');
+        // limpiar
+        document.getElementById('clear-ticket-btn-info').onclick = () => handleClearTicket(ticketRef);
+        document.getElementById('clear-ticket-btn-form').onclick = () => handleClearTicket(ticketRef);
 
-        const clearBtnForm = document.getElementById('clear-ticket-btn-form');
-        const whatsappBtnForm = document.getElementById('whatsapp-share-btn');
-        const shareBtnForm = document.getElementById('generic-share-btn');
-
-        const form = document.getElementById('ticket-form');
-        if (form) form.onsubmit = handleTicketFormSubmit;
-
-        // --- Reset visual ---
-        if (editBtnInfo) editBtnInfo.style.display = 'inline-block';
-        if (cancelEditBtn) cancelEditBtn.style.display = 'none';
-
-        // --- Limpieza previa de handlers ---
-        [editBtnInfo, cancelEditBtn, closeBtn,
-         clearBtnInfo, whatsappBtnInfo, shareBtnInfo,
-         clearBtnForm, whatsappBtnForm, shareBtnForm].forEach(btn => {
-            if (btn) btn.onclick = null;
-        });
-
-        // --- Editar ---
-        if (editBtnInfo) {
-            editBtnInfo.onclick = () => {
-                if (buyerNameInput) buyerNameInput.value = data.buyerName || '';
-                if (buyerPhoneInput) buyerPhoneInput.value = data.buyerPhone || '';
-                if (paymentStatusInput) paymentStatusInput.value = data.status || 'pending';
-
-                infoView.style.display = 'none';
-                formView.style.display = 'block';
-
-                if (cancelEditBtn) cancelEditBtn.style.display = 'inline-block';
-            };
-        }
-
-        // --- Cancelar ediciÃ³n ---
-        if (cancelEditBtn) {
-            cancelEditBtn.onclick = () => {
-                formView.style.display = 'none';
-                infoView.style.display = 'block';
-                cancelEditBtn.style.display = 'none';
-                if (editBtnInfo) editBtnInfo.style.display = 'inline-block';
-            };
-        }
-
-        // --- Cerrar modal ---
-        if (closeBtn) {
-            closeBtn.onclick = () => {
-                modal.style.display = 'none';
-                if (formView) formView.style.display = 'none';
-                if (infoView) infoView.style.display = 'block';
-                if (cancelEditBtn) cancelEditBtn.style.display = 'none';
-                if (editBtnInfo) editBtnInfo.style.display = 'inline-block';
-            };
-        }
-
-        // --- Limpiar boleto (INFO) ---
-        if (clearBtnInfo) {
-            clearBtnInfo.onclick = async () => {
-                await ticketRef.update({ buyerName: '', buyerPhone: '', status: 'pending' });
-                alert("Boleto limpiado correctamente.");
-                closeAndResetModal();
-            };
-        }
-
-        // --- Limpiar boleto (FORM) ---
-        if (clearBtnForm) {
-            clearBtnForm.onclick = async () => {
-                await ticketRef.update({ buyerName: '', buyerPhone: '', status: 'pending' });
-                alert("Boleto limpiado correctamente.");
-                closeAndResetModal();
-            };
-        }
-
-        // --- Compartir WhatsApp (INFO) ---
-        if (whatsappBtnInfo) {
-			whatsappBtnInfo.onclick = () => handleShare("whatsapp");
-		}
-		if (whatsappBtnForm) {
-			whatsappBtnForm.onclick = () => handleShare("whatsapp");
-		}
-
-        // --- Compartir genÃ©rico (INFO) ---
-        if (shareBtnInfo) {
-			shareBtnInfo.onclick = () => handleShare("generic");
-		}
-		if (shareBtnForm) {
-			shareBtnForm.onclick = () => handleShare("generic");
-		}
+        // compartir
+        document.getElementById('whatsapp-share-btn-info').onclick = () => handleShare("whatsapp", raffleId, data.number);
+        document.getElementById('whatsapp-share-btn').onclick = () => handleShare("whatsapp", raffleId, data.number);
+        document.getElementById('generic-share-btn-info').onclick = () => handleShare("generic", raffleId, data.number);
+        document.getElementById('generic-share-btn').onclick = () => handleShare("generic", raffleId, data.number);
 
     } catch (error) {
-        console.error("Error al obtener datos del boleto:", error);
+        console.error("❌ Error al obtener datos del boleto:", error);
         alert("Hubo un error al obtener los datos del boleto.");
     }
 }
+
 
 
 
@@ -1536,40 +1454,15 @@ async function generateFinalStatusImage(raffleData, settings) {
     shareBtn.disabled = true;
 
     try {
-        // 1. Crear el lienzo HTML dinÃ¡mico
-        const statusTemplate = document.createElement('div');
-        statusTemplate.id = 'status-template-generator';
-        statusTemplate.style.cssText = `
-            position:absolute; left:-9999px;
-            width:1080px; height:1920px;
-            color:white;
-            padding:50px 40px; box-sizing:border-box;
-            display:flex; flex-direction:column;
-            font-family:'Poppins', sans-serif;
-            background:linear-gradient(160deg,#4A00E0 0%,#8E2DE2 100%);
-        `;
+        // 1. Obtener todos los boletos de la rifa (ordenados)
+        const ticketsRef = collection(db, "raffles", raffleData.id, "tickets");
+        const q = query(ticketsRef, orderBy("number"));
+        const ticketsSnapshot = await getDocs(q);
 
-        // 2. TÃ­tulo
-        let titleHTML = '';
-        if (settings.titleType === 'prize') {
-            titleHTML = settings.prizePrefix.replace(
-                '{premio}',
-                `<span style="font-weight:800;">${raffleData.prize}</span>`
-            );
-        } else {
-            titleHTML = raffleData.name;
-        }
-
-        // 3. Tickets
-        const ticketsSnapshot = await db.collection('raffles')
-            .doc(raffleData.id)
-            .collection('tickets')
-            .orderBy('number')
-            .get();
-
+        // 2. Generar HTML de tickets
         let ticketsHTML = '';
-        ticketsSnapshot.forEach(doc => {
-            const ticket = doc.data();
+        ticketsSnapshot.forEach(docSnap => {
+            const ticket = docSnap.data();
             const isAvailable = ticket.status === 'available';
             const classes = isAvailable
                 ? 'background-color:#fff;color:#2c2c2c;'
@@ -1584,39 +1477,61 @@ async function generateFinalStatusImage(raffleData, settings) {
                 ">${content}</div>`;
         });
 
-        // 4. MÃ©todos de pago
-        let paymentHTML = raffleData.paymentMethods.map(pm => {
-			const methodDetails = paymentMethods.find(m => m.value === pm.method);
-			if (!methodDetails) return '';
+        // 3. Crear el lienzo dinámico
+        const statusTemplate = document.createElement('div');
+        statusTemplate.id = 'status-template-generator';
+        statusTemplate.style.cssText = `
+            position:absolute; left:-9999px;
+            width:1080px; height:1920px;
+            color:white;
+            padding:50px 40px; box-sizing:border-box;
+            display:flex; flex-direction:column;
+            font-family:'Poppins', sans-serif;
+            background:linear-gradient(160deg,#4A00E0 0%,#8E2DE2 100%);
+        `;
 
-			const pngPath = methodDetails.icon.replace('/banks/', '/banks/png-banks/').replace('.svg', '.png');
-			let detailsText = '';
-			if (pm.accountNumber) {
-				detailsText = `${pm.accountType.charAt(0).toUpperCase() + pm.accountType.slice(1)}: ${pm.accountNumber}`;
-			} else if (pm.phoneNumber) {
-				detailsText = `Cel: ${pm.phoneNumber}`;
-			} else {
-				detailsText = methodDetails.name;
-			}
+        // 4. Título
+        let titleHTML = '';
+        if (settings.titleType === 'prize') {
+            titleHTML = settings.prizePrefix.replace(
+                '{premio}',
+                `<span style="font-weight:800;">${raffleData.prize}</span>`
+            );
+        } else {
+            titleHTML = raffleData.name;
+        }
 
-			return `
-			  <div style="display:flex;align-items:center;gap:6px;">
-				<img src="${pngPath}" 
-					 alt="${methodDetails.name}" 
-					 style="width:clamp(30px, 6vw, 60px);height:auto;object-fit:contain;" />
-				<span style="font-size:clamp(30px, 1.5vw, 16px);">
-				  <strong>${methodDetails.name}:</strong> ${detailsText}
-				</span>
-			  </div>
-			`;
-		}).join('');
+        // 5. Métodos de pago
+        let paymentHTML = (raffleData.paymentMethods || []).map(pm => {
+            const methodDetails = paymentMethods.find(m => m.value === pm.method);
+            if (!methodDetails) return '';
 
-        // 5. Plantilla final
+            const pngPath = methodDetails.icon.replace('/banks/', '/banks/png-banks/').replace('.svg', '.png');
+            let detailsText = '';
+            if (pm.accountNumber) {
+                detailsText = `${pm.accountType.charAt(0).toUpperCase() + pm.accountType.slice(1)}: ${pm.accountNumber}`;
+            } else if (pm.phoneNumber) {
+                detailsText = `Cel: ${pm.phoneNumber}`;
+            } else {
+                detailsText = methodDetails.name;
+            }
+
+            return `
+                <div style="display:flex;align-items:center;gap:6px;">
+                    <img src="${pngPath}" 
+                         alt="${methodDetails.name}" 
+                         style="width:clamp(30px, 6vw, 60px);height:auto;object-fit:contain;" />
+                    <span style="font-size:clamp(30px, 1.5vw, 16px);">
+                        <strong>${methodDetails.name}:</strong> ${detailsText}
+                    </span>
+                </div>
+            `;
+        }).join('');
+
+        // 6. Plantilla final (meto el bloque grande que ya tenías pero usando las variables ticketsHTML y paymentHTML)
         statusTemplate.innerHTML = `
             <div style="flex:1;display:flex;flex-direction:column;">
-                <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:40px;">
-                    <!-- LOGO SVG mÃ¡s grande -->
-                    <svg xmlns="http://www.w3.org/2000/svg"
+				<svg xmlns="http://www.w3.org/2000/svg"
 						 viewBox="0 0 1010.84 231.45"
 						 preserveAspectRatio="xMidYMid meet"
 						 style="height:72px; margin-bottom:16px; display:block;"
@@ -1653,12 +1568,10 @@ async function generateFinalStatusImage(raffleData, settings) {
 						</g>
 					  </g>
 					</svg>
-
-                    <div style="text-align:center;padding:25px;background:rgba(255,255,255,0.15);border-radius:20px;">
-                        <h2 style="margin:0;font-size:4rem;font-weight:700;line-height:1.2;color:white;">
-                            ${titleHTML}
-                        </h2>
-                    </div>
+                <div style="text-align:center;padding:25px;background:rgba(255,255,255,0.15);border-radius:20px;">
+					<h2 style="margin:0;font-size:4rem;font-weight:700;line-height:1.2;color:white;">
+                        ${titleHTML}
+                    </h2>
                 </div>
 
                 <div style="flex-grow:1;display:flex;flex-direction:column;justify-content:center;padding:40px 0;">
@@ -1672,24 +1585,26 @@ async function generateFinalStatusImage(raffleData, settings) {
 
                 <div style="padding:25px;background:rgba(255,255,255,0.15);border-radius:20px;text-align:left;color:white;">
                     <p style="margin:0 0 20px 0;font-size:1.8rem;text-align:center;color:white;">
-                        <strong>Juega:</strong> ${new Date(raffleData.drawDate).toLocaleDateString('es-CO')} con Loteria de ${raffleData.lottery}
+                        <strong>Juega:</strong> ${new Date(raffleData.drawDate).toLocaleDateString('es-CO')} con Lotería de ${raffleData.lottery}
                     </p>
                     <div style="
-						display:grid;
-						grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-						gap:10px;
-						align-items:center;
-						border-top: 1px solid rgba(255,255,255,0.3);
-						border-bottom: 1px solid rgba(255,255,255,0.3);
-						padding: 15px 5px;
-					">
-						${paymentHTML}
-					</div>
-					<p style="font-size: 2rem; margin: 10px 0 5px 0; text-align: center;"><strong>Precio del boleto:</strong> $${raffleData.ticketPrice.toLocaleString('es-CO')}</p>
+                        display:grid;
+                        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                        gap:10px;
+                        align-items:center;
+                        border-top: 1px solid rgba(255,255,255,0.3);
+                        border-bottom: 1px solid rgba(255,255,255,0.3);
+                        padding: 15px 5px;
+                    ">
+                        ${paymentHTML}
+                    </div>
+                    <p style="font-size: 2rem; margin: 10px 0 5px 0; text-align: center;">
+                        <strong>Precio del boleto:</strong> $${raffleData.ticketPrice.toLocaleString('es-CO')}
+                    </p>
                     <p style="margin:20px 0 10px 0;font-size:1.6rem;opacity:0.9;text-align:center;color:white;">
                         Rifa organizada por: ${raffleData.manager}
                     </p>
-                    <div style="height:30px;opacity:0.9;display:flex;align-items:center;justify-content:center;">
+					<div style="height:30px;opacity:0.9;display:flex;align-items:center;justify-content:center;">
 						<p style="margin:0;font-size:1.4rem;color:white;opacity:0.8;">Desarrollado por </p>
 						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 879.14 85.62" style="height:100%;" fill="white">
 						  <g id="Capa_1-2" data-name="Capa 1">
@@ -1720,19 +1635,20 @@ async function generateFinalStatusImage(raffleData, settings) {
 						  </g>
 						</svg>
 					  </div>
-					</div>
-				  </div>
-				`;
+                </div>
+            </div>
+        `;
 
         document.body.appendChild(statusTemplate);
 
-        // 6. Captura sin forzar width/height
+        // 7. Captura con html2canvas
         const canvas = await html2canvas(statusTemplate, { useCORS: true, scale: 1 });
         document.body.removeChild(statusTemplate);
 
         const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
         const file = new File([blob], `estado-rifa.png`, { type: 'image/png' });
 
+        // 8. Compartir o descargar
         const shareData = { files: [file] };
         if (navigator.canShare && navigator.canShare(shareData)) {
             await navigator.share(shareData);
@@ -1744,7 +1660,7 @@ async function generateFinalStatusImage(raffleData, settings) {
             URL.revokeObjectURL(link.href);
         }
     } catch (error) {
-        console.error("Error al generar imagen de estado:", error);
+        console.error("❌ Error al generar imagen de estado:", error);
         alert("Hubo un error al generar la imagen.");
     } finally {
         shareBtn.textContent = 'Compartir Estado de la Rifa';
@@ -1780,46 +1696,47 @@ function openCollaboratorModal(raffleId) {
 
 async function handleCollaboratorInvite(e, raffleId) {
     e.preventDefault();
-    const email = document.getElementById('collaborator-email').value;
-    const currentUser = firebase.auth().currentUser;
+    const email = document.getElementById('collaborator-email').value.trim().toLowerCase();
+    const currentUser = auth.currentUser;
 
     if (!email) {
-        alert('Por favor, ingresa un correo electrÃ³nico.');
+        alert('Por favor, ingresa un correo electrónico.');
         return;
     }
 
     try {
-        // 1. Busca si existe un usuario con ese correo en RifaPro
-        const usersRef = db.collection('users').where('email', '==', email);
-        const snapshot = await usersRef.get();
+        // 1. Buscar si existe un usuario con ese correo
+        const usersRef = collection(db, 'users');
+        const q = query(usersRef, where('email', '==', email));
+        const snapshot = await getDocs(q);
 
         if (snapshot.empty) {
-            alert('Error: No se encontrÃ³ ningÃºn usuario con ese correo electrÃ³nico en RifaPro.');
+            alert('Error: No se encontró ningún usuario con ese correo en RifaPro.');
             return;
         }
 
         const collaborator = snapshot.docs[0];
         const collaboratorId = collaborator.id;
-        
-        // 2. Evita que el dueÃ±o se aÃ±ada a sÃ­ mismo
+
+        // 2. Evita que el dueño se añada a sí mismo
         if (collaboratorId === currentUser.uid) {
-            alert('No puedes aÃ±adirte a ti mismo como colaborador.');
+            alert('No puedes añadirte a ti mismo como colaborador.');
             return;
         }
-        
-        // 3. AÃ±ade el ID del colaborador a las listas de la rifa
-        const raffleRef = db.collection('raffles').doc(raffleId);
-        await raffleRef.update({
-            collaborators: firebase.firestore.FieldValue.arrayUnion(collaboratorId),
-            viewableBy: firebase.firestore.FieldValue.arrayUnion(collaboratorId)
+
+        // 3. Añadir colaborador a la rifa
+        const raffleRef = doc(db, 'raffles', raffleId);
+        await updateDoc(raffleRef, {
+            collaborators: arrayUnion(collaboratorId),
+            viewableBy: arrayUnion(collaboratorId)
         });
 
-        alert(`Â¡${email} ha sido aÃ±adido como colaborador!`);
+        alert(`¡${email} ha sido añadido como colaborador!`);
         document.getElementById('collaborator-modal').style.display = 'none';
 
     } catch (error) {
-        console.error("Error al aÃ±adir colaborador: ", error);
-        alert('Hubo un error al intentar aÃ±adir al colaborador.');
+        console.error("Error al añadir colaborador:", error);
+        alert('Hubo un error al intentar añadir al colaborador.');
     }
 }
 
