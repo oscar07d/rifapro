@@ -1574,6 +1574,24 @@ body.home-page .bottom-nav {
     align-items: center;
 }
 
+#ticket-template {
+    /* 1. Estilos para Ocultar la plantilla fuera de la pantalla */
+    position: absolute;
+    left: -9999px;
+    
+    /* 2. Estilos para darle el Diseño base al boleto */
+    width: 800px;
+    padding: 20px;
+    border-radius: 15px;
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    box-sizing: border-box;
+
+    /* 3. "Blindaje" contra el Modo Oscuro */
+    background: white !important; /* SIEMPRE tendrá fondo blanco */
+    color: #333 !important;      /* SIEMPRE tendrá texto oscuro */
+}
+
 /* --- ESTILOS ROBUSTOS Y PERSONALIZADOS PARA EL MODO OSCURO --- */
 
 /* 1. Definimos los colores base del modo oscuro */
@@ -2021,3 +2039,4 @@ body.dark-mode .ticket:hover {
         height: 30px;
     }
 }
+
