@@ -158,7 +158,7 @@ async function router() {
 
 				console.log("RaffleId que intento abrir:", raffleId, "Usuario:", user.uid);
 
-				// 🔹 Obtener documento de la rifa (modular)
+				// ?? Obtener documento de la rifa (modular)
 				const raffleRef = doc(db, "raffles", raffleId);
 				const raffleSnap = await getDoc(raffleRef);
 				if (!raffleSnap.exists()) {
@@ -170,14 +170,15 @@ async function router() {
 				// Renderizar vista de detalle
 				appContainer.innerHTML = getRaffleDetailView(raffleData);
 
-				// 🔹 Suscripción en tiempo real a tickets (modular)
+				// ?? Suscripción en tiempo real a tickets (modular)
 				const ticketsGrid = document.getElementById('tickets-grid');
 				if (ticketsGrid) {
 					ticketsGrid.innerHTML = 'Cargando boletos...';
-
+					
 					const ticketsRef = collection(db, "raffles", raffleId, "tickets");
 					const q = query(ticketsRef, orderBy("number"));
 
+					// ?? Suscripción en tiempo real a tickets
 					unsubscribeFromTickets = onSnapshot(q, snapshot => {
 						ticketsGrid.innerHTML = '';
 						if (snapshot.empty) {
@@ -192,6 +193,14 @@ async function router() {
 							ticketElement.dataset.id = ticketData.number;
 							ticketsGrid.appendChild(ticketElement);
 						});
+
+						// ?? Si hay ?ticket= en la URL, abre ese modal automáticamente
+						if (ticketNumber) {
+							console.log("Abrir modal automático para ticket:", ticketNumber);
+							openTicketModal(raffleId, ticketNumber).catch(err => {
+								console.error("Error al abrir modal automático:", err);
+							});
+						}
 					}, error => {
 						console.error("Error al suscribirse a los boletos:", error);
 						ticketsGrid.innerHTML = '<p style="color: red; text-align: center;">Error al cargar los boletos. Revisa las reglas de seguridad de Firestore.</p>';
@@ -209,106 +218,112 @@ async function router() {
 				appContainer.innerHTML = '<h2>Error al cargar la rifa.</h2>';
 			}
 		} else if (isStatisticsDetail) {
-            // ---------------------- DETALLE DE ESTADÍSTICAS ----------------------
-            const raffleId = path.split('/')[2].split('?')[0];
-            const urlParams = new URLSearchParams(path.split('?')[1] || '');
-            const ticketNumber = urlParams.get('ticket');
+			// ---------------------- DETALLE DE ESTADÍSTICAS ----------------------
+			const raffleId = path.split('/')[2].split('?')[0];
+			const urlParams = new URLSearchParams(path.split('?')[1] || '');
+			const ticketNumber = urlParams.get('ticket');
 
-            try {
-                const raffleDoc = await db.collection('raffles').doc(raffleId).get();
-                if (!raffleDoc.exists) {
-                    appContainer.innerHTML = '<h2>Rifa no encontrada</h2>';
-                    return;
-                }
-                const raffleData = { id: raffleDoc.id, ...raffleDoc.data() };
-
-                appContainer.innerHTML = getStatisticsDetailView(raffleData);
-
-                const ticketsSnapshot = await db.collection('raffles').doc(raffleId).collection('tickets').get();
-
-                let paidCount = 0, partialCount = 0, pendingCount = 0, availableCount = 0;
-                const tickets = [];
-
-                ticketsSnapshot.forEach(doc => {
-                    const ticket = doc.data();
-                    tickets.push(ticket);
-                    switch (ticket.status) {
-                        case 'paid': paidCount++; break;
-                        case 'partial': partialCount++; break;
-                        case 'pending': pendingCount++; break;
-                        case 'available': availableCount++; break;
-                    }
-                });
-
-                const ticketPrice = raffleData.ticketPrice || 0;
-                const paidRevenue = paidCount * ticketPrice;
-                const partialRevenue = partialCount * ticketPrice;
-                const pendingRevenue = pendingCount * ticketPrice;
-
-                document.getElementById('stats-revenue-paid').textContent = `$${paidRevenue.toLocaleString('es-CO')}`;
-                document.getElementById('stats-revenue-partial').textContent = `$${partialRevenue.toLocaleString('es-CO')}`;
-                document.getElementById('stats-revenue-pending').textContent = `$${pendingRevenue.toLocaleString('es-CO')}`;
-
-                document.getElementById('stats-count-available').textContent = availableCount;
-                document.getElementById('stats-count-paid').textContent = paidCount;
-                document.getElementById('stats-count-partial').textContent = partialCount;
-                document.getElementById('stats-count-pending').textContent = pendingCount;
-
-                const participantsBtn = document.getElementById('show-participants-list-btn');
-                const container = document.getElementById('participants-list-container');
-                const listContainer = document.getElementById('participants-list');
-
-                if (participantsBtn && container && listContainer) {
-                    participantsBtn.addEventListener('click', () => {
-                        if (container.style.display === 'none') {
-                            container.style.display = 'block';
-                            participantsBtn.textContent = 'Ocultar Lista de Participantes';
-                            renderParticipantsList(tickets, listContainer, "all");
-                        } else {
-                            container.style.display = 'none';
-                            participantsBtn.textContent = 'Ver Lista de Participantes';
-                        }
-                    });
-                }
-
-                const statCards = document.querySelectorAll('.stat-card.clickable');
-                statCards.forEach(card => {
-                    card.addEventListener('click', () => {
-                        if (container && participantsBtn && listContainer) {
-                            const status = card.dataset.status;
-                            container.style.display = 'block';
-                            participantsBtn.textContent = 'Ocultar Lista de Participantes';
-                            renderParticipantsList(tickets, listContainer, status);
-                        }
-                    });
-                });
-
-            } catch (error) {
-                console.error("Error al cargar estadísticas:", error);
-                appContainer.innerHTML = '<p>Error al cargar la página de estadísticas.</p>';
-            }
-
-        } else if (isParticipantsList) {
-			// ---------------------- LISTA DE PARTICIPANTES ----------------------
-			const raffleId = path.split('/')[2];
 			try {
-				const raffleDoc = await db.collection('raffles').doc(raffleId).get();
-				if (!raffleDoc.exists) {
+				// ?? Obtener rifa
+				const raffleRef = doc(db, "raffles", raffleId);
+				const raffleSnap = await getDoc(raffleRef);
+
+				if (!raffleSnap.exists()) {
 					appContainer.innerHTML = '<h2>Rifa no encontrada</h2>';
 					return;
 				}
-				const raffleData = { id: raffleDoc.id, ...raffleDoc.data() };
+				const raffleData = { id: raffleSnap.id, ...raffleSnap.data() };
 
-				const ticketsSnapshot = await db.collection('raffles')
-					.doc(raffleId)
-					.collection('tickets')
-					.where('buyerName', '!=', '') // Solo boletos con cliente
-					.get();
+				appContainer.innerHTML = getStatisticsDetailView(raffleData);
+
+				// ?? Obtener tickets de la rifa
+				const ticketsRef = collection(db, "raffles", raffleId, "tickets");
+				const ticketsSnapshot = await getDocs(ticketsRef);
+
+				let paidCount = 0, partialCount = 0, pendingCount = 0, availableCount = 0;
+				const tickets = [];
+
+				ticketsSnapshot.forEach(docSnap => {
+					const ticket = docSnap.data();
+					tickets.push(ticket);
+					switch (ticket.status) {
+						case 'paid': paidCount++; break;
+						case 'partial': partialCount++; break;
+						case 'pending': pendingCount++; break;
+						case 'available': availableCount++; break;
+					}
+				});
+
+				const ticketPrice = raffleData.ticketPrice || 0;
+				const paidRevenue = paidCount * ticketPrice;
+				const partialRevenue = partialCount * ticketPrice;
+				const pendingRevenue = pendingCount * ticketPrice;
+
+				document.getElementById('stats-revenue-paid').textContent = `$${paidRevenue.toLocaleString('es-CO')}`;
+				document.getElementById('stats-revenue-partial').textContent = `$${partialRevenue.toLocaleString('es-CO')}`;
+				document.getElementById('stats-revenue-pending').textContent = `$${pendingRevenue.toLocaleString('es-CO')}`;
+
+				document.getElementById('stats-count-available').textContent = availableCount;
+				document.getElementById('stats-count-paid').textContent = paidCount;
+				document.getElementById('stats-count-partial').textContent = partialCount;
+				document.getElementById('stats-count-pending').textContent = pendingCount;
+
+				const participantsBtn = document.getElementById('show-participants-list-btn');
+				const container = document.getElementById('participants-list-container');
+				const listContainer = document.getElementById('participants-list');
+
+				if (participantsBtn && container && listContainer) {
+					participantsBtn.addEventListener('click', () => {
+						if (container.style.display === 'none') {
+							container.style.display = 'block';
+							participantsBtn.textContent = 'Ocultar Lista de Participantes';
+							renderParticipantsList(tickets, listContainer, "all");
+						} else {
+							container.style.display = 'none';
+							participantsBtn.textContent = 'Ver Lista de Participantes';
+						}
+					});
+				}
+
+				const statCards = document.querySelectorAll('.stat-card.clickable');
+				statCards.forEach(card => {
+					card.addEventListener('click', () => {
+						if (container && participantsBtn && listContainer) {
+							const status = card.dataset.status;
+							container.style.display = 'block';
+							participantsBtn.textContent = 'Ocultar Lista de Participantes';
+							renderParticipantsList(tickets, listContainer, status);
+						}
+					});
+				});
+
+			} catch (error) {
+				console.error("Error al cargar estadísticas:", error);
+				appContainer.innerHTML = '<p>Error al cargar la página de estadísticas.</p>';
+			}
+		} else if (isParticipantsList) {
+			// ---------------------- LISTA DE PARTICIPANTES ----------------------
+			const raffleId = path.split('/')[2];
+			try {
+				// ?? Obtener la rifa
+				const raffleRef = doc(db, "raffles", raffleId);
+				const raffleSnap = await getDoc(raffleRef);
+
+				if (!raffleSnap.exists()) {
+					appContainer.innerHTML = '<h2>Rifa no encontrada</h2>';
+					return;
+				}
+				const raffleData = { id: raffleSnap.id, ...raffleSnap.data() };
+
+				// ?? Obtener solo tickets con comprador
+				const ticketsRef = collection(db, "raffles", raffleId, "tickets");
+				const q = query(ticketsRef, where("buyerName", "!=", ""));
+				const ticketsSnapshot = await getDocs(q);
 
 				const participants = [];
-				ticketsSnapshot.forEach(doc => participants.push(doc.data()));
+				ticketsSnapshot.forEach(docSnap => participants.push(docSnap.data()));
 
-				// ? Renderizamos la vista de participantes
+				// Renderizar la vista de participantes
 				appContainer.innerHTML = getParticipantsListView(raffleData, participants);
 
 				// ---------- Click en tarjeta para abrir detalle ----------
@@ -320,14 +335,13 @@ async function router() {
 					});
 				});
 
-				// ---------- Filtro único y robusto (nombre, teléfono, boleto y estado) ----------
+				// ---------- Filtro único y robusto ----------
 				(() => {
 					const searchInput = document.getElementById('search-participant');
 					const statusFilter = document.getElementById('status-filter');
 
 					if (!searchInput || !statusFilter) return;
 
-					// ?? Mapear estados en español/inglés a clave interna
 					const statusLabelsRev = {
 						'pagado': 'paid', 'pagados': 'paid', 'pagado(s)': 'paid',
 						'parcial': 'partial', 'parciales': 'partial',
@@ -337,7 +351,6 @@ async function router() {
 						'paid': 'paid', 'partial': 'partial', 'pending': 'pending', 'available': 'available'
 					};
 
-					// Normalizar texto (sin tildes y minúsculas)
 					const normalize = str => (str || '')
 						.toString()
 						.normalize('NFD')
@@ -366,8 +379,6 @@ async function router() {
 
 					searchInput.addEventListener('input', applyFilter);
 					statusFilter.addEventListener('change', applyFilter);
-
-					// Ejecutar filtro inicial
 					applyFilter();
 				})();
 
@@ -384,7 +395,7 @@ async function router() {
 			}
 
 			try {
-				// 🔹 Consultar rifas que puede ver el usuario
+				// ?? Consultar rifas que puede ver el usuario
 				const rafflesRef = collection(db, "raffles");
 				const q = query(
 					rafflesRef,
@@ -397,7 +408,7 @@ async function router() {
 				if (rafflesSnapshot.empty) {
 					rafflesHTML = '<h2>No tienes rifas para administrar.</h2><p>Crea una nueva o pide que te añadan como colaborador.</p>';
 				} else {
-					// 🔹 Construir las tarjetas de rifas
+					// ?? Construir las tarjetas de rifas
 					const raffleCardPromises = rafflesSnapshot.docs.map(async (raffleDoc) => {
 						const raffleData = { id: raffleDoc.id, ...raffleDoc.data() };
 
@@ -431,7 +442,7 @@ async function router() {
 			}
 
 			try {
-				// 🔹 Consultar rifas del usuario
+				// ?? Consultar rifas del usuario
 				const rafflesRef = collection(db, "raffles");
 				const q = query(
 					rafflesRef,
@@ -466,37 +477,52 @@ async function router() {
 				appContainer.innerHTML = '<p>Error al cargar las rifas.</p>';
 			}
 		} else if (path === '/edit-profile') {
-			// Lógica para cargar los datos de Editar Perfil
-			const userDoc = await db.collection('users').doc(user.uid).get();
-			const userData = userDoc.exists ? userDoc.data() : {};
+		// ---------------------- EDITAR PERFIL ----------------------
+		try {
+			const userRef = doc(db, "users", user.uid);
+			const userSnap = await getDoc(userRef);
+
+			const userData = userSnap.exists() ? userSnap.data() : {};
 			const fullUserData = {
 				uid: user.uid,
 				email: user.email,
 				photoURL: user.photoURL,
-				displayName: userData.name || user.displayName, 
+				displayName: userData.name || user.displayName,
 			};
+
 			appContainer.innerHTML = getEditProfileView(fullUserData);
+		} catch (error) {
+			console.error("Error al cargar perfil:", error);
+			appContainer.innerHTML = '<p>Error al cargar el perfil.</p>';
+		}
 
-		} else if (path === '/security') {
-			// Lógica para cargar los datos de Seguridad
-			const userDoc = await db.collection('users').doc(user.uid).get();
-			const userData = userDoc.exists ? userDoc.data() : {};
+	} else if (path === '/security') {
+		// ---------------------- SEGURIDAD ----------------------
+		try {
+			const userRef = doc(db, "users", user.uid);
+			const userSnap = await getDoc(userRef);
+
+			const userData = userSnap.exists() ? userSnap.data() : {};
 			const fullUserData = { email: user.email, ...userData };
+
 			appContainer.innerHTML = getSecurityView(fullUserData);
+		} catch (error) {
+			console.error("Error al cargar seguridad:", error);
+			appContainer.innerHTML = '<p>Error al cargar la página de seguridad.</p>';
+		}
 
-		} else {
-            // CORRECCIÓN CLAVE 2: La estructura if/else ahora es correcta
-            // ---------------------- VISTAS PLANAS ----------------------
-            const user = currentUser;
-            const userName = user ? user.displayName || user.email : 'Invitado';
-            appContainer.innerHTML = (path === '/') ? view(userName) : view();
-        }
+	} else {
+		// ---------------------- VISTAS PLANAS ----------------------
+		const user = currentUser;
+		const userName = user ? user.displayName || user.email : 'Invitado';
+		appContainer.innerHTML = (path === '/') ? view(userName) : view();
+	}
 
-        attachEventListeners(path);
+	attachEventListeners(path);
 
-    } else {
-        appContainer.innerHTML = '<h2>Error 404: Página no encontrada</h2>';
-    }
+	} else {
+		appContainer.innerHTML = '<h2>Error 404: Página no encontrada</h2>';
+	}
 }
 
 
@@ -548,10 +574,10 @@ async function handleClearTicket(ticketRef) {
             buyerPhone: '',
             status: 'available'
         });
-        alert("✅ Boleto limpiado correctamente.");
+        alert(" Boleto limpiado correctamente.");
         closeAndResetModal();
     } catch (error) {
-        console.error("❌ Error al limpiar el boleto:", error);
+        console.error("Error al limpiar el boleto:", error);
         alert("Hubo un error al limpiar el boleto.");
     }
 }
@@ -559,7 +585,7 @@ async function handleClearTicket(ticketRef) {
 
 async function handleShare(type, raffleId, ticketNumber) {
     try {
-        // 🔹 Obtener datos de Firestore (modular)
+        // ?? Obtener datos de Firestore (modular)
         const raffleRef = doc(db, "raffles", raffleId);
         const ticketRef = doc(db, "raffles", raffleId, "tickets", ticketNumber);
 
@@ -569,7 +595,7 @@ async function handleShare(type, raffleId, ticketNumber) {
         const raffleData = raffleSnap.data();
         const ticketData = ticketSnap.data();
 
-        // 🔹 Rellenar plantilla con los datos
+        // ?? Rellenar plantilla con los datos
         document.getElementById('template-prize').textContent = raffleData.prize || '';
         document.getElementById('template-buyer').textContent = ticketData.buyerName || '';
         document.getElementById('template-manager').textContent = raffleData.manager || '';
@@ -579,7 +605,7 @@ async function handleShare(type, raffleId, ticketNumber) {
             : '';
         document.getElementById('template-number').textContent = ticketData.number;
 
-        // 🔹 Métodos de pago
+        // ?? Métodos de pago
         const paymentMethodsContainer = document.getElementById('template-payment-methods');
         let paymentHTML = '';
         (raffleData.paymentMethods || []).forEach(pm => {
@@ -611,22 +637,22 @@ async function handleShare(type, raffleId, ticketNumber) {
         });
         paymentMethodsContainer.innerHTML = paymentHTML;
 
-        // 🔹 Generar imagen con html2canvas
+        // ?? Generar imagen con html2canvas
         const templateElement = document.getElementById('ticket-template');
         const canvas = await html2canvas(templateElement, { useCORS: true, scale: 2 });
         const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
         const fileName = `boleto-${ticketData.number}-${(raffleData.name || '').replace(/\s+/g, '-')}.png`;
         const file = new File([blob], fileName, { type: 'image/png' });
 
-        const shareText = `🎟️ Hola ${ticketData.buyerName || ''}! Aquí está tu boleto #${ticketData.number} para la rifa "${raffleData.name}". ¡Mucha suerte!`;
+        const shareText = `??? Hola ${ticketData.buyerName || ''}! Aquí está tu boleto #${ticketData.number} para la rifa "${raffleData.name}". ¡Mucha suerte!`;
 
-        // 🔹 Compartir
+        // ?? Compartir
         if (type === 'whatsapp') {
             const imageUrl = URL.createObjectURL(blob);
             const viewContainer = document.getElementById('modal-view-container');
             viewContainer.innerHTML = `
                 <div class="ticket-preview-wrapper">
-                    <h4>✅ ¡Boleto listo para WhatsApp!</h4>
+                    <h4>? ¡Boleto listo para WhatsApp!</h4>
                     <a href="https://wa.me/?text=${encodeURIComponent(shareText)}" 
                        target="_blank" class="btn btn-whatsapp" 
                        style="margin-top:1rem;">Abrir WhatsApp</a>
@@ -646,7 +672,7 @@ async function handleShare(type, raffleId, ticketNumber) {
             }
         }
     } catch (error) {
-        console.error("❌ Error al generar/compartir imagen:", error);
+        console.error("? Error al generar/compartir imagen:", error);
         alert("Hubo un error al procesar la imagen.");
     }
 }
@@ -654,7 +680,7 @@ async function handleShare(type, raffleId, ticketNumber) {
 // --- MANEJO DE ESTADO DE AUTENTICACIÃ“N ---
 
 onAuthStateChanged(async (user) => {
-    console.log("👤 Estado de autenticación cambió:", user);
+    console.log("?? Estado de autenticación cambió:", user);
 
     currentUser = user; // guardamos global
 
@@ -662,22 +688,22 @@ onAuthStateChanged(async (user) => {
         updateUIForLoggedInUser(user);
 
         if (window.location.hash === '#/login' || window.location.hash === '') {
-            console.log("➡️ Redirigiendo al Home...");
+            console.log("?? Redirigiendo al Home...");
             window.location.hash = '/';
         }
 
-        // 🔐 Solo ejecutamos router si el usuario ya tiene UID
+        // ?? Solo ejecutamos router si el usuario ya tiene UID
         await router();
     } else {
         updateUIForLoggedOutUser();
-        console.log("🚪 Usuario salió, yendo a login...");
+        console.log("?? Usuario salió, yendo a login...");
 
-        // 🔐 Evitamos que router intente cargar rifas si no hay user
+        // ?? Evitamos que router intente cargar rifas si no hay user
         if (window.location.hash !== '#/login') {
             window.location.hash = '/login';
         }
 
-        appContainer.innerHTML = getAuthView(); // ⬅️ solo renderizamos login
+        appContainer.innerHTML = getAuthView(); // ?? solo renderizamos login
     }
 });
 
@@ -1080,12 +1106,13 @@ function attachEventListeners(path) {
         const closeModalBtn = modal ? modal.querySelector('.close-modal') : null;
 
         if (ticketsGrid) {
-            ticketsGrid.addEventListener('click', (e) => {
-                if (e.target.classList.contains('ticket')) {
-                    openTicketModal(e.target.dataset.id);
-                }
-            });
-        }
+			ticketsGrid.addEventListener('click', (e) => {
+				if (e.target.classList.contains('ticket')) {
+					const raffleId = window.location.hash.split('/')[2].split('?')[0];
+					openTicketModal(raffleId, e.target.dataset.id);
+				}
+			});
+		}
 
         if (modal && closeModalBtn) {
             closeModalBtn.addEventListener('click', () => closeAndResetModal());
@@ -1123,13 +1150,13 @@ function attachEventListeners(path) {
     // ---------------------- PARTICIPANTES (listeners y filtros) ----------------------
     } else if (isParticipantsList) {
         // Click sobre tarjeta -> ir al detalle de la rifa y abrir ticket
-        document.querySelectorAll('.participant-card').forEach(card => {
-            card.addEventListener('click', () => {
-                const ticketNumber = card.dataset.ticket;
-                const raffleId = card.dataset.raffle;
-                window.location.hash = `/raffle/${raffleId}?ticket=${ticketNumber}`;
-            });
-        });
+        // document.querySelectorAll('.participant-card').forEach(card => {
+        //   card.addEventListener('click', () => {
+        //       const ticketNumber = card.dataset.ticket;
+        //       const raffleId = card.dataset.raffle;
+        //       window.location.hash = `/raffle/${raffleId}?ticket=${ticketNumber}`;
+        //   });
+        // });
 
         // Filtro robusto: busca por nombre, teléfono, número de boleto y filtra por estado
         const searchInput = document.getElementById('search-participant');
@@ -1190,7 +1217,8 @@ function attachEventListeners(path) {
 }
 
 
-async function openTicketModal(ticketNumber) {
+async function openTicketModal(raffleId, ticketNumber) {
+    console.log("Intentando abrir boleto:", ticketNumber, raffleId);
     const modal = document.getElementById('ticket-modal');
     if (!modal) return;
 
@@ -1199,71 +1227,133 @@ async function openTicketModal(ticketNumber) {
     const formView = document.getElementById('ticket-form');
     const infoView = document.getElementById('ticket-info-view');
 
-    const raffleId = window.location.hash.slice(1).split('/')[2];
-    if (!raffleId) return;
+    // 🔹 Validación básica
+    if (!raffleId || !ticketNumber) {
+        console.warn("❌ Falta raffleId o ticketNumber en openTicketModal:", raffleId, ticketNumber);
+        return;
+    }
 
     try {
-        const ticketRef = doc(db, "raffles", raffleId, "tickets", ticketNumber);
-        const ticketSnap = await getDoc(ticketRef);
+        // --- Intentar obtener el ticket directamente por ID ---
+        const ticketRef = doc(db, "raffles", raffleId, "tickets", ticketNumber.toString());
+        let ticketSnap = await getDoc(ticketRef);
 
+        // --- Si no existe, buscar por campo "number" ---
         if (!ticketSnap.exists()) {
-            alert("Error: No se encontró el boleto.");
-            return;
+            console.warn("getDoc por ID falló, buscando por campo 'number'...");
+            const ticketsRef = collection(db, "raffles", raffleId, "tickets");
+            const q = query(ticketsRef, where("number", "==", parseInt(ticketNumber)));
+            const querySnap = await getDocs(q);
+
+            if (!querySnap.empty) {
+                ticketSnap = querySnap.docs[0];
+            } else {
+                alert("⚠️ No se encontró el boleto.");
+                return;
+            }
         }
+
         const data = ticketSnap.data();
 
-        // --- títulos ---
+        // --- Llenar títulos ---
         modalTitleForm.textContent = `Boleto #${data.number}`;
         modalTitleInfo.textContent = `Boleto #${data.number}`;
 
-        // --- llenar form ---
+        // --- Llenar el formulario ---
         formView.querySelector('#buyer-name').value = data.buyerName || '';
         formView.querySelector('#buyer-phone').value = data.buyerPhone || '';
         formView.querySelector('#payment-status').value = data.status || 'pending';
 
-        // --- llenar info ---
+        // --- Llenar la vista de solo lectura ---
+        const statusMap = {
+            'pending': 'Pendiente',
+            'partial': 'Pago Parcial',
+            'paid': 'Pagado Total',
+            'available': 'Disponible'
+        };
         infoView.querySelector('#info-buyer-name').textContent = data.buyerName || 'Usa el botón "Editar Boleto"';
         infoView.querySelector('#info-buyer-phone').textContent = data.buyerPhone || 'Usa el botón "Editar Boleto"';
-        const statusMap = { 'pending': 'Pendiente', 'partial': 'Pago Parcial', 'paid': 'Pagado Total', 'available': 'Disponible' };
         infoView.querySelector('#info-payment-status').textContent = statusMap[data.status] || data.status;
 
-        // --- estado inicial ---
+        // --- Mostrar modal ---
         formView.style.display = 'none';
         infoView.style.display = 'block';
         modal.style.display = 'flex';
 
-        // --- botones ---
-        document.getElementById('edit-ticket-btn-info').onclick = () => {
-            infoView.style.display = 'none';
-            formView.style.display = 'block';
-            document.getElementById('cancel-edit-btn').style.display = 'inline-block';
-        };
-        document.getElementById('cancel-edit-btn').onclick = () => {
-            formView.style.display = 'none';
-            infoView.style.display = 'block';
-            document.getElementById('cancel-edit-btn').style.display = 'none';
-        };
-        modal.querySelector('.close-modal').onclick = () => {
-            modal.style.display = 'none';
-        };
+        // --- Botones ---
+        const editBtn = document.getElementById('edit-ticket-btn-info');
+        const cancelBtn = document.getElementById('cancel-edit-btn');
+        const closeBtn = modal.querySelector('.close-modal');
 
-        // limpiar
-        document.getElementById('clear-ticket-btn-info').onclick = () => handleClearTicket(ticketRef);
-        document.getElementById('clear-ticket-btn-form').onclick = () => handleClearTicket(ticketRef);
+        if (editBtn && cancelBtn) {
+            editBtn.onclick = () => {
+                infoView.style.display = 'none';
+                formView.style.display = 'block';
+                cancelBtn.style.display = 'inline-block';
+            };
 
-        // compartir
-        document.getElementById('whatsapp-share-btn-info').onclick = () => handleShare("whatsapp", raffleId, data.number);
-        document.getElementById('whatsapp-share-btn').onclick = () => handleShare("whatsapp", raffleId, data.number);
-        document.getElementById('generic-share-btn-info').onclick = () => handleShare("generic", raffleId, data.number);
-        document.getElementById('generic-share-btn').onclick = () => handleShare("generic", raffleId, data.number);
+            cancelBtn.onclick = () => {
+                formView.style.display = 'none';
+                infoView.style.display = 'block';
+                cancelBtn.style.display = 'none';
+            };
+        }
 
+        if (closeBtn) {
+            closeBtn.onclick = () => {
+                modal.style.display = 'none';
+            };
+        }
+
+        // --- Botones de limpiar boleto ---
+        const clearInfoBtn = document.getElementById('clear-ticket-btn-info');
+        const clearFormBtn = document.getElementById('clear-ticket-btn-form');
+        if (clearInfoBtn) clearInfoBtn.onclick = () => handleClearTicket(ticketRef);
+        if (clearFormBtn) clearFormBtn.onclick = () => handleClearTicket(ticketRef);
+
+        // --- Botones de compartir ---
+        const whatsappInfo = document.getElementById('whatsapp-share-btn-info');
+        const whatsappForm = document.getElementById('whatsapp-share-btn');
+        const genericInfo = document.getElementById('generic-share-btn-info');
+        const genericForm = document.getElementById('generic-share-btn');
+
+        if (whatsappInfo) whatsappInfo.onclick = () => handleShare("whatsapp", raffleId, data.number);
+        if (whatsappForm) whatsappForm.onclick = () => handleShare("whatsapp", raffleId, data.number);
+        if (genericInfo) genericInfo.onclick = () => handleShare("generic", raffleId, data.number);
+        if (genericForm) genericForm.onclick = () => handleShare("generic", raffleId, data.number);
+		
+		// --- GUARDAR CAMBIOS DEL FORMULARIO ---
+        const form = document.getElementById('ticket-form');
+        if (form) {
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault(); // 🚫 evita recargar la página
+
+                try {
+                    const buyerName = form.querySelector('#buyer-name').value.trim();
+                    const buyerPhone = form.querySelector('#buyer-phone').value.trim();
+                    const status = form.querySelector('#payment-status').value;
+
+                    await updateDoc(ticketRef, { buyerName, buyerPhone, status });
+
+                    alert('✅ Boleto actualizado correctamente.');
+
+                    // Refrescar vista
+                    formView.style.display = 'none';
+                    infoView.style.display = 'block';
+                    infoView.querySelector('#info-buyer-name').textContent = buyerName;
+                    infoView.querySelector('#info-buyer-phone').textContent = buyerPhone;
+                    infoView.querySelector('#info-payment-status').textContent = statusMap[status] || status;
+                } catch (error) {
+                    console.error("❌ Error al guardar los cambios del boleto:", error);
+                    alert("Hubo un error al guardar los cambios del boleto.");
+                }
+            }, { once: true }); // evita múltiples registros
+        }
     } catch (error) {
         console.error("❌ Error al obtener datos del boleto:", error);
-        alert("Hubo un error al obtener los datos del boleto.");
+        alert("Hubo un error al obtener los datos del boleto.\n\n" + error.message);
     }
 }
-
-
 
 
 async function handleCreateRaffle(e) {
@@ -1346,18 +1436,14 @@ async function handleCreateRaffle(e) {
 		// 3. Confirmar batch
 		await batch.commit();
 
-		alert("🎉 ¡Rifa creada con éxito!");
+		alert("¡Rifa creada con éxito!");
 		window.location.hash = `#/raffle/${raffleRef.id}`;
 	} catch (error) {
-		console.error("❌ Error al crear la rifa:", error.code, error.message);
+		console.error("Error al crear la rifa:", error.code, error.message);
 		alert(`Hubo un error al crear la rifa:\n\n${error.message}`);
 	}
 }
 
-// --- INICIALIZACIÃ“N ---
-window.addEventListener('hashchange', router);
-
-window.addEventListener('load', router);
 
 async function handleDeleteRaffle(raffleId, cardElement) {
     const raffleName = cardElement.querySelector('h3').textContent;
@@ -1660,7 +1746,7 @@ async function generateFinalStatusImage(raffleData, settings) {
             URL.revokeObjectURL(link.href);
         }
     } catch (error) {
-        console.error("❌ Error al generar imagen de estado:", error);
+        console.error("Error al generar imagen de estado:", error);
         alert("Hubo un error al generar la imagen.");
     } finally {
         shareBtn.textContent = 'Compartir Estado de la Rifa';
@@ -1903,3 +1989,8 @@ async function fixOldRaffles() {
     }
   });
 }
+
+			
+// --- INICIALIZACIÃ“N ---
+window.addEventListener('hashchange', router);
+window.addEventListener('load', router);
