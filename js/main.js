@@ -11,6 +11,7 @@ import {
   getDocs,
   query,
   where,
+  writeBatch,
   orderBy,
   onSnapshot,
   updateDoc,
@@ -1203,9 +1204,10 @@ function attachEventListeners(path) {
                 const collaborateButton = e.target.closest('.btn-collaborate');
 
                 if (deleteButton) {
-                    const card = deleteButton.closest('.raffle-card');
-                    if (card) handleDeleteRaffle(card.dataset.id, card);
-                }
+					const card = deleteButton.closest('.raffle-card');
+					if (card) handleDeleteRaffle(card.dataset.id, card);
+				}
+
 
                 if (collaborateButton) {
                     const card = collaborateButton.closest('.raffle-card');
@@ -1227,9 +1229,9 @@ async function openTicketModal(raffleId, ticketNumber) {
     const formView = document.getElementById('ticket-form');
     const infoView = document.getElementById('ticket-info-view');
 
-    // 🔹 Validación básica
+    // ?? Validación básica
     if (!raffleId || !ticketNumber) {
-        console.warn("❌ Falta raffleId o ticketNumber en openTicketModal:", raffleId, ticketNumber);
+        console.warn("? Falta raffleId o ticketNumber en openTicketModal:", raffleId, ticketNumber);
         return;
     }
 
@@ -1248,7 +1250,7 @@ async function openTicketModal(raffleId, ticketNumber) {
             if (!querySnap.empty) {
                 ticketSnap = querySnap.docs[0];
             } else {
-                alert("⚠️ No se encontró el boleto.");
+                alert("?? No se encontró el boleto.");
                 return;
             }
         }
@@ -1326,7 +1328,7 @@ async function openTicketModal(raffleId, ticketNumber) {
         const form = document.getElementById('ticket-form');
         if (form) {
             form.addEventListener('submit', async (e) => {
-                e.preventDefault(); // 🚫 evita recargar la página
+                e.preventDefault(); // ?? evita recargar la página
 
                 try {
                     const buyerName = form.querySelector('#buyer-name').value.trim();
@@ -1335,7 +1337,7 @@ async function openTicketModal(raffleId, ticketNumber) {
 
                     await updateDoc(ticketRef, { buyerName, buyerPhone, status });
 
-                    alert('✅ Boleto actualizado correctamente.');
+                    alert('? Boleto actualizado correctamente.');
 
                     // Refrescar vista
                     formView.style.display = 'none';
@@ -1344,13 +1346,13 @@ async function openTicketModal(raffleId, ticketNumber) {
                     infoView.querySelector('#info-buyer-phone').textContent = buyerPhone;
                     infoView.querySelector('#info-payment-status').textContent = statusMap[status] || status;
                 } catch (error) {
-                    console.error("❌ Error al guardar los cambios del boleto:", error);
+                    console.error("? Error al guardar los cambios del boleto:", error);
                     alert("Hubo un error al guardar los cambios del boleto.");
                 }
             }, { once: true }); // evita múltiples registros
         }
     } catch (error) {
-        console.error("❌ Error al obtener datos del boleto:", error);
+        console.error("? Error al obtener datos del boleto:", error);
         alert("Hubo un error al obtener los datos del boleto.\n\n" + error.message);
     }
 }
@@ -1444,39 +1446,33 @@ async function handleCreateRaffle(e) {
 	}
 }
 
-
 async function handleDeleteRaffle(raffleId, cardElement) {
-    const raffleName = cardElement.querySelector('h3').textContent;
-    const isConfirmed = confirm(`Â¿EstÃ¡s seguro de que quieres eliminar la rifa "${raffleName}"?\n\nÂ¡Esta acciÃ³n es irreversible y borrarÃ¡ todos los boletos asociados!`);
-
-    if (!isConfirmed) {
-        return;
-    }
+    if (!confirm('⚠️ ¿Seguro que quieres eliminar esta rifa completa? Esta acción no se puede deshacer.')) return;
 
     try {
-        // Paso 1: Borrar todos los boletos de la subcolecciÃ³n
-        const ticketsSnapshot = await db.collection('raffles').doc(raffleId).collection('tickets').get();
-        const batch = db.batch();
-        ticketsSnapshot.forEach(doc => {
-            batch.delete(doc.ref);
-        });
-        await batch.commit();
-        console.log('Todos los boletos de la subcolecciÃ³n han sido eliminados.');
+        // 📁 Referencia al documento principal de la rifa
+        const raffleRef = doc(db, 'raffles', raffleId);
 
-        // Paso 2: Borrar el documento principal de la rifa
-        await db.collection('raffles').doc(raffleId).delete();
-        console.log('Documento de la rifa eliminado.');
+        // 📄 Eliminamos todos los boletos dentro de la subcolección "tickets"
+        const ticketsRef = collection(db, 'raffles', raffleId, 'tickets');
+        const ticketsSnap = await getDocs(ticketsRef);
 
-        // Paso 3: Eliminar la tarjeta de la vista
-        cardElement.style.transition = 'opacity 0.5s ease';
-        cardElement.style.opacity = '0';
-        setTimeout(() => cardElement.remove(), 500);
+        const deletePromises = ticketsSnap.docs.map(ticketDoc => deleteDoc(ticketDoc.ref));
+        await Promise.all(deletePromises);
 
-        alert(`La rifa "${raffleName}" ha sido eliminada con Éxito.`);
+        // 🗑️ Eliminamos el documento principal de la rifa
+        await deleteDoc(raffleRef);
 
+        // 🧼 Eliminamos visualmente la tarjeta del DOM
+        if (cardElement) {
+            cardElement.remove();
+        }
+
+        alert('✅ La rifa y todos sus boletos fueron eliminados correctamente.');
+        console.log(`Rifa ${raffleId} eliminada completamente.`);
     } catch (error) {
-        console.error("Error al eliminar la rifa:", error);
-        alert("Hubo un error al intentar eliminar la rifa.");
+        console.error("❌ Error al eliminar la rifa:", error);
+        alert("Hubo un error al eliminar la rifa:\n" + error.message);
     }
 }
 
