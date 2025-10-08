@@ -66,6 +66,10 @@ export const getAuthView = () => `
             </button>
 
             <p id="auth-toggle-text" class="auth-toggle">¿No tienes cuenta? <a href="#" id="auth-toggle-link">Regístrate</a></p>
+			<p class="auth-note">
+			  💡 Solo necesitas hacer clic una vez en “Regístrate” para activar los campos de usuario, contraseña y el inicio con Google.  
+			  No es necesario volver a hacerlo, a menos que borres tus cookies o datos de navegación (Ctrl + Shift + R en Windows/Linux, ⌘ + Shift + R en Mac o desde tu celular limpiando los datos del navegador).
+			</p>
         </div>
     </div>
 `;
@@ -225,7 +229,6 @@ export const getExploreView = (rafflesHTML) => `
 
 // Genera el HTML para una sola tarjeta de rifa
 export const getRaffleCard = (raffle, currentUser) => {
-    // Verificaciones para asegurar que los datos existen
     const percentage = raffle.soldPercentage || 0;
     const raffleName = raffle.name || 'Rifa sin nombre';
     const prize = raffle.prize || 'No especificado';
@@ -239,8 +242,25 @@ export const getRaffleCard = (raffle, currentUser) => {
 
     const isOwner = currentUser && raffle.ownerId === currentUser.uid;
 
+    // 🔹 Mostrar solo si hay colaboradores
+    let collaboratorAvatarHTML = '';
+    if (raffle.collaborators && raffle.collaborators.length > 0) {
+        const collaborator = raffle.collaborators[0]; // el primer colaborador
+        const photoURL = collaborator.photoURL || null;
+        const name = collaborator.name || 'Colaborador';
+
+        collaboratorAvatarHTML = `
+            <div class="raffle-collaborator-avatar" title="${name}">
+                ${photoURL
+                    ? `<img src="${photoURL}" alt="${name}">`
+                    : `<svg xmlns="http://www.w3.org/2000/svg" height="28px" viewBox="0 -960 960 960" width="28px" fill="currentColor"><path d="M234-276q51-39 114-61.5T480-360q69 0 132 22.5T726-276q35-41 54.5-93T800-480q0-133-93.5-226.5T480-800q-133 0-226.5 93.5T160-480q0 59 19.5 111t54.5 93Zm246-164q-59 0-99.5-40.5T340-580q0-59 40.5-99.5T480-720q59 0 99.5 40.5T620-580q0 59-40.5 99.5T480-440Zm0 360q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q53 0 100-15.5t86-44.5q-39-29-86-44.5T480-280q-53 0-100 15.5T294-220q39 29 86 44.5T480-160Zm0-360q26 0 43-17t17-43q0-26-17-43t-43-17q-26 0-43 17t-17 43q0 26 17 43t43 17Zm0-60Zm0 360Z"/></svg>`
+                }
+            </div>`;
+    }
+
     return `
     <div class="raffle-card" data-id="${raffle.id}">
+        ${collaboratorAvatarHTML}
         <div class="raffle-card-content">
             <h3>${raffleName}</h3>
             <p class="info-row"><strong>Premio:</strong> ${prize}</p>
