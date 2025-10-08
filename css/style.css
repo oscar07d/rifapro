@@ -37,6 +37,15 @@
     cursor: not-allowed;
 }
 
+.auth-note {
+  font-size: 0.85rem;
+  color: #aaa;
+  margin-top: 0.75rem;
+  text-align: center;
+  line-height: 1.4;
+}
+
+
 /* --- ESTILOS FINALES Y RESPONSIVOS PARA EL LOGIN --- */
 
 /* Regla global para un mejor manejo de tamaños */
@@ -247,7 +256,6 @@ header h1 {
     box-shadow: var(--shadow-md);
     width: 100%;
     max-width: 1200px; /* Un solo ancho máximo para consistencia */
-    margin: 2rem auto; /* Margen arriba/abajo para separar de la cabecera */
     box-sizing: border-box;
 }
 
@@ -391,6 +399,7 @@ input:focus, select:focus {
 }
 
 .raffle-card {
+    position: relative; /* permite ubicar el avatar dentro del card */
     background-color: var(--card-bg-color);
     border-radius: var(--border-radius);
     box-shadow: var(--shadow-sm);
@@ -398,19 +407,50 @@ input:focus, select:focus {
     transition: transform 0.3s, box-shadow 0.3s;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow: visible; /* evita que se recorte el avatar */
 }
+
+.raffle-collaborator-avatar {
+    position: absolute;
+    top: 30px;
+    right: 32px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--card-bg-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    border: 2px solid #fff;
+    z-index: 5;
+    transition: transform 0.25s ease;
+}
+
+.raffle-collaborator-avatar:hover {
+    transform: scale(1.05);
+}
+
+.raffle-collaborator-avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
 .raffle-card:hover {
     transform: translateY(-5px);
     box-shadow: var(--shadow-md);
 }
 
 .raffle-card-content {
-    padding: 0s.5rem;
+    padding: 0.5rem; /* corregido: antes estaba mal escrito */
     display: flex;
     flex-direction: column;
     flex-grow: 1;
-    text-align: left; /* ?? Alinea el texto a la izquierda */
+    text-align: left;
+    position: relative;
+    z-index: 1; /* mantiene el contenido debajo del avatar */
 }
 
 .raffle-card-content h3 {
@@ -429,8 +469,9 @@ input:focus, select:focus {
 
 .raffle-card .btn-secondary {
     width: 100%;
-    margin-top: auto; /* Empuja el botÃ³n al final */
+    margin-top: auto;
 }
+
 
 /* Barra de Progreso */
 .progress-bar-container {
@@ -2039,4 +2080,3 @@ body.dark-mode .ticket:hover {
         height: 30px;
     }
 }
-
