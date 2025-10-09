@@ -1,9 +1,17 @@
 // js/main.js
 
-// Importamos la configuraciÃ³n de Firebase y los mÃ³dulos necesarios
+// ✅ Configuración base
 import { app } from './firebase-init.js';
-import { getAuth } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-import { 
+
+// ✅ Firebase Auth
+import {
+  getAuth,
+  updateProfile,
+  updateEmail
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+
+// ✅ Firestore (base de datos)
+import {
   getFirestore,
   collection,
   doc,
@@ -22,6 +30,16 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
+// ✅ Firebase Storage (para subir fotos de perfil, QR, etc.)
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
+
+// ✅ Funciones auxiliares de autenticación
 import {
   registerUser,
   loginUser,
@@ -32,16 +50,17 @@ import {
   sendPasswordResetEmail
 } from './auth.js';
 
+// ✅ Componentes de interfaz
 import {
   paymentMethods,
-  getAuthView, 
-  getHomeView, 
-  getCreateRaffleView, 
-  getExploreView, 
+  getAuthView,
+  getHomeView,
+  getCreateRaffleView,
+  getExploreView,
   getRaffleCard,
   getRaffleDetailView,
   getCollaboratorModal,
-  getStatisticsListView,  
+  getStatisticsListView,
   getStatisticsDetailView,
   getParticipantsListView,
   getSettingsView,
@@ -51,6 +70,7 @@ import {
 
 const auth = getAuth(app);
 const db = getFirestore(app);
+const storage = getStorage(app);
 
 if (localStorage.getItem('darkMode') === 'enabled') {
     document.body.classList.add('dark-mode');
@@ -60,7 +80,7 @@ document.body.insertAdjacentHTML("beforeend", getCollaboratorModal());
 
 // Inicializamos Firebase con nuestra configuraciÃ³n
 firebase.initializeApp(app);
-const storage = firebase.storage();
+// const storage = firebase.storage();
 
 // Elementos del DOM
 const appContainer = document.getElementById('app-container');
@@ -851,12 +871,11 @@ function attachEventListeners(path) {
             });
         }
     } else if (path === '/edit-profile') {
-		// --- Lógica para guardar el nombre (esta ya la tenías) ---
+		// --- Lógica para guardar el nombre ---
 		const form = document.getElementById('edit-profile-form');
 		if (form) {
 			form.addEventListener('submit', async (e) => {
 				e.preventDefault();
-
 				const saveButton = form.querySelector('button[type="submit"]');
 				const newName = document.getElementById('profile-name').value;
 				const user = auth.currentUser;
@@ -867,22 +886,22 @@ function attachEventListeners(path) {
 				saveButton.disabled = true;
 
 				try {
-					await user.updateProfile({ displayName: newName });
-					await db.collection('users').doc(user.uid).update({ name: newName });
+					await updateProfile(user, { displayName: newName });
+					await updateDoc(doc(db, 'users', user.uid), { name: newName });
 
 					alert('¡Perfil actualizado con éxito!');
-					document.querySelector('#user-info span').textContent = newName; // Actualiza el nombre en la cabecera
+					document.querySelector('#user-info span').textContent = newName;
 					window.location.hash = '/settings';
-
 				} catch (error) {
 					console.error("Error al actualizar el perfil:", error);
 					alert("Hubo un error al guardar los cambios.");
+				} finally {
 					saveButton.textContent = 'Guardar cambios';
 					saveButton.disabled = false;
 				}
 			});
 		}
-		// --- AÑADIDO: Lógica para que el lápiz de la foto funcione ---
+		// --- Lógica para cambiar la foto de perfil ---
 		const editAvatarBtn = document.getElementById('edit-avatar-button');
 		const avatarUploadInput = document.getElementById('avatar-upload-input');
 		const avatarImg = document.querySelector('.profile-avatar-img');
@@ -890,43 +909,31 @@ function attachEventListeners(path) {
 		const cropperContainer = document.getElementById('cropper-container');
 		const saveCropBtn = document.getElementById('save-crop-btn');
 		const cancelCropBtn = document.getElementById('cancel-crop-btn');
-		let croppieInstance = null; // Aquí guardaremos la instancia de Croppie
+		let croppieInstance = null;
 
 		if (editAvatarBtn && avatarUploadInput) {
-        
-			// 2. Cuando se hace clic en el lápiz, abrimos el selector de archivos
-			editAvatarBtn.addEventListener('click', () => {
-				avatarUploadInput.click();
-			});
+			editAvatarBtn.addEventListener('click', () => avatarUploadInput.click());
 
-			// 3. Cuando el usuario elige un archivo
 			avatarUploadInput.addEventListener('change', (e) => {
 				const file = e.target.files[0];
 				if (!file) return;
 
 				const reader = new FileReader();
 				reader.onload = (event) => {
-					// Destruimos cualquier instancia vieja de Croppie
-					if (croppieInstance) {
-						croppieInstance.destroy();
-					}
-					// Mostramos la ventana emergente
+					if (croppieInstance) croppieInstance.destroy();
+
 					cropperModal.style.display = 'flex';
-					// Creamos una nueva instancia de Croppie
 					croppieInstance = new Croppie(cropperContainer, {
 						viewport: { width: 200, height: 200, type: 'circle' },
 						boundary: { width: 250, height: 250 },
 						enableExif: true
 					});
-					// Le cargamos la imagen que el usuario seleccionó
-					croppieInstance.bind({
-						url: event.target.result,
-					});
+
+					croppieInstance.bind({ url: event.target.result });
 				};
 				reader.readAsDataURL(file);
 			});
 
-			// 4. Cuando el usuario hace clic en "Cancelar" en el modal
 			cancelCropBtn.addEventListener('click', () => {
 				cropperModal.style.display = 'none';
 				if (croppieInstance) {
@@ -935,11 +942,8 @@ function attachEventListeners(path) {
 				}
 			});
 
-			// 5. Cuando el usuario hace clic en "Guardar Foto"
 			saveCropBtn.addEventListener('click', async () => {
 				if (!croppieInstance) return;
-
-				// Obtenemos la imagen recortada de Croppie
 				const blob = await croppieInstance.result({ type: 'blob', size: 'viewport', format: 'png' });
 
 				const user = auth.currentUser;
@@ -949,36 +953,28 @@ function attachEventListeners(path) {
 				saveCropBtn.disabled = true;
 
 				try {
-					// Subimos el archivo BLOB (la imagen recortada) a Firebase
-					const filePath = `avatars/${user.uid}/profile.png`; // Siempre el mismo nombre para reemplazar
-					const fileRef = storage.ref(filePath);
-					await fileRef.put(blob);
+					const fileRef = ref(storage, `avatars/${user.uid}/profile.png`);
+					await uploadBytes(fileRef, blob);
+					const photoURL = await getDownloadURL(fileRef);
 
-					const photoURL = await fileRef.getDownloadURL();
+					await updateProfile(user, { photoURL });
+					await updateDoc(doc(db, 'users', user.uid), { photoURL });
 
-					// Actualizamos la URL en Auth y Firestore
-					await user.updateProfile({ photoURL: photoURL });
-					await db.collection('users').doc(user.uid).update({ photoURL: photoURL });
-
-					// Mostramos la nueva foto y cerramos todo
 					avatarImg.src = photoURL;
 					cropperModal.style.display = 'none';
-					if (croppieInstance) {
-						croppieInstance.destroy();
-						croppieInstance = null;
-					}
-					alert('¡Foto de perfil actualizada!');
+					if (croppieInstance) croppieInstance.destroy();
 
-					} catch (error) {
-						console.error("Error al subir la foto:", error);
-						alert("Hubo un error al actualizar la foto.");
-					} finally {
-						saveCropBtn.textContent = 'Guardar Foto';
-						saveCropBtn.disabled = false;
-					}
-				});
-			}
+					alert('¡Foto de perfil actualizada!');
+				} catch (error) {
+					console.error("Error al subir la foto:", error);
+					alert("Hubo un error al actualizar la foto.");
+				} finally {
+					saveCropBtn.textContent = 'Guardar Foto';
+					saveCropBtn.disabled = false;
+				}
+			});
 		}
+	}
 
 		if (path === '/login') {
 		const authForm = document.getElementById('auth-form');
