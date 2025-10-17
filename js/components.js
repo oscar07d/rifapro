@@ -842,7 +842,7 @@ export const getPageHeader = (title) => `
 
 export const getCollaboratorsView = () => `
 <div class="collaborators-container">
-	${getPageHeader('ConfiguraciÃ³n')}
+	${getPageHeader('Gestionar Colaboradores')}
     <div class="collaborators-search">
         <input type="text" id="collaborator-search" placeholder="🔍 Buscar por nombre o rifa" />
     </div>
@@ -855,3 +855,4 @@ export const getCollaboratorsView = () => `
     </div>
 </div>
 `;
+
