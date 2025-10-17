@@ -1,16 +1,16 @@
 // js/main.js
 
-// ✅ Configuración base
+// ? Configuración base
 import { app } from './firebase-init.js';
 
-// ✅ Firebase Auth
+// ? Firebase Auth
 import {
   getAuth,
   updateProfile,
   updateEmail
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
-// ✅ Firestore (base de datos)
+// ? Firestore (base de datos)
 import {
   getFirestore,
   collection,
@@ -30,7 +30,7 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-// ✅ Firebase Storage (para subir fotos de perfil, QR, etc.)
+// ? Firebase Storage (para subir fotos de perfil, QR, etc.)
 import {
   getStorage,
   ref,
@@ -39,7 +39,7 @@ import {
   deleteObject
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
 
-// ✅ Funciones auxiliares de autenticación
+// ? Funciones auxiliares de autenticación
 import {
   registerUser,
   loginUser,
@@ -50,7 +50,7 @@ import {
   sendPasswordResetEmail
 } from './auth.js';
 
-// ✅ Componentes de interfaz
+// ? Componentes de interfaz
 import {
   paymentMethods,
   getAuthView,
@@ -65,7 +65,8 @@ import {
   getParticipantsListView,
   getSettingsView,
   getEditProfileView,
-  getSecurityView
+  getSecurityView,
+  getCollaboratorsView
 } from './components.js';
 
 const auth = getAuth(app);
@@ -110,6 +111,7 @@ const routes = {
 	'/settings': getSettingsView,
 	'/edit-profile': getEditProfileView,
 	'/security': getSecurityView,
+	'/collaborators': getCollaboratorsView
 };
 
 async function createTicketsForRaffle(raffleId) {
@@ -496,6 +498,14 @@ async function router() {
 			} catch (error) {
 				console.error("Error al obtener rifas para estadísticas:", error);
 				appContainer.innerHTML = '<p>Error al cargar las rifas.</p>';
+			}
+		} else if (path === '/collaborators') {
+			try {
+				appContainer.innerHTML = getCollaboratorsView();
+				attachEventListeners('/collaborators');
+			} catch (error) {
+				console.error("Error al cargar la vista de colaboradores:", error);
+				appContainer.innerHTML = '<p>Error al cargar la página de colaboradores.</p>';
 			}
 		} else if (path === '/edit-profile') {
 		// ---------------------- EDITAR PERFIL ----------------------
@@ -1221,7 +1231,123 @@ function attachEventListeners(path) {
                 }
             });
         }
-    }
+    } else if (path === '/collaborators') {
+		const backBtn = document.getElementById('back-to-home');
+		const searchInput = document.getElementById('collaborator-search');
+		const listContainer = document.getElementById('collaborators-list-container');
+		const user = auth.currentUser;
+
+		if (!user || !listContainer) return;
+
+		if (backBtn) backBtn.addEventListener('click', () => (window.location.hash = '/home'));
+
+		const rafflesRef = collection(db, 'raffles');
+		const q = query(rafflesRef, where('ownerId', '==', user.uid));
+
+		onSnapshot(q, async (snapshot) => {
+			const raffles = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+			const collaboratorMap = {};
+			for (const raffle of raffles) {
+				if (raffle.collaborators) {
+					for (const colId of raffle.collaborators) {
+						if (!collaboratorMap[colId]) collaboratorMap[colId] = { raffles: [] };
+						collaboratorMap[colId].raffles.push({ id: raffle.id, name: raffle.name });
+					}
+				}
+			}
+
+			const colEntries = Object.entries(collaboratorMap);
+			const colDetails = await Promise.all(
+				colEntries.map(async ([id, data]) => {
+					const colRef = doc(db, 'users', id);
+					const colSnap = await getDoc(colRef);
+					return {
+						id,
+						name: colSnap.exists() ? colSnap.data().name || 'Sin nombre' : 'Desconocido',
+						photoURL: colSnap.exists() ? colSnap.data().photoURL || null : null,
+						raffles: data.raffles
+					};
+				})
+			);
+
+			if (!colDetails.length) {
+				listContainer.innerHTML = `<p style="text-align:center;color:#777;">No tienes colaboradores asignados.</p>`;
+				return;
+			}
+
+			listContainer.innerHTML = colDetails.map(col => `
+				<div class="collaborator-card" data-id="${col.id}">
+					<div class="collaborator-header">
+						<div class="collaborator-info">
+							${
+								col.photoURL
+									? `<img src="${col.photoURL}" alt="${col.name}">`
+									: `<svg xmlns="http://www.w3.org/2000/svg" height="42px" viewBox="0 -960 960 960" width="42px" fill="currentColor"><path d="M234-276q51-39 114-61.5T480-360q69 0 132 22.5T726-276q35-41 54.5-93T800-480q0-133-93.5-226.5T480-800q-133 0-226.5 93.5T160-480q0 59 19.5 111t54.5 93Zm246-164q-59 0-99.5-40.5T340-580q0-59 40.5-99.5T480-720q59 0 99.5 40.5T620-580q0 59-40.5 99.5T480-440Z"/></svg>`
+							}
+							<span class="collaborator-name">${col.name}</span>
+						</div>
+						<button class="btn-toggle-accordion" title="Ver rifas del colaborador">
+							<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M480-344 240-584l56-56 184 184 184-184 56 56-240 240Z"/></svg>
+						</button>
+					</div>
+					<div class="collaborator-accordion">
+						${col.raffles.map(r => `
+							<div class="raffle-item" data-raffle="${r.id}">
+								<span class="raffle-name">${r.name}</span>
+								<button class="btn-remove-collaborator" data-col="${col.id}" data-raffle="${r.id}" title="Eliminar colaborador de esta rifa">
+									<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" viewBox="0 0 256 256">
+										<path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z"/>
+									</svg>
+								</button>
+							</div>
+						`).join('')}
+					</div>
+				</div>
+			`).join('');
+
+			// Acordeones
+			document.querySelectorAll('.btn-toggle-accordion').forEach(btn => {
+				btn.addEventListener('click', (e) => {
+					const card = e.target.closest('.collaborator-card');
+					const accordion = card.querySelector('.collaborator-accordion');
+					accordion.classList.toggle('active');
+					btn.classList.toggle('active');
+				});
+			});
+
+			// Eliminar colaborador de una rifa
+			document.querySelectorAll('.btn-remove-collaborator').forEach(btn => {
+				btn.addEventListener('click', async (e) => {
+					const raffleId = btn.dataset.raffle;
+					const colId = btn.dataset.col;
+					if (!confirm('¿Deseas eliminar a este colaborador de esta rifa?')) return;
+
+					const raffleRef = doc(db, 'raffles', raffleId);
+					await updateDoc(raffleRef, {
+						collaborators: arrayRemove(colId),
+						viewableBy: arrayRemove(colId)
+					});
+				});
+			});
+		});
+
+		// Filtro búsqueda
+		if (searchInput) {
+			searchInput.addEventListener('input', () => {
+				const query = searchInput.value.toLowerCase();
+				document.querySelectorAll('.collaborator-card').forEach(card => {
+					const name = card.querySelector('.collaborator-name').textContent.toLowerCase();
+					const raffles = [...card.querySelectorAll('.raffle-name')].map(r => r.textContent.toLowerCase());
+					const match = name.includes(query) || raffles.some(r => r.includes(query));
+					card.style.display = match ? '' : 'none';
+					if (raffles.some(r => r.includes(query))) {
+						card.querySelector('.collaborator-accordion').classList.add('active');
+					}
+				});
+			});
+		}
+	}
 }
 
 
@@ -1453,31 +1579,31 @@ async function handleCreateRaffle(e) {
 }
 
 async function handleDeleteRaffle(raffleId, cardElement) {
-    if (!confirm('⚠️ ¿Seguro que quieres eliminar esta rifa completa? Esta acción no se puede deshacer.')) return;
+    if (!confirm('?? ¿Seguro que quieres eliminar esta rifa completa? Esta acción no se puede deshacer.')) return;
 
     try {
-        // 📁 Referencia al documento principal de la rifa
+        // ?? Referencia al documento principal de la rifa
         const raffleRef = doc(db, 'raffles', raffleId);
 
-        // 📄 Eliminamos todos los boletos dentro de la subcolección "tickets"
+        // ?? Eliminamos todos los boletos dentro de la subcolección "tickets"
         const ticketsRef = collection(db, 'raffles', raffleId, 'tickets');
         const ticketsSnap = await getDocs(ticketsRef);
 
         const deletePromises = ticketsSnap.docs.map(ticketDoc => deleteDoc(ticketDoc.ref));
         await Promise.all(deletePromises);
 
-        // 🗑️ Eliminamos el documento principal de la rifa
+        // ??? Eliminamos el documento principal de la rifa
         await deleteDoc(raffleRef);
 
-        // 🧼 Eliminamos visualmente la tarjeta del DOM
+        // ?? Eliminamos visualmente la tarjeta del DOM
         if (cardElement) {
             cardElement.remove();
         }
 
-        alert('✅ La rifa y todos sus boletos fueron eliminados correctamente.');
+        alert('? La rifa y todos sus boletos fueron eliminados correctamente.');
         console.log(`Rifa ${raffleId} eliminada completamente.`);
     } catch (error) {
-        console.error("❌ Error al eliminar la rifa:", error);
+        console.error("? Error al eliminar la rifa:", error);
         alert("Hubo un error al eliminar la rifa:\n" + error.message);
     }
 }
@@ -1793,7 +1919,7 @@ async function handleCollaboratorInvite(e, raffleId) {
     }
 
     try {
-        // 1. Buscar si existe un usuario con ese correo
+        // 1️⃣ Buscar si existe un usuario con ese correo
         const usersRef = collection(db, 'users');
         const q = query(usersRef, where('email', '==', email));
         const snapshot = await getDocs(q);
@@ -1803,23 +1929,33 @@ async function handleCollaboratorInvite(e, raffleId) {
             return;
         }
 
-        const collaborator = snapshot.docs[0];
-        const collaboratorId = collaborator.id;
+        const collaboratorDoc = snapshot.docs[0];
+        const collaboratorId = collaboratorDoc.id;
+        const collaboratorData = collaboratorDoc.data();
 
-        // 2. Evita que el dueño se añada a sí mismo
+        // 2️⃣ Evita que el dueño se añada a sí mismo
         if (collaboratorId === currentUser.uid) {
             alert('No puedes añadirte a ti mismo como colaborador.');
             return;
         }
 
-        // 3. Añadir colaborador a la rifa
+        // 3️⃣ Construir objeto con toda la información del colaborador
+        const collaboratorInfo = {
+            uid: collaboratorId,
+            name: collaboratorData.displayName || collaboratorData.name || collaboratorData.email,
+            email: collaboratorData.email,
+            photoURL: collaboratorData.photoURL || null,
+            addedAt: new Date().toISOString()
+        };
+
+        // 4️⃣ Actualizar la rifa agregando el colaborador
         const raffleRef = doc(db, 'raffles', raffleId);
         await updateDoc(raffleRef, {
-            collaborators: arrayUnion(collaboratorId),
+            collaborators: arrayUnion(collaboratorInfo),
             viewableBy: arrayUnion(collaboratorId)
         });
 
-        alert(`¡${email} ha sido añadido como colaborador!`);
+        alert(`✅ ¡${collaboratorInfo.name || email} ha sido añadido como colaborador!`);
         document.getElementById('collaborator-modal').style.display = 'none';
 
     } catch (error) {
@@ -1827,6 +1963,7 @@ async function handleCollaboratorInvite(e, raffleId) {
         alert('Hubo un error al intentar añadir al colaborador.');
     }
 }
+
 
 window.addEventListener("DOMContentLoaded", () => {
     const editBtn = document.getElementById('edit-ticket-btn');
