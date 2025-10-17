@@ -1,54 +1,54 @@
 // js/components.js
 
-// LISTA CENTRAL DE MÉTODOS DE PAGO
+// LISTA CENTRAL DE MÃ‰TODOS DE PAGO
 export const paymentMethods = [
     { name: 'Efectivo', value: 'efectivo', icon: 'assets/banks/efectivo.svg' },
     { name: 'Nequi', value: 'nequi', icon: 'assets/banks/nequi.svg' },
-    { name: 'Bre-B', value: 'bre-b', icon: 'assets/banks/bre-b.svg' }, // <-- AÑADIDO DE VUELTA
+    { name: 'Bre-B', value: 'bre-b', icon: 'assets/banks/bre-b.svg' }, // <-- AÃ‘ADIDO DE VUELTA
     { name: 'Daviplata', value: 'daviplata', icon: 'assets/banks/daviplata.svg' },
     { name: 'Nu', value: 'nu', icon: 'assets/banks/nu.svg' },
     { name: 'Bancolombia', value: 'bancolombia', icon: 'assets/banks/bancolombia.svg' },
     { name: 'AV Villas', value: 'av-villas', icon: 'assets/banks/av-villas.svg' },
     { name: 'BBVA', value: 'bbva', icon: 'assets/banks/bbva.svg' },
-    { name: 'Bogotá', value: 'bogota', icon: 'assets/banks/bogota.svg' },
+    { name: 'BogotÃ¡', value: 'bogota', icon: 'assets/banks/bogota.svg' },
     { name: 'Caja Social', value: 'caja-social', icon: 'assets/banks/caja-social.svg' },
     { name: 'Davivienda', value: 'davivienda', icon: 'assets/banks/davivienda.svg' }, // <-- CORREGIDO
     { name: 'Falabella', value: 'falabella', icon: 'assets/banks/falabella.svg' },
     { name: 'Finandina', value: 'finandina', icon: 'assets/banks/finandina.svg' },
-    { name: 'Itaú', value: 'itau', icon: 'assets/banks/itau.svg' },
+    { name: 'ItaÃº', value: 'itau', icon: 'assets/banks/itau.svg' },
     { name: 'Lulo Bank', value: 'lulo', icon: 'assets/banks/lulo.svg' },
     { name: 'Movii', value: 'movii', icon: 'assets/banks/movii.svg' },
     { name: 'Pibank', value: 'pibank', icon: 'assets/banks/pibank.svg' },
     { name: 'Powwi', value: 'powwi', icon: 'assets/banks/powwi.svg' },
-    { name: 'Ualá', value: 'uala', icon: 'assets/banks/uala.svg' }
+    { name: 'UalÃ¡', value: 'uala', icon: 'assets/banks/uala.svg' }
 ];
 
-// Vista para el inicio de sesión y registro
+// Vista para el inicio de sesiÃ³n y registro
 export const getAuthView = () => `
     <div class="login-wrapper">
         <div class="login-branding-panel">
             <img src="assets/logo_rifapro_b.svg" alt="RifaPro Logo">
-            <h1>Gestiona tus rifas de forma fácil y profesional.</h1>
-            <p>Controla tus boletos, pagos y estadísticas en un solo lugar.</p>
+            <h1>Gestiona tus rifas de forma fÃ¡cil y profesional.</h1>
+            <p>Controla tus boletos, pagos y estadÃ­sticas en un solo lugar.</p>
         </div>
 
         <div class="auth-container">
             <div class="auth-header">
-                <h2 id="auth-title">Iniciar Sesión</h2>
-                <p id="auth-subtitle">¡Bienvenido de nuevo!</p>
+                <h2 id="auth-title">Iniciar SesiÃ³n</h2>
+                <p id="auth-subtitle">Â¡Bienvenido de nuevo!</p>
             </div>
 
             <form id="auth-form">
                 <div class="form-group">
-                    <label for="email">Correo Electrónico</label>
+                    <label for="email">Correo ElectrÃ³nico</label>
                     <input type="email" id="email" required placeholder="tu@correo.com">
                 </div>
                 <div class="form-group">
-                    <label for="password">Contraseña</label>
-                    <input type="password" id="password" required placeholder="••••••••••">
+                    <label for="password">ContraseÃ±a</label>
+                    <input type="password" id="password" required placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢">
                 </div>
-                <a href="#" id="forgot-password-link" class="forgot-password">¿Olvidaste tu contraseña?</a>
-                <button type="submit" id="auth-action-btn" class="btn btn-primary">Iniciar Sesión</button>
+                <a href="#" id="forgot-password-link" class="forgot-password">Â¿Olvidaste tu contraseÃ±a?</a>
+                <button type="submit" id="auth-action-btn" class="btn btn-primary">Iniciar SesiÃ³n</button>
             </form>
             
             <div class="separator">
@@ -65,10 +65,10 @@ export const getAuthView = () => `
                 <span>Iniciar con Google</span>
             </button>
 
-            <p id="auth-toggle-text" class="auth-toggle">¿No tienes cuenta? <a href="#" id="auth-toggle-link">Regístrate</a></p>
+            <p id="auth-toggle-text" class="auth-toggle">Â¿No tienes cuenta? <a href="#" id="auth-toggle-link">RegÃ­strate</a></p>
 			<p class="auth-note">
-			  💡 Solo necesitas hacer clic una vez en “Regístrate” para activar los campos de usuario, contraseña y el inicio con Google.  
-			  No es necesario volver a hacerlo, a menos que borres tus cookies o datos de navegación (Ctrl + Shift + R en Windows/Linux, ⌘ + Shift + R en Mac o desde tu celular limpiando los datos del navegador).
+			  ðŸ’¡ Solo necesitas hacer clic una vez en â€œRegÃ­strateâ€ para activar los campos de usuario, contraseÃ±a y el inicio con Google.  
+			  No es necesario volver a hacerlo, a menos que borres tus cookies o datos de navegaciÃ³n (Ctrl + Shift + R en Windows/Linux, âŒ˜ + Shift + R en Mac o desde tu celular limpiando los datos del navegador).
 			</p>
         </div>
     </div>
@@ -77,33 +77,51 @@ export const getAuthView = () => `
 // Vista del panel principal (Home)
 export const getHomeView = (userName) => `
     <div class="home-container">
-        <h2> ¡Bienvenido, ${userName}!</h2>
+        <h2>¡Bienvenido, ${userName}!</h2>
         <p>¿Qué te gustaría hacer hoy?</p>
         <div class="home-buttons">
             <a href="#/create" class="btn btn-primary">
-                	<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m368-320 112-84 110 84-42-136 112-88H524l-44-136-44 136H300l110 88-42 136ZM160-160q-33 0-56.5-23.5T80-240v-135q0-11 7-19t18-10q24-8 39.5-29t15.5-47q0-26-15.5-47T105-556q-11-2-18-10t-7-19v-135q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v135q0 11-7 19t-18 10q-24 8-39.5 29T800-480q0 26 15.5 47t39.5 29q11 2 18 10t7 19v135q0 33-23.5 56.5T800-160H160Zm0-80h640v-102q-37-22-58.5-58.5T720-480q0-43 21.5-79.5T800-618v-102H160v102q37 22 58.5 58.5T240-480q0 43-21.5 79.5T160-342v102Zm320-240Z"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
+                    <path d="m368-320 112-84 110 84-42-136 112-88H524l-44-136-44 136H300l110 88-42 136ZM160-160q-33 0-56.5-23.5T80-240v-135q0-11 7-19t18-10q24-8 39.5-29t15.5-47q0-26-15.5-47T105-556q-11-2-18-10t-7-19v-135q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v135q0 11-7 19t-18 10q-24 8-39.5 29T800-480q0 26 15.5 47t39.5 29q11 2 18 10t7 19v135q0 33-23.5 56.5T800-160H160Zm0-80h640v-102q-37-22-58.5-58.5T720-480q0-43 21.5-79.5T800-618v-102H160v102q37 22 58.5 58.5T240-480q0 43-21.5 79.5T160-342v102Zm320-240Z"/>
+                </svg>
                 <span>Crear Rifa</span>
             </a>
+
             <a href="#/explore" class="btn btn-primary">
-                	<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m363-310 117-71 117 71-31-133 104-90-137-11-53-126-53 126-137 11 104 90-31 133ZM480-28 346-160H160v-186L28-480l132-134v-186h186l134-132 134 132h186v186l132 134-132 134v186H614L480-28Zm0-112 100-100h140v-140l100-100-100-100v-140H580L480-820 380-720H240v140L140-480l100 100v140h140l100 100Zm0-340Z"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
+                    <path d="m363-310 117-71 117 71-31-133 104-90-137-11-53-126-53 126-137 11 104 90-31 133ZM480-28 346-160H160v-186L28-480l132-134v-186h186l134-132 134 132h186v186l132 134-132 134v186H614L480-28Zm0-112 100-100h140v-140l100-100-100-100v-140H580L480-820 380-720H240v140L140-480l100 100v140h140l100 100Zm0-340Z"/>
+                </svg>
                 <span>Administrar Rifas</span>
             </a>
+
             <a href="#/statistics" class="btn btn-primary">
-                	<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M200-120q-33 0-56.5-23.5T120-200v-640h80v640h640v80H200Zm40-120v-360h160v360H240Zm200 0v-560h160v560H440Zm200 0v-200h160v200H640Z"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
+                    <path d="M200-120q-33 0-56.5-23.5T120-200v-640h80v640h640v80H200Zm40-120v-360h160v360H240Zm200 0v-560h160v560H440Zm200 0v-200h160v200H640Z"/>
+                </svg>
                 <span>Estadísticas</span>
             </a>
+
+			<!-- 🔹 Nuevo botón para gestionar colaboradores -->
+            <a href="#/collaborators" class="btn btn-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" height="30px" viewBox="0 -960 960 960" width="30px" fill="currentColor"><path d="M-3.19-236.81v-59.59q0-41.57 43.29-67.51 43.29-25.94 113.48-25.94 10.93 0 20.74.38 9.82.38 19.54 1.83-10.56 19.36-15.82 39.85-5.27 20.49-5.27 42.76v68.22H-3.19Zm240 0V-305q0-32.72 17.62-59.89 17.62-27.18 50.18-47.5t77.54-30.56q44.99-10.24 97.8-10.24 53.83 0 98.7 10.24 44.87 10.24 77.5 30.56 32.56 20.32 49.8 47.5 17.24 27.17 17.24 59.89v68.19H236.81Zm550.36 0v-68.26q0-22.96-4.85-43.32-4.86-20.35-14.93-39.2 9.73-1.5 19.44-1.88 9.71-.38 19.84-.38 70.56 0 113.54 25.54 42.98 25.55 42.98 67.98v59.52H787.17Zm-473.02-72.01h332.03v-4q-5.48-29.98-52.2-49.29-46.73-19.31-113.94-19.31-67.21 0-113.98 19.39-46.76 19.39-51.91 49.88v3.33ZM153.09-422.39q-30.89 0-52.95-22.13-22.05-22.14-22.05-53.22 0-31.52 22.1-53.41 22.1-21.89 53.13-21.89 31.48 0 53.45 21.88 21.97 21.89 21.97 53.66 0 30.83-21.92 52.97t-53.73 22.14Zm653.33 0q-30.88 0-52.94-22.13-22.06-22.14-22.06-53.22 0-31.52 22.1-53.41 22.1-21.89 53.14-21.89 31.47 0 53.44 21.88 21.97 21.89 21.97 53.66 0 30.83-21.91 52.97-21.92 22.14-53.74 22.14Zm-326.34-60.56q-51.36 0-87.32-35.95-35.95-35.95-35.95-87.32 0-52.19 35.95-87.65 35.96-35.46 87.32-35.46 52.2 0 87.65 35.46 35.46 35.46 35.46 87.65 0 51.37-35.46 87.32-35.45 35.95-87.65 35.95Zm.27-71.93q21.69 0 36.38-14.9 14.69-14.9 14.69-36.73t-14.82-36.44q-14.81-14.61-36.37-14.61-21.69 0-36.59 14.71-14.9 14.71-14.9 36.45 0 21.56 14.8 36.54t36.81 14.98Zm-.02 246.06ZM480-606.14Z"/></svg>
+                <span>Colaboradores</span>
+            </a>
+
             <a href="#/settings" class="btn btn-primary">
-                	<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m370-80-16-128q-13-5-24.5-12T307-235l-119 50L78-375l103-78q-1-7-1-13.5v-27q0-6.5 1-13.5L78-585l110-190 119 50q11-8 23-15t24-12l16-128h220l16 128q13 5 24.5 12t22.5 15l119-50 110 190-103 78q1 7 1 13.5v27q0 6.5-2 13.5l103 78-110 190-118-50q-11 8-23 15t-24 12L590-80H370Zm70-80h79l14-106q31-8 57.5-23.5T639-327l99 41 39-68-86-65q5-14 7-29.5t2-31.5q0-16-2-31.5t-7-29.5l86-65-39-68-99 42q-22-23-48.5-38.5T533-694l-13-106h-79l-14 106q-31 8-57.5 23.5T321-633l-99-41-39 68 86 64q-5 15-7 30t-2 32q0 16 2 31t7 30l-86 65 39 68 99-42q22 23 48.5 38.5T427-266l13 106Zm42-180q58 0 99-41t41-99q0-58-41-99t-99-41q-59 0-99.5 41T342-480q0 58 40.5 99t99.5 41Zm-2-140Z"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
+                    <path d="m370-80-16-128q-13-5-24.5-12T307-235l-119 50L78-375l103-78q-1-7-1-13.5v-27q0-6.5 1-13.5L78-585l110-190 119 50q11-8 23-15t24-12l16-128h220l16 128q13 5 24.5 12t22.5 15l119-50 110 190-103 78q1 7 1 13.5v27q0 6.5-2 13.5l103 78-110 190-118-50q-11 8-23 15t-24 12L590-80H370Zm70-80h79l14-106q31-8 57.5-23.5T639-327l99 41 39-68-86-65q5-14 7-29.5t2-31.5q0-16-2-31.5t-7-29.5l86-65-39-68-99 42q-22-23-48.5-38.5T533-694l-13-106h-79l-14 106q-31 8-57.5 23.5T321-633l-99-41-39 68 86 64q-5 15-7 30t-2 32q0 16 2 31t7 30l-86 65 39 68 99-42q22 23 48.5 38.5T427-266l13 106Zm42-180q58 0 99-41t41-99q0-58-41-99t-99-41q-59 0-99.5 41T342-480q0 58 40.5 99t99.5 41Zm-2-140Z"/>
+                </svg>
                 <span>Configuración</span>
             </a>
         </div>
     </div>
 `;
 
+
 export const getStatisticsListView = (rafflesHTML) => `
     <div class="statistics-container">
-        ${getPageHeader('Estadísticas de Rifas')}
-        <p>Selecciona una rifa para ver sus detalles y estadísticas.</p>
+        ${getPageHeader('EstadÃ­sticas de Rifas')}
+        <p>Selecciona una rifa para ver sus detalles y estadÃ­sticas.</p>
         ${rafflesHTML}
     </div>
 `;
@@ -133,12 +151,12 @@ export const getCreateRaffleView = () => {
 
             <div class="form-group">
                 <label for="raffle-manager">Responsable de la Rifa</label>
-                <input type="text" id="raffle-manager" placeholder="Ej: Tu nombre o el de tu organización" required>
+                <input type="text" id="raffle-manager" placeholder="Ej: Tu nombre o el de tu organizaciÃ³n" required>
             </div>
             
             <div class="form-group">
-                <label for="raffle-lottery">Juega con la lotería de</label>
-                <input type="text" id="raffle-lottery" placeholder="Ej: Lotería de Bogotá" required>
+                <label for="raffle-lottery">Juega con la loterÃ­a de</label>
+                <input type="text" id="raffle-lottery" placeholder="Ej: LoterÃ­a de BogotÃ¡" required>
             </div>
 
             <div class="form-group">
@@ -154,7 +172,7 @@ export const getCreateRaffleView = () => {
                 </div>
             </div>
             <div class="form-group">
-                <label for="payment-deadline">Fecha límite de pago</label>
+                <label for="payment-deadline">Fecha lÃ­mite de pago</label>
                 <input type="date" id="payment-deadline" required>
             </div>
             <div class="form-group">
@@ -163,7 +181,7 @@ export const getCreateRaffleView = () => {
             </div>
             
             <div class="form-group">
-                <label>Métodos de pago</label>
+                <label>MÃ©todos de pago</label>
                 <div class="payment-options-grid">
                     ${paymentOptionsHTML}
                 </div>
@@ -173,7 +191,7 @@ export const getCreateRaffleView = () => {
                 <div id="nequi-details" class="payment-details-wrapper" style="display: none;">
                     <h4>Detalles para Nequi</h4>
                     <div class="form-group">
-                        <label for="nequi-phone-number">Número de Celular</label>
+                        <label for="nequi-phone-number">NÃºmero de Celular</label>
                         <input type="tel" id="nequi-phone-number" placeholder="Ej: 3001234567">
                     </div>
                 </div>
@@ -181,7 +199,7 @@ export const getCreateRaffleView = () => {
                 <div id="daviplata-details" class="payment-details-wrapper" style="display: none;">
                     <h4>Detalles para Daviplata</h4>
                     <div class="form-group">
-                        <label for="daviplata-phone-number">Número de Celular</label>
+                        <label for="daviplata-phone-number">NÃºmero de Celular</label>
                         <input type="tel" id="daviplata-phone-number" placeholder="Ej: 3001234567">
                     </div>
                 </div>
@@ -205,7 +223,7 @@ export const getCreateRaffleView = () => {
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="bank-account-number">Número de Cuenta</label>
+                        <label for="bank-account-number">NÃºmero de Cuenta</label>
                         <input type="text" id="bank-account-number" placeholder="Ej: 1234567890">
                     </div>
                 </div>
@@ -217,7 +235,7 @@ export const getCreateRaffleView = () => {
     `;
 };
 
-// Vista para la página de "Explorar Rifas"
+// Vista para la pÃ¡gina de "Explorar Rifas"
 export const getExploreView = (rafflesHTML) => `
     <div class="explore-container">
 		${getPageHeader('Administrar Mis Rifas')}
@@ -242,18 +260,21 @@ export const getRaffleCard = (raffle, currentUser) => {
 
     const isOwner = currentUser && raffle.ownerId === currentUser.uid;
 
-    // 🔹 Mostrar solo si hay colaboradores
+    // 🧩 Mostrar avatar del colaborador si existe
     let collaboratorAvatarHTML = '';
     if (raffle.collaborators && raffle.collaborators.length > 0) {
-        const collaborator = raffle.collaborators[0]; // el primer colaborador
-        const photoURL = collaborator.photoURL || null;
+        const collaborator = raffle.collaborators[0]; // toma el primer colaborador
         const name = collaborator.name || 'Colaborador';
+        const photoURL = collaborator.photoURL || '';
 
         collaboratorAvatarHTML = `
             <div class="raffle-collaborator-avatar" title="${name}">
-                ${photoURL
-                    ? `<img src="${photoURL}" alt="${name}">`
-                    : `<svg xmlns="http://www.w3.org/2000/svg" height="28px" viewBox="0 -960 960 960" width="28px" fill="currentColor"><path d="M234-276q51-39 114-61.5T480-360q69 0 132 22.5T726-276q35-41 54.5-93T800-480q0-133-93.5-226.5T480-800q-133 0-226.5 93.5T160-480q0 59 19.5 111t54.5 93Zm246-164q-59 0-99.5-40.5T340-580q0-59 40.5-99.5T480-720q59 0 99.5 40.5T620-580q0 59-40.5 99.5T480-440Zm0 360q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q53 0 100-15.5t86-44.5q-39-29-86-44.5T480-280q-53 0-100 15.5T294-220q39 29 86 44.5T480-160Zm0-360q26 0 43-17t17-43q0-26-17-43t-43-17q-26 0-43 17t-17 43q0 26 17 43t43 17Zm0-60Zm0 360Z"/></svg>`
+                ${
+                    photoURL
+                        ? `<img src="${photoURL}" alt="${name}" />`
+                        : `<svg xmlns="http://www.w3.org/2000/svg" height="28px" viewBox="0 -960 960 960" width="28px" fill="currentColor">
+                            <path d="M234-276q51-39 114-61.5T480-360q69 0 132 22.5T726-276q35-41 54.5-93T800-480q0-133-93.5-226.5T480-800q-133 0-226.5 93.5T160-480q0 59 19.5 111t54.5 93Zm246-164q-59 0-99.5-40.5T340-580q0-59 40.5-99.5T480-720q59 0 99.5 40.5T620-580q0 59-40.5 99.5T480-440Zm0 360q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q53 0 100-15.5t86-44.5q-39-29-86-44.5T480-280q-53 0-100 15.5T294-220q39 29 86 44.5T480-160Zm0-360q26 0 43-17t17-43q0-26-17-43t-43-17q-26 0-43 17t-17 43q0 26 17 43t43 17Z"/>
+                           </svg>`
                 }
             </div>`;
     }
@@ -283,22 +304,22 @@ export const getRaffleCard = (raffle, currentUser) => {
 
             <div class="raffle-card-actions">
                 <button type="button" class="btn-icon btn-collaborate" title="Añadir Colaborador">
-					<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M502.39-486.54q31.15-33.92 47.37-76.95t16.22-88.83q0-45.79-16.7-89.18-16.69-43.39-47.37-76.35 63.83 9.91 103.95 57.43 40.12 47.51 40.12 108.22 0 61.68-40.36 108.95t-103.23 56.71ZM725.98-147.8v-127.18q0-39.35-15.76-73.04-15.76-33.7-43.2-60.13 55.55 16.8 99.16 48.17 43.62 31.37 43.62 85v127.18h-83.82Zm83.11-298.18v-80.72h-80.72v-80h80.72v-80.71h80v80.71h80.71v80h-80.71v80.72h-80Zm-491-38.09q-69.59 0-118.86-49.27-49.27-49.27-49.27-118.86 0-69.58 49.27-118.74 49.27-49.15 118.86-49.15 69.58 0 118.74 49.15 49.15 49.16 49.15 118.74 0 69.59-49.15 118.86-49.16 49.27-118.74 49.27ZM-10.04-147.8v-120.61q0-36.24 18.57-66.61 18.58-30.37 49.73-46.33 62.96-31.24 128.03-46.98 65.08-15.74 131.8-15.74 67.43 0 132.39 15.62 64.95 15.62 127.19 46.86 31.16 15.96 49.73 46.25 18.58 30.3 18.58 66.91v120.63H-10.04Zm328.12-427.27q31.81 0 54.35-22.65 22.55-22.65 22.55-54.47 0-31.81-22.59-54.35-22.59-22.55-54.3-22.55-31.82 0-54.48 22.59-22.65 22.59-22.65 54.3 0 31.82 22.65 54.48 22.66 22.65 54.47 22.65ZM80.96-238.8h474.02v-28.42q0-10.77-5.5-19.58-5.5-8.81-14.5-13.7-52.57-26.28-106.85-39.42-54.28-13.15-109.98-13.15t-110.4 13.27q-54.71 13.26-106.79 39.3-9 4.89-14.5 13.7-5.5 8.81-5.5 19.58v28.42Zm237.13-413.4Zm0 413.4Z"/></svg>
-				</button>
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
+                        <path d="M502.39-486.54q31.15-33.92 47.37-76.95t16.22-88.83q0-45.79-16.7-89.18-16.69-43.39-47.37-76.35 63.83 9.91 103.95 57.43 40.12 47.51 40.12 108.22 0 61.68-40.36 108.95t-103.23 56.71ZM725.98-147.8v-127.18q0-39.35-15.76-73.04-15.76-33.7-43.2-60.13 55.55 16.8 99.16 48.17 43.62 31.37 43.62 85v127.18h-83.82Zm83.11-298.18v-80.72h-80.72v-80h80.72v-80.71h80v80.71h80.71v80h-80.71v80.72h-80Zm-491-38.09q-69.59 0-118.86-49.27-49.27-49.27-49.27-118.86 0-69.58 49.27-118.74 49.27-49.15 118.86-49.15 69.58 0 118.74 49.15 49.15 49.16 49.15 118.74 0 69.59-49.15 118.86-49.16 49.27-118.74 49.27ZM-10.04-147.8v-120.61q0-36.24 18.57-66.61 18.58-30.37 49.73-46.33 62.96-31.24 128.03-46.98 65.08-15.74 131.8-15.74 67.43 0 132.39 15.62 64.95 15.62 127.19 46.86 31.16 15.96 49.73 46.25 18.58 30.3 18.58 66.91v120.63H-10.04Z"/>
+                    </svg>
+                </button>
 
                 <a href="#/raffle/${raffle.id}" class="btn btn-secondary">Administrar</a>
                 
                 ${isOwner ? `
                 <button type="button" class="btn-icon btn-delete-raffle" title="Eliminar Rifa">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
-                        <path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z"></path>
+                        <path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z"/>
                     </svg>
-                </button>
-                ` : ''}
+                </button>` : ''}
             </div>
         </div>
-    </div>
-    `;
+    </div>`;
 };
 
 export const getRaffleDetailView = (raffle) => {
@@ -323,13 +344,13 @@ export const getRaffleDetailView = (raffle) => {
                 <p><strong>Juega con:</strong> Loteria de ${raffle.lottery}</p>
                 <p><strong>Fecha del sorteo:</strong> ${new Date(raffle.drawDate).toLocaleDateString('es-CO')}</p>
                 <div class="payment-icons-list detail-view">
-                    <strong>Métodos de pago:</strong> ${paymentIconsHTML}
+                    <strong>MÃ©todos de pago:</strong> ${paymentIconsHTML}
                 </div>
             </div>
         </div>
 
         <div class="tickets-grid-container">
-            <h3>Selecciona tu número</h3>
+            <h3>Selecciona tu nÃºmero</h3>
             <div id="tickets-grid"></div>
 
             <div class="grid-actions">
@@ -342,7 +363,7 @@ export const getRaffleDetailView = (raffle) => {
     ${getCollaboratorModal()} `;
 };
 
-// AHORA, DEFINIMOS LA SEGUNDA FUNCIÓN POR SEPARADO
+// AHORA, DEFINIMOS LA SEGUNDA FUNCIÃ“N POR SEPARADO
 export const getTicketModal = () => `
     <div id="ticket-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
@@ -356,7 +377,7 @@ export const getTicketModal = () => `
                         <input type="text" id="buyer-name" required>
                     </div>
                     <div class="form-group">
-                        <label for="buyer-phone">Número de Celular</label>
+                        <label for="buyer-phone">NÃºmero de Celular</label>
                         <input type="tel" id="buyer-phone" required>
                     </div>
                     <div class="form-group">
@@ -385,7 +406,7 @@ export const getTicketModal = () => `
                         <p id="info-buyer-name" class="info-text"></p>
                     </div>
                     <div class="form-group">
-                        <label>Número de Celular</label>
+                        <label>NÃºmero de Celular</label>
                         <p id="info-buyer-phone" class="info-text"></p>
                     </div>
                     <div class="form-group">
@@ -428,12 +449,12 @@ export const getTicketModal = () => `
                     </div>
                 </div>
                 <div style="width: 45%; background: linear-gradient(45deg, #6a11cb, #2575fc); color: white; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                    <p style="margin: 0; font-size: 1.5rem; font-weight: 500;">TU NÚMERO</p>
+                    <p style="margin: 0; font-size: 1.5rem; font-weight: 500;">TU NÃšMERO</p>
                     <p id="template-number" style="margin: 0; font-size: 8rem; font-weight: 700; line-height: 1;"></p>
                 </div>
             </div>
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 20px; padding-top: 15px; border-top: 2px solid #f0f2f5;">
-                 <p style="margin: 0 0 5px 0; font-size: 0.9rem; color: #777; font-weight: 600;">¡Mucha Suerte!</p>
+                 <p style="margin: 0 0 5px 0; font-size: 0.9rem; color: #777; font-weight: 600;">Â¡Mucha Suerte!</p>
                  <div style="display: flex; align-items: center; gap: 5px;">
                     <p style="margin: 0; font-size: 0.75rem; color: #999;">Desarrollado por</p>
                     <svg id="Capa_2" data-name="Capa 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 879.14 85.62" style="height: 16px; opacity: 0.6;">
@@ -449,11 +470,11 @@ export const getStatusModal = () => `
     <div id="status-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
             <span class="close-modal close-status-modal">&times;</span>
-            <h3>Personalizar Título</h3>
+            <h3>Personalizar TÃ­tulo</h3>
             <form id="status-form">
                 
                 <div class="form-group">
-                    <label>Título Principal</label>
+                    <label>TÃ­tulo Principal</label>
                     <select id="status-title-type">
                         <option value="raffle_name">Mostrar Nombre de la Rifa</option>
                         <option value="prize">Mostrar Premio</option>
@@ -461,9 +482,9 @@ export const getStatusModal = () => `
                 </div>
 
                 <div id="prize-options-wrapper" class="form-group" style="display: none;">
-                    <label for="status-prize-prefix">Estilo del Título del Premio</label>
+                    <label for="status-prize-prefix">Estilo del TÃ­tulo del Premio</label>
                     <select id="status-prize-prefix">
-                        <option value="¡Gana {premio}">¡Gana {premio}!</option>
+                        <option value="Â¡Gana {premio}">Â¡Gana {premio}!</option>
                         <option value="Gran Rifa de {premio}">Gran Rifa de {premio}</option>
                         </select>
                 </div>
@@ -478,14 +499,14 @@ export const getCollaboratorModal = () => `
     <div id="collaborator-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
             <span class="close-modal close-collaborator-modal">&times;</span>
-            <h3>Añadir Colaborador</h3>
-            <p>Ingresa el correo del usuario de RifaPro que te ayudará a administrar esta rifa.</p>
+            <h3>AÃ±adir Colaborador</h3>
+            <p>Ingresa el correo del usuario de RifaPro que te ayudarÃ¡ a administrar esta rifa.</p>
             <form id="collaborator-form">
                 <div class="form-group">
                     <label for="collaborator-email">Correo del Colaborador</label>
                     <input type="email" id="collaborator-email" required>
                 </div>
-                <button type="submit" class="btn btn-primary">Añadir</button>
+                <button type="submit" class="btn btn-primary">AÃ±adir</button>
             </form>
         </div>
     </div>
@@ -500,7 +521,7 @@ document.addEventListener("click", (e) => {
 export const getStatisticsDetailView = (raffle) => `
     <div class="statistics-container">
         <div class="stats-header">
-            ${getPageHeader(`Estadísticas: ${raffle.name}`)}
+            ${getPageHeader(`EstadÃ­sticas: ${raffle.name}`)}
             <div class="header-actions">
 				<a href="#/participants/${raffle.id}" class="btn btn-secondary">
 					<svg xmlns="http://www.w3.org/2000/svg" 
@@ -516,7 +537,7 @@ export const getStatisticsDetailView = (raffle) => `
         </div>
 
         <div class="stats-group">
-            <h3>Cálculo de Ganancias</h3>
+            <h3>CÃ¡lculo de Ganancias</h3>
             <div class="stats-cards-grid">
                 <div class="stat-card">
                     <h4>Pagado Total</h4>
@@ -580,7 +601,7 @@ export const getParticipantsListView = (raffle, tickets) => {
         `;
     }
 
-    // Traducci�n de estados (clave en ingl�s, etiqueta en espa�ol)
+    // Traducciï¿½n de estados (clave en inglï¿½s, etiqueta en espaï¿½ol)
     const statusLabels = {
         paid: "Pagado",
         partial: "Parcial",
@@ -608,7 +629,7 @@ export const getParticipantsListView = (raffle, tickets) => {
                 </div>
 
                 <div class="participant-row">
-                    <div class="participant-label">Teléfono:</div>
+                    <div class="participant-label">TelÃ©fono:</div>
                     <div class="participant-value participant-phone">${ticket.phone || ticket.buyerPhone || 'N/A'}</div>
                 </div>
 
@@ -628,7 +649,7 @@ export const getParticipantsListView = (raffle, tickets) => {
             <h2>Lista de Participantes - ${raffle.name || 'Rifa'}</h2>
 
             <div class="filters">
-                <input type="text" id="search-participant" placeholder="Buscar por nombre o teléfono..." />
+                <input type="text" id="search-participant" placeholder="Buscar por nombre o telÃ©fono..." />
                 <select id="status-filter">
                     <option value="all">Todos</option>
                     <option value="paid">Pagados</option>
@@ -647,7 +668,7 @@ export const getParticipantsListView = (raffle, tickets) => {
 
 export const getSettingsView = () => `
     <div class="settings-container">
-		${getPageHeader('Configuración')}
+		${getPageHeader('ConfiguraciÃ³n')}
         <div class="settings-section">
             <h3>Cuenta</h3>
             <div id="go-to-edit-profile" class="settings-item">
@@ -667,7 +688,7 @@ export const getSettingsView = () => `
         </div>
 
         <div class="settings-section">
-            <h3>Información</h3>
+            <h3>InformaciÃ³n</h3>
             <div class="settings-item">
                 <div class="item-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M140.78-180.78v-106H214v-260.78q0-90.35 53.11-161.92 53.11-71.56 139.89-93.26v-23.48q0-30.41 21.29-51.71 21.29-21.29 51.71-21.29t51.71 21.29Q553-856.63 553-826.22v23.48q87.35 21.7 140.18 92.98Q746-638.48 746-547.56v260.78h73.22v106H140.78ZM480-497.17Zm.57 442.61q-35.8 0-61.3-25.33-25.49-25.33-25.49-60.89h173q0 35.82-25.32 61.02-25.33 25.2-60.89 25.2ZM320-286.78h320v-260.78q0-66-47-113t-113-47q-66 0-113 47t-47 113v260.78Z"/></svg>
@@ -699,7 +720,7 @@ export const getSettingsView = () => `
 
         <button id="settings-logout-btn" class="btn btn-danger-outline">
             <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="currentColor"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h280v80H200Zm440-160-55-58 102-102H360v-80h327L585-622l55-58 200 200-200 200Z"/></svg>
-            <span>Cerrar Sesión</span>
+            <span>Cerrar SesiÃ³n</span>
         </button>
     </div>
 `;
@@ -742,7 +763,7 @@ export const getEditProfileView = (user) => {
                 <input type="text" id="profile-username" value="${username}" readonly>
             </div>
             <div class="form-group">
-                <label for="profile-email">Correo electrónico</label>
+                <label for="profile-email">Correo electrÃ³nico</label>
                 <input type="email" id="profile-email" value="${email}" readonly>
             </div>
 
@@ -768,7 +789,7 @@ export const getAvatarCropperModal = () => `
 
 export const getSecurityView = (user) => {
     const email = user.email || '';
-    const phoneNumber = user.phoneNumber || ''; // Asumimos que guardaremos el tel�fono aqu�
+    const phoneNumber = user.phoneNumber || ''; // Asumimos que guardaremos el telï¿½fono aquï¿½
 
     return `
     <div class="security-container">
@@ -781,23 +802,23 @@ export const getSecurityView = (user) => {
 
         <div class="accordion">
             <div class="accordion-header">
-                <span>Cambiar Contraseña</span>
+                <span>Cambiar ContraseÃ±a</span>
                 <span class="accordion-icon">&rsaquo;</span>
             </div>
             <div class="accordion-content">
-                <p>Te enviaremos un correo electrónico con un enlace seguro para que puedas restablecer tu contraseña.</p>
+                <p>Te enviaremos un correo electrÃ³nico con un enlace seguro para que puedas restablecer tu contraseÃ±a.</p>
                 <button id="send-reset-password-btn" class="btn btn-secondary">Enviar Solicitud</button>
             </div>
         </div>
 
         <form id="security-form">
             <div class="form-group">
-                <label for="security-email">Cambiar Correo Electrónico</label>
+                <label for="security-email">Cambiar Correo ElectrÃ³nico</label>
                 <input type="email" id="security-email" value="${email}">
             </div>
             <div class="form-group">
-                <label for="security-phone">Editar Número de Celular</label>
-                <input type="tel" id="security-phone" value="${phoneNumber}" placeholder="Introduce tu número de celular">
+                <label for="security-phone">Editar NÃºmero de Celular</label>
+                <input type="tel" id="security-phone" value="${phoneNumber}" placeholder="Introduce tu nÃºmero de celular">
             </div>
 
             <a href="#/manage-guests" class="btn btn-secondary-outline">Gestionar invitados en mis rifas</a>
@@ -817,4 +838,20 @@ export const getPageHeader = (title) => `
         </a>
         <h2>${title}</h2>
     </div>
+`;
+
+export const getCollaboratorsView = () => `
+<div class="collaborators-container">
+	${getPageHeader('ConfiguraciÃ³n')}
+    <div class="collaborators-search">
+        <input type="text" id="collaborator-search" placeholder="🔍 Buscar por nombre o rifa" />
+    </div>
+
+    <div class="collaborators-list">
+        <h3>Lista de Colaboradores</h3>
+        <div id="collaborators-list-container">
+            <p class="loading-text">Cargando colaboradores...</p>
+        </div>
+    </div>
+</div>
 `;
