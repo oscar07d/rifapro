@@ -2002,7 +2002,7 @@ async function loadParticipantsList(raffleId, filterStatus = "all", searchQuery 
             participants = participants.filter(p => p.status === filterStatus);
         }
 
-        // Filtro por bÃºsqueda
+        // Filtro por búsqueda
         if (searchQuery) {
             const queryLower = searchQuery.toLowerCase();
             participants = participants.filter(p =>
@@ -2049,7 +2049,7 @@ function setupParticipantsEvents(raffleId) {
         });
     }
 
-    // BÃºsqueda
+    // Búsqueda
     if (searchInput) {
         searchInput.addEventListener("input", () => {
             loadParticipantsList(raffleId, filterSelect.value, searchInput.value);
@@ -2133,3 +2133,4 @@ async function fixOldRaffles() {
 // --- INICIALIZACIÃ“N ---
 window.addEventListener('hashchange', router);
 window.addEventListener('load', router);
+
