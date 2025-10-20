@@ -1,54 +1,54 @@
 // js/components.js
 
-// LISTA CENTRAL DE MÃ‰TODOS DE PAGO
+// LISTA CENTRAL DE Mí‰TODOS DE PAGO
 export const paymentMethods = [
     { name: 'Efectivo', value: 'efectivo', icon: 'assets/banks/efectivo.svg' },
     { name: 'Nequi', value: 'nequi', icon: 'assets/banks/nequi.svg' },
-    { name: 'Bre-B', value: 'bre-b', icon: 'assets/banks/bre-b.svg' }, // <-- AÃ‘ADIDO DE VUELTA
+    { name: 'Bre-B', value: 'bre-b', icon: 'assets/banks/bre-b.svg' }, // <-- Aí‘ADIDO DE VUELTA
     { name: 'Daviplata', value: 'daviplata', icon: 'assets/banks/daviplata.svg' },
     { name: 'Nu', value: 'nu', icon: 'assets/banks/nu.svg' },
     { name: 'Bancolombia', value: 'bancolombia', icon: 'assets/banks/bancolombia.svg' },
     { name: 'AV Villas', value: 'av-villas', icon: 'assets/banks/av-villas.svg' },
     { name: 'BBVA', value: 'bbva', icon: 'assets/banks/bbva.svg' },
-    { name: 'BogotÃ¡', value: 'bogota', icon: 'assets/banks/bogota.svg' },
+    { name: 'Bogotá', value: 'bogota', icon: 'assets/banks/bogota.svg' },
     { name: 'Caja Social', value: 'caja-social', icon: 'assets/banks/caja-social.svg' },
     { name: 'Davivienda', value: 'davivienda', icon: 'assets/banks/davivienda.svg' }, // <-- CORREGIDO
     { name: 'Falabella', value: 'falabella', icon: 'assets/banks/falabella.svg' },
     { name: 'Finandina', value: 'finandina', icon: 'assets/banks/finandina.svg' },
-    { name: 'ItaÃº', value: 'itau', icon: 'assets/banks/itau.svg' },
+    { name: 'Itaíº', value: 'itau', icon: 'assets/banks/itau.svg' },
     { name: 'Lulo Bank', value: 'lulo', icon: 'assets/banks/lulo.svg' },
     { name: 'Movii', value: 'movii', icon: 'assets/banks/movii.svg' },
     { name: 'Pibank', value: 'pibank', icon: 'assets/banks/pibank.svg' },
     { name: 'Powwi', value: 'powwi', icon: 'assets/banks/powwi.svg' },
-    { name: 'UalÃ¡', value: 'uala', icon: 'assets/banks/uala.svg' }
+    { name: 'Ualá', value: 'uala', icon: 'assets/banks/uala.svg' }
 ];
 
-// Vista para el inicio de sesiÃ³n y registro
+// Vista para el inicio de sesión y registro
 export const getAuthView = () => `
     <div class="login-wrapper">
         <div class="login-branding-panel">
             <img src="assets/logo_rifapro_b.svg" alt="RifaPro Logo">
-            <h1>Gestiona tus rifas de forma fÃ¡cil y profesional.</h1>
-            <p>Controla tus boletos, pagos y estadÃ­sticas en un solo lugar.</p>
+            <h1>Gestiona tus rifas de forma fácil y profesional.</h1>
+            <p>Controla tus boletos, pagos y estadí­sticas en un solo lugar.</p>
         </div>
 
         <div class="auth-container">
             <div class="auth-header">
-                <h2 id="auth-title">Iniciar SesiÃ³n</h2>
+                <h2 id="auth-title">Iniciar Sesión</h2>
                 <p id="auth-subtitle">Â¡Bienvenido de nuevo!</p>
             </div>
 
             <form id="auth-form">
                 <div class="form-group">
-                    <label for="email">Correo ElectrÃ³nico</label>
+                    <label for="email">Correo Electrónico</label>
                     <input type="email" id="email" required placeholder="tu@correo.com">
                 </div>
                 <div class="form-group">
-                    <label for="password">ContraseÃ±a</label>
+                    <label for="password">Contraseí±a</label>
                     <input type="password" id="password" required placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢">
                 </div>
-                <a href="#" id="forgot-password-link" class="forgot-password">Â¿Olvidaste tu contraseÃ±a?</a>
-                <button type="submit" id="auth-action-btn" class="btn btn-primary">Iniciar SesiÃ³n</button>
+                <a href="#" id="forgot-password-link" class="forgot-password">Â¿Olvidaste tu contraseí±a?</a>
+                <button type="submit" id="auth-action-btn" class="btn btn-primary">Iniciar Sesión</button>
             </form>
             
             <div class="separator">
@@ -65,10 +65,10 @@ export const getAuthView = () => `
                 <span>Iniciar con Google</span>
             </button>
 
-            <p id="auth-toggle-text" class="auth-toggle">Â¿No tienes cuenta? <a href="#" id="auth-toggle-link">RegÃ­strate</a></p>
+            <p id="auth-toggle-text" class="auth-toggle">Â¿No tienes cuenta? <a href="#" id="auth-toggle-link">Regí­strate</a></p>
 			<p class="auth-note">
-			  ðŸ’¡ Solo necesitas hacer clic una vez en â€œRegÃ­strateâ€ para activar los campos de usuario, contraseÃ±a y el inicio con Google.  
-			  No es necesario volver a hacerlo, a menos que borres tus cookies o datos de navegaciÃ³n (Ctrl + Shift + R en Windows/Linux, âŒ˜ + Shift + R en Mac o desde tu celular limpiando los datos del navegador).
+			  ðŸ’¡ Solo necesitas hacer clic una vez en â€œRegí­strateâ€ para activar los campos de usuario, contraseí±a y el inicio con Google.  
+			  No es necesario volver a hacerlo, a menos que borres tus cookies o datos de navegación (Ctrl + Shift + R en Windows/Linux, âŒ˜ + Shift + R en Mac o desde tu celular limpiando los datos del navegador).
 			</p>
         </div>
     </div>
@@ -120,8 +120,8 @@ export const getHomeView = (userName) => `
 
 export const getStatisticsListView = (rafflesHTML) => `
     <div class="statistics-container">
-        ${getPageHeader('EstadÃ­sticas de Rifas')}
-        <p>Selecciona una rifa para ver sus detalles y estadÃ­sticas.</p>
+        ${getPageHeader('Estadí­sticas de Rifas')}
+        <p>Selecciona una rifa para ver sus detalles y estadí­sticas.</p>
         ${rafflesHTML}
     </div>
 `;
@@ -151,12 +151,12 @@ export const getCreateRaffleView = () => {
 
             <div class="form-group">
                 <label for="raffle-manager">Responsable de la Rifa</label>
-                <input type="text" id="raffle-manager" placeholder="Ej: Tu nombre o el de tu organizaciÃ³n" required>
+                <input type="text" id="raffle-manager" placeholder="Ej: Tu nombre o el de tu organización" required>
             </div>
             
             <div class="form-group">
-                <label for="raffle-lottery">Juega con la loterÃ­a de</label>
-                <input type="text" id="raffle-lottery" placeholder="Ej: LoterÃ­a de BogotÃ¡" required>
+                <label for="raffle-lottery">Juega con la loterí­a de</label>
+                <input type="text" id="raffle-lottery" placeholder="Ej: Loterí­a de Bogotá" required>
             </div>
 
             <div class="form-group">
@@ -172,7 +172,7 @@ export const getCreateRaffleView = () => {
                 </div>
             </div>
             <div class="form-group">
-                <label for="payment-deadline">Fecha lÃ­mite de pago</label>
+                <label for="payment-deadline">Fecha lí­mite de pago</label>
                 <input type="date" id="payment-deadline" required>
             </div>
             <div class="form-group">
@@ -181,7 +181,7 @@ export const getCreateRaffleView = () => {
             </div>
             
             <div class="form-group">
-                <label>MÃ©todos de pago</label>
+                <label>Mí©todos de pago</label>
                 <div class="payment-options-grid">
                     ${paymentOptionsHTML}
                 </div>
@@ -191,7 +191,7 @@ export const getCreateRaffleView = () => {
                 <div id="nequi-details" class="payment-details-wrapper" style="display: none;">
                     <h4>Detalles para Nequi</h4>
                     <div class="form-group">
-                        <label for="nequi-phone-number">NÃºmero de Celular</label>
+                        <label for="nequi-phone-number">Níºmero de Celular</label>
                         <input type="tel" id="nequi-phone-number" placeholder="Ej: 3001234567">
                     </div>
                 </div>
@@ -199,7 +199,7 @@ export const getCreateRaffleView = () => {
                 <div id="daviplata-details" class="payment-details-wrapper" style="display: none;">
                     <h4>Detalles para Daviplata</h4>
                     <div class="form-group">
-                        <label for="daviplata-phone-number">NÃºmero de Celular</label>
+                        <label for="daviplata-phone-number">Níºmero de Celular</label>
                         <input type="tel" id="daviplata-phone-number" placeholder="Ej: 3001234567">
                     </div>
                 </div>
@@ -223,7 +223,7 @@ export const getCreateRaffleView = () => {
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="bank-account-number">NÃºmero de Cuenta</label>
+                        <label for="bank-account-number">Níºmero de Cuenta</label>
                         <input type="text" id="bank-account-number" placeholder="Ej: 1234567890">
                     </div>
                 </div>
@@ -235,7 +235,7 @@ export const getCreateRaffleView = () => {
     `;
 };
 
-// Vista para la pÃ¡gina de "Explorar Rifas"
+// Vista para la página de "Explorar Rifas"
 export const getExploreView = (rafflesHTML) => `
     <div class="explore-container">
 		${getPageHeader('Administrar Mis Rifas')}
@@ -344,13 +344,13 @@ export const getRaffleDetailView = (raffle) => {
                 <p><strong>Juega con:</strong> Loteria de ${raffle.lottery}</p>
                 <p><strong>Fecha del sorteo:</strong> ${new Date(raffle.drawDate).toLocaleDateString('es-CO')}</p>
                 <div class="payment-icons-list detail-view">
-                    <strong>MÃ©todos de pago:</strong> ${paymentIconsHTML}
+                    <strong>Mí©todos de pago:</strong> ${paymentIconsHTML}
                 </div>
             </div>
         </div>
 
         <div class="tickets-grid-container">
-            <h3>Selecciona tu nÃºmero</h3>
+            <h3>Selecciona tu níºmero</h3>
             <div id="tickets-grid"></div>
 
             <div class="grid-actions">
@@ -363,7 +363,7 @@ export const getRaffleDetailView = (raffle) => {
     ${getCollaboratorModal()} `;
 };
 
-// AHORA, DEFINIMOS LA SEGUNDA FUNCIÃ“N POR SEPARADO
+// AHORA, DEFINIMOS LA SEGUNDA FUNCIí“N POR SEPARADO
 export const getTicketModal = () => `
     <div id="ticket-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
@@ -377,7 +377,7 @@ export const getTicketModal = () => `
                         <input type="text" id="buyer-name" required>
                     </div>
                     <div class="form-group">
-                        <label for="buyer-phone">NÃºmero de Celular</label>
+                        <label for="buyer-phone">Níºmero de Celular</label>
                         <input type="tel" id="buyer-phone" required>
                     </div>
                     <div class="form-group">
@@ -406,7 +406,7 @@ export const getTicketModal = () => `
                         <p id="info-buyer-name" class="info-text"></p>
                     </div>
                     <div class="form-group">
-                        <label>NÃºmero de Celular</label>
+                        <label>Níºmero de Celular</label>
                         <p id="info-buyer-phone" class="info-text"></p>
                     </div>
                     <div class="form-group">
@@ -449,7 +449,7 @@ export const getTicketModal = () => `
                     </div>
                 </div>
                 <div style="width: 45%; background: linear-gradient(45deg, #6a11cb, #2575fc); color: white; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                    <p style="margin: 0; font-size: 1.5rem; font-weight: 500;">TU NÃšMERO</p>
+                    <p style="margin: 0; font-size: 1.5rem; font-weight: 500;">TU NíšMERO</p>
                     <p id="template-number" style="margin: 0; font-size: 8rem; font-weight: 700; line-height: 1;"></p>
                 </div>
             </div>
@@ -470,11 +470,11 @@ export const getStatusModal = () => `
     <div id="status-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
             <span class="close-modal close-status-modal">&times;</span>
-            <h3>Personalizar TÃ­tulo</h3>
+            <h3>Personalizar Tí­tulo</h3>
             <form id="status-form">
                 
                 <div class="form-group">
-                    <label>TÃ­tulo Principal</label>
+                    <label>Tí­tulo Principal</label>
                     <select id="status-title-type">
                         <option value="raffle_name">Mostrar Nombre de la Rifa</option>
                         <option value="prize">Mostrar Premio</option>
@@ -482,7 +482,7 @@ export const getStatusModal = () => `
                 </div>
 
                 <div id="prize-options-wrapper" class="form-group" style="display: none;">
-                    <label for="status-prize-prefix">Estilo del TÃ­tulo del Premio</label>
+                    <label for="status-prize-prefix">Estilo del Tí­tulo del Premio</label>
                     <select id="status-prize-prefix">
                         <option value="Â¡Gana {premio}">Â¡Gana {premio}!</option>
                         <option value="Gran Rifa de {premio}">Gran Rifa de {premio}</option>
@@ -499,14 +499,14 @@ export const getCollaboratorModal = () => `
     <div id="collaborator-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
             <span class="close-modal close-collaborator-modal">&times;</span>
-            <h3>AÃ±adir Colaborador</h3>
-            <p>Ingresa el correo del usuario de RifaPro que te ayudarÃ¡ a administrar esta rifa.</p>
+            <h3>Aí±adir Colaborador</h3>
+            <p>Ingresa el correo del usuario de RifaPro que te ayudará a administrar esta rifa.</p>
             <form id="collaborator-form">
                 <div class="form-group">
                     <label for="collaborator-email">Correo del Colaborador</label>
                     <input type="email" id="collaborator-email" required>
                 </div>
-                <button type="submit" class="btn btn-primary">AÃ±adir</button>
+                <button type="submit" class="btn btn-primary">Aí±adir</button>
             </form>
         </div>
     </div>
@@ -521,7 +521,7 @@ document.addEventListener("click", (e) => {
 export const getStatisticsDetailView = (raffle) => `
     <div class="statistics-container">
         <div class="stats-header">
-            ${getPageHeader(`EstadÃ­sticas: ${raffle.name}`)}
+            ${getPageHeader(`Estadí­sticas: ${raffle.name}`)}
             <div class="header-actions">
 				<a href="#/participants/${raffle.id}" class="btn btn-secondary">
 					<svg xmlns="http://www.w3.org/2000/svg" 
@@ -537,7 +537,7 @@ export const getStatisticsDetailView = (raffle) => `
         </div>
 
         <div class="stats-group">
-            <h3>CÃ¡lculo de Ganancias</h3>
+            <h3>Cálculo de Ganancias</h3>
             <div class="stats-cards-grid">
                 <div class="stat-card">
                     <h4>Pagado Total</h4>
@@ -629,7 +629,7 @@ export const getParticipantsListView = (raffle, tickets) => {
                 </div>
 
                 <div class="participant-row">
-                    <div class="participant-label">TelÃ©fono:</div>
+                    <div class="participant-label">Telí©fono:</div>
                     <div class="participant-value participant-phone">${ticket.phone || ticket.buyerPhone || 'N/A'}</div>
                 </div>
 
@@ -649,7 +649,7 @@ export const getParticipantsListView = (raffle, tickets) => {
             <h2>Lista de Participantes - ${raffle.name || 'Rifa'}</h2>
 
             <div class="filters">
-                <input type="text" id="search-participant" placeholder="Buscar por nombre o telÃ©fono..." />
+                <input type="text" id="search-participant" placeholder="Buscar por nombre o telí©fono..." />
                 <select id="status-filter">
                     <option value="all">Todos</option>
                     <option value="paid">Pagados</option>
@@ -668,7 +668,7 @@ export const getParticipantsListView = (raffle, tickets) => {
 
 export const getSettingsView = () => `
     <div class="settings-container">
-		${getPageHeader('ConfiguraciÃ³n')}
+		${getPageHeader('Configuración')}
         <div class="settings-section">
             <h3>Cuenta</h3>
             <div id="go-to-edit-profile" class="settings-item">
@@ -688,7 +688,7 @@ export const getSettingsView = () => `
         </div>
 
         <div class="settings-section">
-            <h3>InformaciÃ³n</h3>
+            <h3>Información</h3>
             <div class="settings-item">
                 <div class="item-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M140.78-180.78v-106H214v-260.78q0-90.35 53.11-161.92 53.11-71.56 139.89-93.26v-23.48q0-30.41 21.29-51.71 21.29-21.29 51.71-21.29t51.71 21.29Q553-856.63 553-826.22v23.48q87.35 21.7 140.18 92.98Q746-638.48 746-547.56v260.78h73.22v106H140.78ZM480-497.17Zm.57 442.61q-35.8 0-61.3-25.33-25.49-25.33-25.49-60.89h173q0 35.82-25.32 61.02-25.33 25.2-60.89 25.2ZM320-286.78h320v-260.78q0-66-47-113t-113-47q-66 0-113 47t-47 113v260.78Z"/></svg>
@@ -720,7 +720,7 @@ export const getSettingsView = () => `
 
         <button id="settings-logout-btn" class="btn btn-danger-outline">
             <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="currentColor"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h280v80H200Zm440-160-55-58 102-102H360v-80h327L585-622l55-58 200 200-200 200Z"/></svg>
-            <span>Cerrar SesiÃ³n</span>
+            <span>Cerrar Sesión</span>
         </button>
     </div>
 `;
@@ -763,7 +763,7 @@ export const getEditProfileView = (user) => {
                 <input type="text" id="profile-username" value="${username}" readonly>
             </div>
             <div class="form-group">
-                <label for="profile-email">Correo electrÃ³nico</label>
+                <label for="profile-email">Correo electrónico</label>
                 <input type="email" id="profile-email" value="${email}" readonly>
             </div>
 
@@ -802,23 +802,23 @@ export const getSecurityView = (user) => {
 
         <div class="accordion">
             <div class="accordion-header">
-                <span>Cambiar ContraseÃ±a</span>
+                <span>Cambiar Contraseí±a</span>
                 <span class="accordion-icon">&rsaquo;</span>
             </div>
             <div class="accordion-content">
-                <p>Te enviaremos un correo electrÃ³nico con un enlace seguro para que puedas restablecer tu contraseÃ±a.</p>
+                <p>Te enviaremos un correo electrónico con un enlace seguro para que puedas restablecer tu contraseí±a.</p>
                 <button id="send-reset-password-btn" class="btn btn-secondary">Enviar Solicitud</button>
             </div>
         </div>
 
         <form id="security-form">
             <div class="form-group">
-                <label for="security-email">Cambiar Correo ElectrÃ³nico</label>
+                <label for="security-email">Cambiar Correo Electrónico</label>
                 <input type="email" id="security-email" value="${email}">
             </div>
             <div class="form-group">
-                <label for="security-phone">Editar NÃºmero de Celular</label>
-                <input type="tel" id="security-phone" value="${phoneNumber}" placeholder="Introduce tu nÃºmero de celular">
+                <label for="security-phone">Editar Níºmero de Celular</label>
+                <input type="tel" id="security-phone" value="${phoneNumber}" placeholder="Introduce tu níºmero de celular">
             </div>
 
             <a href="#/manage-guests" class="btn btn-secondary-outline">Gestionar invitados en mis rifas</a>
@@ -855,4 +855,5 @@ export const getCollaboratorsView = () => `
     </div>
 </div>
 `;
+
 
