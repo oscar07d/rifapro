@@ -683,7 +683,7 @@ async function handleShare(type, raffleId, ticketNumber) {
             const viewContainer = document.getElementById('modal-view-container');
             viewContainer.innerHTML = `
                 <div class="ticket-preview-wrapper">
-                    <h4>? ¡Boleto listo para WhatsApp!</h4>
+                    <h4>¡Boleto listo para WhatsApp!</h4>
                     <a href="https://wa.me/?text=${encodeURIComponent(shareText)}" 
                        target="_blank" class="btn btn-whatsapp" 
                        style="margin-top:1rem;">Abrir WhatsApp</a>
@@ -708,7 +708,7 @@ async function handleShare(type, raffleId, ticketNumber) {
     }
 }
 
-// --- MANEJO DE ESTADO DE AUTENTICACIÃ“N ---
+// --- MANEJO DE ESTADO DE AUTENTICACIóN ---
 
 onAuthStateChanged(async (user) => {
     console.log("?? Estado de autenticación cambió:", user);
@@ -2130,7 +2130,8 @@ async function fixOldRaffles() {
 }
 
 			
-// --- INICIALIZACIÃ“N ---
+// --- INICIALIZACIóN ---
 window.addEventListener('hashchange', router);
 window.addEventListener('load', router);
+
 
