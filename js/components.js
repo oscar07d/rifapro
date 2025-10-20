@@ -180,7 +180,7 @@ export const getCreateRaffleView = () => {
             </div>
             
             <div class="form-group">
-                <label>Mí©todos de pago</label>
+                <label>Métodos de pago</label>
                 <div class="payment-options-grid">
                     ${paymentOptionsHTML}
                 </div>
@@ -343,7 +343,7 @@ export const getRaffleDetailView = (raffle) => {
                 <p><strong>Juega con:</strong> Loteria de ${raffle.lottery}</p>
                 <p><strong>Fecha del sorteo:</strong> ${new Date(raffle.drawDate).toLocaleDateString('es-CO')}</p>
                 <div class="payment-icons-list detail-view">
-                    <strong>Mí©todos de pago:</strong> ${paymentIconsHTML}
+                    <strong>Métodos de pago:</strong> ${paymentIconsHTML}
                 </div>
             </div>
         </div>
@@ -628,7 +628,7 @@ export const getParticipantsListView = (raffle, tickets) => {
                 </div>
 
                 <div class="participant-row">
-                    <div class="participant-label">Telí©fono:</div>
+                    <div class="participant-label">Teléfono:</div>
                     <div class="participant-value participant-phone">${ticket.phone || ticket.buyerPhone || 'N/A'}</div>
                 </div>
 
@@ -648,7 +648,7 @@ export const getParticipantsListView = (raffle, tickets) => {
             <h2>Lista de Participantes - ${raffle.name || 'Rifa'}</h2>
 
             <div class="filters">
-                <input type="text" id="search-participant" placeholder="Buscar por nombre o telí©fono..." />
+                <input type="text" id="search-participant" placeholder="Buscar por nombre o teléfono..." />
                 <select id="status-filter">
                     <option value="all">Todos</option>
                     <option value="paid">Pagados</option>
@@ -854,6 +854,7 @@ export const getCollaboratorsView = () => `
     </div>
 </div>
 `;
+
 
 
 
