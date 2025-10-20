@@ -35,7 +35,7 @@ export const getAuthView = () => `
         <div class="auth-container">
             <div class="auth-header">
                 <h2 id="auth-title">Iniciar Sesión</h2>
-                <p id="auth-subtitle">Â¡Bienvenido de nuevo!</p>
+                <p id="auth-subtitle">¡Bienvenido de nuevo!</p>
             </div>
 
             <form id="auth-form">
@@ -854,6 +854,7 @@ export const getCollaboratorsView = () => `
     </div>
 </div>
 `;
+
 
 
 
