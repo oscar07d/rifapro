@@ -44,10 +44,10 @@ export const getAuthView = () => `
                     <input type="email" id="email" required placeholder="tu@correo.com">
                 </div>
                 <div class="form-group">
-                    <label for="password">Contraseí±a</label>
+                    <label for="password">Contraseña</label>
                     <input type="password" id="password" required placeholder="••••••••••">
                 </div>
-                <a href="#" id="forgot-password-link" class="forgot-password">Â¿Olvidaste tu contraseí±a?</a>
+                <a href="#" id="forgot-password-link" class="forgot-password">¿Olvidaste tu contraseña?</a>
                 <button type="submit" id="auth-action-btn" class="btn btn-primary">Iniciar Sesión</button>
             </form>
             
@@ -498,14 +498,14 @@ export const getCollaboratorModal = () => `
     <div id="collaborator-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
             <span class="close-modal close-collaborator-modal">&times;</span>
-            <h3>Aí±adir Colaborador</h3>
+            <h3>Añadir Colaborador</h3>
             <p>Ingresa el correo del usuario de RifaPro que te ayudará a administrar esta rifa.</p>
             <form id="collaborator-form">
                 <div class="form-group">
                     <label for="collaborator-email">Correo del Colaborador</label>
                     <input type="email" id="collaborator-email" required>
                 </div>
-                <button type="submit" class="btn btn-primary">Aí±adir</button>
+                <button type="submit" class="btn btn-primary">Añadir</button>
             </form>
         </div>
     </div>
@@ -801,11 +801,11 @@ export const getSecurityView = (user) => {
 
         <div class="accordion">
             <div class="accordion-header">
-                <span>Cambiar Contraseí±a</span>
+                <span>Cambiar Contraseña</span>
                 <span class="accordion-icon">&rsaquo;</span>
             </div>
             <div class="accordion-content">
-                <p>Te enviaremos un correo electrónico con un enlace seguro para que puedas restablecer tu contraseí±a.</p>
+                <p>Te enviaremos un correo electrónico con un enlace seguro para que puedas restablecer tu contraseña.</p>
                 <button id="send-reset-password-btn" class="btn btn-secondary">Enviar Solicitud</button>
             </div>
         </div>
@@ -854,6 +854,7 @@ export const getCollaboratorsView = () => `
     </div>
 </div>
 `;
+
 
 
 
