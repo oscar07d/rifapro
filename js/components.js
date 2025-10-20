@@ -15,7 +15,7 @@ export const paymentMethods = [
     { name: 'Davivienda', value: 'davivienda', icon: 'assets/banks/davivienda.svg' }, // <-- CORREGIDO
     { name: 'Falabella', value: 'falabella', icon: 'assets/banks/falabella.svg' },
     { name: 'Finandina', value: 'finandina', icon: 'assets/banks/finandina.svg' },
-    { name: 'Itaíº', value: 'itau', icon: 'assets/banks/itau.svg' },
+    { name: 'Itaú', value: 'itau', icon: 'assets/banks/itau.svg' },
     { name: 'Lulo Bank', value: 'lulo', icon: 'assets/banks/lulo.svg' },
     { name: 'Movii', value: 'movii', icon: 'assets/banks/movii.svg' },
     { name: 'Pibank', value: 'pibank', icon: 'assets/banks/pibank.svg' },
@@ -190,7 +190,7 @@ export const getCreateRaffleView = () => {
                 <div id="nequi-details" class="payment-details-wrapper" style="display: none;">
                     <h4>Detalles para Nequi</h4>
                     <div class="form-group">
-                        <label for="nequi-phone-number">Níºmero de Celular</label>
+                        <label for="nequi-phone-number">Número de Celular</label>
                         <input type="tel" id="nequi-phone-number" placeholder="Ej: 3001234567">
                     </div>
                 </div>
@@ -198,7 +198,7 @@ export const getCreateRaffleView = () => {
                 <div id="daviplata-details" class="payment-details-wrapper" style="display: none;">
                     <h4>Detalles para Daviplata</h4>
                     <div class="form-group">
-                        <label for="daviplata-phone-number">Níºmero de Celular</label>
+                        <label for="daviplata-phone-number">Número de Celular</label>
                         <input type="tel" id="daviplata-phone-number" placeholder="Ej: 3001234567">
                     </div>
                 </div>
@@ -222,7 +222,7 @@ export const getCreateRaffleView = () => {
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="bank-account-number">Níºmero de Cuenta</label>
+                        <label for="bank-account-number">Número de Cuenta</label>
                         <input type="text" id="bank-account-number" placeholder="Ej: 1234567890">
                     </div>
                 </div>
@@ -349,7 +349,7 @@ export const getRaffleDetailView = (raffle) => {
         </div>
 
         <div class="tickets-grid-container">
-            <h3>Selecciona tu níºmero</h3>
+            <h3>Selecciona tu número</h3>
             <div id="tickets-grid"></div>
 
             <div class="grid-actions">
@@ -376,7 +376,7 @@ export const getTicketModal = () => `
                         <input type="text" id="buyer-name" required>
                     </div>
                     <div class="form-group">
-                        <label for="buyer-phone">Níºmero de Celular</label>
+                        <label for="buyer-phone">Número de Celular</label>
                         <input type="tel" id="buyer-phone" required>
                     </div>
                     <div class="form-group">
@@ -405,7 +405,7 @@ export const getTicketModal = () => `
                         <p id="info-buyer-name" class="info-text"></p>
                     </div>
                     <div class="form-group">
-                        <label>Níºmero de Celular</label>
+                        <label>Número de Celular</label>
                         <p id="info-buyer-phone" class="info-text"></p>
                     </div>
                     <div class="form-group">
@@ -816,8 +816,8 @@ export const getSecurityView = (user) => {
                 <input type="email" id="security-email" value="${email}">
             </div>
             <div class="form-group">
-                <label for="security-phone">Editar Níºmero de Celular</label>
-                <input type="tel" id="security-phone" value="${phoneNumber}" placeholder="Introduce tu níºmero de celular">
+                <label for="security-phone">Editar Número de Celular</label>
+                <input type="tel" id="security-phone" value="${phoneNumber}" placeholder="Introduce tu número de celular">
             </div>
 
             <a href="#/manage-guests" class="btn btn-secondary-outline">Gestionar invitados en mis rifas</a>
@@ -854,6 +854,7 @@ export const getCollaboratorsView = () => `
     </div>
 </div>
 `;
+
 
 
 
