@@ -45,7 +45,7 @@ export const getAuthView = () => `
                 </div>
                 <div class="form-group">
                     <label for="password">Contraseí±a</label>
-                    <input type="password" id="password" required placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢">
+                    <input type="password" id="password" required placeholder="••••••••••">
                 </div>
                 <a href="#" id="forgot-password-link" class="forgot-password">Â¿Olvidaste tu contraseí±a?</a>
                 <button type="submit" id="auth-action-btn" class="btn btn-primary">Iniciar Sesión</button>
@@ -65,10 +65,9 @@ export const getAuthView = () => `
                 <span>Iniciar con Google</span>
             </button>
 
-            <p id="auth-toggle-text" class="auth-toggle">Â¿No tienes cuenta? <a href="#" id="auth-toggle-link">Regí­strate</a></p>
+            <p id="auth-toggle-text" class="auth-toggle">¿No tienes cuenta? <a href="#" id="auth-toggle-link">Regí­strate</a></p>
 			<p class="auth-note">
-			  ðŸ’¡ Solo necesitas hacer clic una vez en â€œRegí­strateâ€ para activar los campos de usuario, contraseí±a y el inicio con Google.  
-			  No es necesario volver a hacerlo, a menos que borres tus cookies o datos de navegación (Ctrl + Shift + R en Windows/Linux, âŒ˜ + Shift + R en Mac o desde tu celular limpiando los datos del navegador).
+			  ¡Solo necesitas hacer clic una vez en 'Regístrate' para activar los campos de usuario, contraseña y el inicio con Google. No es necesario volver a hacerlo, a menos que borres tus cookies o datos de navegación (Ctrl + Shift + R en Windows/Linux, ⌘ + Shift + R en Mac o desde tu celular limpiando los datos del navegador).
 			</p>
         </div>
     </div>
@@ -855,5 +854,6 @@ export const getCollaboratorsView = () => `
     </div>
 </div>
 `;
+
 
 
