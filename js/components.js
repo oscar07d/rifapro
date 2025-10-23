@@ -1,3 +1,4 @@
+
 // js/components.js
 
 // LISTA CENTRAL DE Mí‰TODOS DE PAGO
@@ -854,10 +855,3 @@ export const getCollaboratorsView = () => `
     </div>
 </div>
 `;
-
-
-
-
-
-
-
