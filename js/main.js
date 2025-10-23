@@ -178,7 +178,7 @@ async function router() {
 
 			try {
 				if (!user) {
-					appContainer.innerHTML = '<h2>Debes iniciar sesi�n para administrar rifas.</h2>';
+					appContainer.innerHTML = '<h2>Debes iniciar sesión para administrar rifas.</h2>';
 					return;
 				}
 
@@ -222,9 +222,9 @@ async function router() {
 
 						// ?? Si hay ?ticket= en la URL, abre ese modal autom�ticamente
 						if (ticketNumber) {
-							console.log("Abrir modal autom�tico para ticket:", ticketNumber);
+							console.log("Abrir modal automático para ticket:", ticketNumber);
 							openTicketModal(raffleId, ticketNumber).catch(err => {
-								console.error("Error al abrir modal autom�tico:", err);
+								console.error("Error al abrir modal automático:", err);
 							});
 						}
 					}, error => {
@@ -324,8 +324,8 @@ async function router() {
 				});
 
 			} catch (error) {
-				console.error("Error al cargar estad�sticas:", error);
-				appContainer.innerHTML = '<p>Error al cargar la p�gina de estad�sticas.</p>';
+				console.error("Error al cargar estadísticas:", error);
+				appContainer.innerHTML = '<p>Error al cargar la página de estadísticas.</p>';
 			}
 		} else if (isParticipantsList) {
 			// ---------------------- LISTA DE PARTICIPANTES ----------------------
@@ -416,7 +416,7 @@ async function router() {
 			// ---------------------- EXPLORAR ----------------------
 			const user = currentUser;
 			if (!user) {
-				appContainer.innerHTML = "<h2>Debes iniciar sesi�n para ver tus rifas.</h2>";
+				appContainer.innerHTML = "<h2>Debes iniciar sesión para ver tus rifas.</h2>";
 				return;
 			}
 
@@ -432,7 +432,7 @@ async function router() {
 
 				let rafflesHTML = '';
 				if (rafflesSnapshot.empty) {
-					rafflesHTML = '<h2>No tienes rifas para administrar.</h2><p>Crea una nueva o pide que te a�adan como colaborador.</p>';
+					rafflesHTML = '<h2>No tienes rifas para administrar.</h2><p>Crea una nueva o pide que te añadan como colaborador.</p>';
 				} else {
 					// ?? Construir las tarjetas de rifas
 					const raffleCardPromises = rafflesSnapshot.docs.map(async (raffleDoc) => {
@@ -463,7 +463,7 @@ async function router() {
 			// ---------------------- LISTA DE ESTAD�STICAS ----------------------
 			const user = currentUser;
 			if (!user) {
-				appContainer.innerHTML = "<h2>Debes iniciar sesi�n para ver las estad�sticas.</h2>";
+				appContainer.innerHTML = "<h2>Debes iniciar sesión para ver las estadísticas.</h2>";
 				return;
 			}
 
@@ -479,7 +479,7 @@ async function router() {
 
 				let rafflesHTML = '';
 				if (rafflesSnapshot.empty) {
-					rafflesHTML = '<h2>No tienes rifas para ver estad�sticas.</h2>';
+					rafflesHTML = '<h2>No tienes rifas para ver estadísticas.</h2>';
 				} else {
 					rafflesHTML = `<div class="raffles-grid">`;
 					rafflesSnapshot.forEach(raffleDoc => {
@@ -488,7 +488,7 @@ async function router() {
 							<div class="raffle-card-simple">
 								<h3>${raffle.name || 'Rifa sin nombre'}</h3>
 								<p><strong>Premio:</strong> ${raffle.prize || 'No especificado'}</p>
-								<a href="#/statistics/${raffle.id}" class="btn btn-primary">Ver Estad�sticas</a>
+								<a href="#/statistics/${raffle.id}" class="btn btn-primary">Ver Estadísticas</a>
 							</div>
 						`;
 					});
@@ -499,7 +499,7 @@ async function router() {
 				appContainer.innerHTML = getStatisticsListView(rafflesHTML);
 
 			} catch (error) {
-				console.error("Error al obtener rifas para estad�sticas:", error);
+				console.error("Error al obtener rifas para estadísticas:", error);
 				appContainer.innerHTML = '<p>Error al cargar las rifas.</p>';
 			}
 		} else if (path === '/collaborators') {
@@ -508,7 +508,7 @@ async function router() {
 				attachEventListeners('/collaborators');
 			} catch (error) {
 				console.error("Error al cargar la vista de colaboradores:", error);
-				appContainer.innerHTML = '<p>Error al cargar la p�gina de colaboradores.</p>';
+				appContainer.innerHTML = '<p>Error al cargar la página de colaboradores.</p>';
 			}
 		} else if (path === '/edit-profile') {
 		// ---------------------- EDITAR PERFIL ----------------------
@@ -542,7 +542,7 @@ async function router() {
 			appContainer.innerHTML = getSecurityView(fullUserData);
 		} catch (error) {
 			console.error("Error al cargar seguridad:", error);
-			appContainer.innerHTML = '<p>Error al cargar la p�gina de seguridad.</p>';
+			appContainer.innerHTML = '<p>Error al cargar la página de seguridad.</p>';
 		}
 
 	} else {
@@ -812,11 +812,11 @@ async function handleTicketFormSubmit(e) {
 async function handleClearTicket(ticketRef) {
     const ticketSnap = await getDoc(ticketRef);
     if (!ticketSnap.exists()) {
-        alert("Error: No se encontr� el boleto.");
+        alert("Error: No se encontró el boleto.");
         return;
     }
     const ticketData = ticketSnap.data();
-    const isConfirmed = confirm(`�Est�s seguro de que quieres limpiar el boleto #${ticketData.number}? Se borrar�n los datos del comprador y quedar� disponible.`);
+    const isConfirmed = confirm(`¿Estás seguro de que quieres limpiar el boleto #${ticketData.number}? Se borrarán los datos del comprador y quedará disponible.`);
     if (!isConfirmed) return;
 
     try {
@@ -895,7 +895,7 @@ async function handleShare(type, raffleId, ticketNumber) {
         const fileName = `boleto-${ticketData.number}-${(raffleData.name || '').replace(/\s+/g, '-')}.png`;
         const file = new File([blob], fileName, { type: 'image/png' });
 
-        const shareText = `??? Hola ${ticketData.buyerName || ''}! Aqu� est� tu boleto #${ticketData.number} para la rifa "${raffleData.name}". �Mucha suerte!`;
+        const shareText = `👋🏻 Hola ${ticketData.buyerName || ''}! Aquí está tu boleto #${ticketData.number} para la rifa "${raffleData.name}". ¡Mucha suerte!`;
 
         // ?? Compartir
         if (type === 'whatsapp') {
@@ -903,7 +903,7 @@ async function handleShare(type, raffleId, ticketNumber) {
             const viewContainer = document.getElementById('modal-view-container');
             viewContainer.innerHTML = `
                 <div class="ticket-preview-wrapper">
-                    <h4>? �Boleto listo para WhatsApp!</h4>
+                    <h4>👋🏻 ¡Boleto listo para WhatsApp!</h4>
                     <a href="https://wa.me/?text=${encodeURIComponent(shareText)}" 
                        target="_blank" class="btn btn-whatsapp" 
                        style="margin-top:1rem;">Abrir WhatsApp</a>
@@ -931,7 +931,7 @@ async function handleShare(type, raffleId, ticketNumber) {
 // --- MANEJO DE ESTADO DE AUTENTICACIÓN ---
 
 onAuthStateChanged(async (user) => {
-    console.log("?? Estado de autenticaci�n cambi�:", user);
+    console.log("?? Estado de autenticación cambió:", user);
 
     currentUser = user; // guardamos global
 
@@ -947,7 +947,7 @@ onAuthStateChanged(async (user) => {
         await router();
     } else {
         updateUIForLoggedOutUser();
-        console.log("?? Usuario sali�, yendo a login...");
+        console.log("🙋🏻‍♂️ Usuario salió, yendo a login...");
 
         // ?? Evitamos que router intente cargar rifas si no hay user
         if (window.location.hash !== '#/login') {
@@ -1074,7 +1074,7 @@ function attachEventListeners(path) {
                 if (user && user.email) {
                     // **CORREGIDO**: Se llama a sendPasswordResetEmail directamente
                     sendPasswordResetEmail(user.email)
-                        .then(() => { alert('�Correo de restablecimiento enviado!'); })
+                        .then(() => { alert('¡Correo de restablecimiento enviado!'); })
                         .catch((error) => { alert('Hubo un error: ' + error.message); });
                 }
             });
@@ -1103,10 +1103,10 @@ function attachEventListeners(path) {
 
                 try {
                     await Promise.all(updates);
-                    alert('�Cambios guardados con �xito!');
+                    alert('¡Cambios guardados con éxito!');
                 } catch (error) {
                     console.error("Error al guardar cambios:", error);
-                    alert("Error: " + error.message + "\n\nEs posible que necesites volver a iniciar sesi�n para cambiar tu correo.");
+                    alert("Error: " + error.message + "\n\nEs posible que necesites volver a iniciar sesión para cambiar tu correo.");
                 }
             });
         }
@@ -1129,7 +1129,7 @@ function attachEventListeners(path) {
 					await updateProfile(user, { displayName: newName });
 					await updateDoc(doc(db, 'users', user.uid), { name: newName });
 
-					alert('�Perfil actualizado con �xito!');
+					alert('¡Perfil actualizado con éxito!');
 					document.querySelector('#user-info span').textContent = newName;
 					window.location.hash = '/settings';
 				} catch (error) {
@@ -1204,7 +1204,7 @@ function attachEventListeners(path) {
 					cropperModal.style.display = 'none';
 					if (croppieInstance) croppieInstance.destroy();
 
-					alert('�Foto de perfil actualizada!');
+					alert('¡Foto de perfil actualizada!');
 				} catch (error) {
 					console.error("Error al subir la foto:", error);
 					alert("Hubo un error al actualizar la foto.");
@@ -1249,21 +1249,35 @@ function attachEventListeners(path) {
                 const provider = new GoogleAuthProvider();
                 const result = await signInWithPopup(auth, provider);
                 const user = result.user;
+
+                // --- Sincronizar con Firestore ---
                 const userRef = doc(db, 'users', user.uid);
                 const userSnap = await getDoc(userRef);
 
-                await setDoc(doc(db, 'users', user.uid), {
-                    name: user.displayName || user.email,
-                    email: user.email,
-                    photoURL: user.photoURL || '',
-                    provider: 'google'
-                }, { merge: true });
+                if (!userSnap.exists()) {
+                    await setDoc(userRef, {
+                        email: user.email || '',
+                        name: user.displayName || 'Sin nombre',
+                        photoURL: user.photoURL || '',
+                        createdAt: new Date(),
+                        lastLogin: new Date(),
+                        provider: 'google'
+                    });
+                } else {
+                    // Si ya existe, solo actualizamos foto y nombre por si cambió
+                    await updateDoc(userRef, {
+                        name: user.displayName || userSnap.data().name,
+                        photoURL: user.photoURL || userSnap.data().photoURL,
+                        lastLogin: new Date()
+                    });
+                }
 
-                alert(`Bienvenido ${user.displayName || user.email}`);
-                await router();
+                console.log('Inicio de sesión con Google exitoso');
+                router(); // Redirige al home
+
             } catch (error) {
-                console.error('Error al iniciar sesión con Google:', error);
-                alert('Hubo un error al iniciar sesión con Google.');
+                console.error("Error al iniciar sesión con Google:", error);
+                alert('Error al iniciar sesión con Google: ' + error.message);
             }
         }
 
@@ -1279,32 +1293,32 @@ function attachEventListeners(path) {
 				isLogin = !isLogin; // Este c�digo ahora cambia el interruptor que est� arriba
 
 				// Actualizamos el texto de la pantalla
-				document.getElementById('auth-title').innerText = isLogin ? 'Iniciar Sesi�n' : 'Crear una Cuenta';
-				document.getElementById('auth-subtitle').innerText = isLogin ? '�Bienvenido de nuevo!' : 'Es r�pido y f�cil.';
-				document.getElementById('auth-action-btn').innerText = isLogin ? 'Iniciar Sesi�n' : 'Crear Cuenta';
+				document.getElementById('auth-title').innerText = isLogin ? 'Iniciar Sesión' : 'Crear una Cuenta';
+				document.getElementById('auth-subtitle').innerText = isLogin ? '¡Bienvenido de nuevo!' : 'Es rápido y fácil.';
+				document.getElementById('auth-action-btn').innerText = isLogin ? 'Iniciar Sesión' : 'Crear Cuenta';
 
-				// Ocultamos el enlace de "Olvid� contrase�a" en la pantalla de registro
+				// Ocultamos el enlace de "Olvidé contraseña" en la pantalla de registro
 				forgotPasswordLink.style.display = isLogin ? 'block' : 'none';
 
 				document.getElementById('auth-toggle-text').innerHTML = isLogin 
-					? '�No tienes cuenta? <a href="#" id="auth-toggle-link">Reg�strate</a>' 
-					: '�Ya tienes cuenta? <a href="#" id="auth-toggle-link">Inicia Sesi�n</a>';
+					? '¿No tienes cuenta? <a href="#" id="auth-toggle-link">Regístrate</a>' 
+					: '¿Ya tienes cuenta? <a href="#" id="auth-toggle-link">Inicia Sesión</a>';
 
-				// Volvemos a a�adir el listener al nuevo enlace que acabamos de crear
+				// Volvemos a añadir el listener al nuevo enlace que acabamos de crear
 				document.getElementById('auth-toggle-link').addEventListener('click', toggleAuthMode);
 			};
 			toggleLink.addEventListener('click', toggleAuthMode);
 		}
 
-		// L�gica del enlace de "Olvidaste tu contrase�a"
+		// Lógica del enlace de "Olvidaste tu contraseña"
 		if (forgotPasswordLink) {
 			forgotPasswordLink.addEventListener('click', (e) => {
 				e.preventDefault();
-				const email = prompt("Por favor, ingresa tu correo para enviarte el enlace de recuperaci�n:");
+				const email = prompt("Por favor, ingresa tu correo para enviarte el enlace de recuperación:");
 				if (email) {
 					sendPasswordResetEmail(email)
 						.then(() => {
-							alert('�Correo de recuperaci�n enviado! Revisa tu bandeja de entrada.');
+							alert('¡Correo de recuperación enviado! Revisa tu bandeja de entrada.');
 						})
 						.catch((error) => {
 							alert('Error: ' + error.message);
@@ -1381,7 +1395,7 @@ function attachEventListeners(path) {
             });
         }
 
-    // ---------------------- ESTAD�STICAS (detalle) ----------------------
+    // ---------------------- ESTADÍSTICAS (detalle) ----------------------
     } else if (isStatisticsDetail) {
         const participantsBtn = document.getElementById('show-participants-list-btn');
         const participantsContainer = document.getElementById('participants-list-container');
@@ -1504,7 +1518,11 @@ function attachEventListeners(path) {
 
                 for (const raffle of raffles) {
                     if (raffle.collaborators && Array.isArray(raffle.collaborators)) {
-                        for (const colId of raffle.collaborators) {
+                        for (const col of raffle.collaborators) {
+                            const colId = typeof col === 'string' ? col : col.uid; // 👈 fuerza UID string
+
+                            if (!colId) continue; // ignora si está vacío o malformado
+
                             if (!collaboratorMap[colId]) collaboratorMap[colId] = { raffles: [] };
                             collaboratorMap[colId].raffles.push({
                                 id: raffle.id,
@@ -1527,39 +1545,45 @@ function attachEventListeners(path) {
                         const colRef = doc(db, 'users', colId);
                         const colSnap = await getDoc(colRef);
 
-                        let name = 'Desconocido';
-                        let photoURL = null;
-
-                        if (colSnap.exists()) {
-                            const data = colSnap.data();
-                            name = data.name || data.displayName || 'Sin nombre';
-                            photoURL = data.photoURL || null;
-                        }
-
-                        // 🔹 Si Firestore no tiene el usuario, intentamos cargarlo desde Auth (como respaldo)
-                        if (!photoURL || name === 'Desconocido') {
-                            try {
-                                const userRecord = await getDoc(doc(db, 'users', colId));
-                                if (userRecord.exists()) {
-                                    const data = userRecord.data();
-                                    name = data.name || data.displayName || name;
-                                    photoURL = data.photoURL || photoURL;
+                        // Si no existe el documento del usuario, lo tratamos como "fantasma"
+                        if (!colSnap.exists()) {
+                            console.warn(`🕵️ Usuario fantasma detectado: ${colId}. Será eliminado de las rifas.`);
+                            // Limpieza automática de rifas que lo incluyan
+                            for (const r of collaboratorMap[colId].raffles) {
+                                try {
+                                    const raffleRef = doc(db, 'raffles', r.id);
+                                    await updateDoc(raffleRef, {
+                                        collaborators: arrayRemove(colId),
+                                        viewableBy: arrayRemove(colId)
+                                    });
+                                } catch (err) {
+                                    console.error(`Error limpiando colaborador inexistente en rifa ${r.id}:`, err);
                                 }
-                            } catch (err) {
-                                console.warn(`No se encontró info en Auth para ${colId}:`, err);
                             }
+                            // No devolvemos nada — este colaborador no se mostrará
+                            return null;
                         }
 
+                        const data = colSnap.data();
                         return {
                             id: colId,
-                            name,
-                            photoURL,
+                            name: data.name || data.displayName || 'Sin nombre',
+                            photoURL: data.photoURL || null,
                             raffles: collaboratorMap[colId].raffles
                         };
                     })
                 );
 
-                // Construir HTML de la lista
+                // Filtrar los que sí existen
+                const validCollaborators = collaboratorData.filter(Boolean);
+
+                // Si no quedan colaboradores válidos
+                if (validCollaborators.length === 0) {
+                    listContainer.innerHTML = `<p style="text-align:center;color:#777;">No tienes colaboradores válidos registrados.</p>`;
+                    return;
+                }
+
+                // 🔹 Construir HTML de la lista
                 listContainer.innerHTML = collaboratorData.map(col => `
                     <div class="collaborator-card" data-id="${col.id}">
                         <div class="collaborator-header">
@@ -1607,20 +1631,52 @@ function attachEventListeners(path) {
                         const raffleId = btn.dataset.raffle;
                         const colId = btn.dataset.col;
 
+                        if (!colId || colId === 'undefined' || colId === 'null') {
+                            alert('⚠️ No se pudo identificar correctamente al colaborador. Verifica los datos.');
+                            console.warn('Colaborador sin ID válido:', btn);
+                            return;
+                        }
+
                         if (!confirm('⚠️ ¿Deseas eliminar a este colaborador de esta rifa?')) return;
 
                         try {
                             const raffleRef = doc(db, 'raffles', raffleId);
+
+                            // 🔹 Verificamos si el colaborador realmente está en la lista antes de eliminar
+                            const raffleSnap = await getDoc(raffleRef);
+                            if (!raffleSnap.exists()) {
+                                alert('⚠️ Esta rifa ya no existe.');
+                                return;
+                            }
+
+                            const raffleData = raffleSnap.data();
+                            const collaborators = raffleData.collaborators || [];
+                            const viewableBy = raffleData.viewableBy || [];
+
+                            if (!collaborators.includes(colId) && !viewableBy.includes(colId)) {
+                                console.warn('El colaborador ya no estaba en la lista.');
+                                btn.closest('.raffle-item').remove();
+                                return;
+                            }
+
+                            // 🔹 Eliminamos el colaborador correctamente
                             await updateDoc(raffleRef, {
                                 collaborators: arrayRemove(colId),
                                 viewableBy: arrayRemove(colId)
                             });
 
+                            // 🔹 Eliminación visual
                             btn.closest('.raffle-item').remove();
-                            alert('Colaborador eliminado correctamente.');
+
+                            // 🔹 Si el colaborador no tiene más rifas, quitamos su tarjeta
+                            const card = btn.closest('.collaborator-card');
+                            const remainingRaffles = card.querySelectorAll('.raffle-item').length;
+                            if (remainingRaffles === 0) card.remove();
+
+                            alert('✅ Colaborador eliminado correctamente.');
                         } catch (error) {
                             console.error('Error al eliminar colaborador:', error);
-                            alert('Hubo un error al eliminar al colaborador.');
+                            alert('❌ Hubo un error al eliminar al colaborador.');
                         }
                     });
                 });
@@ -1672,7 +1728,7 @@ async function openTicketModal(raffleId, ticketNumber) {
 
         // --- Si no existe, buscar por campo "number" ---
         if (!ticketSnap.exists()) {
-            console.warn("getDoc por ID fall�, buscando por campo 'number'...");
+            console.warn("getDoc por ID falló, buscando por campo 'number'...");
             const ticketsRef = collection(db, "raffles", raffleId, "tickets");
             const q = query(ticketsRef, where("number", "==", parseInt(ticketNumber)));
             const querySnap = await getDocs(q);
@@ -1680,7 +1736,7 @@ async function openTicketModal(raffleId, ticketNumber) {
             if (!querySnap.empty) {
                 ticketSnap = querySnap.docs[0];
             } else {
-                alert("?? No se encontr� el boleto.");
+                alert("😐 No se encontró el boleto.");
                 return;
             }
         }
@@ -1703,8 +1759,8 @@ async function openTicketModal(raffleId, ticketNumber) {
             'paid': 'Pagado Total',
             'available': 'Disponible'
         };
-        infoView.querySelector('#info-buyer-name').textContent = data.buyerName || 'Usa el bot�n "Editar Boleto"';
-        infoView.querySelector('#info-buyer-phone').textContent = data.buyerPhone || 'Usa el bot�n "Editar Boleto"';
+        infoView.querySelector('#info-buyer-name').textContent = data.buyerName || 'Usa el botón "Editar Boleto"';
+        infoView.querySelector('#info-buyer-phone').textContent = data.buyerPhone || 'Usa el botón "Editar Boleto"';
         infoView.querySelector('#info-payment-status').textContent = statusMap[data.status] || data.status;
 
         // --- Mostrar modal ---
@@ -1798,7 +1854,7 @@ async function handleCreateRaffle(e) {
 
     const selectedOptions = document.querySelectorAll('.payment-option.selected');
     if (selectedOptions.length === 0) {
-        alert('Por favor, selecciona al menos un m�todo de pago.');
+        alert('Por favor, selecciona al menos un método de pago.');
         return;
     }
 
@@ -1819,7 +1875,7 @@ async function handleCreateRaffle(e) {
             const brebKey = document.getElementById('bre-b-key').value;
             // Validación específica para Bre-B
             if (!brebKey.startsWith('@')) {
-                alert('La llave de Bre-B debe empezar con "@". Por favor, corr�gela.');
+                alert('La llave de Bre-B debe empezar con "@". Por favor, corrígela.');
                 return; // Detenemos el envío del formulario
             }
             methodInfo.key = brebKey;
@@ -1868,7 +1924,7 @@ async function handleCreateRaffle(e) {
 		// 3. Confirmar batch
 		await batch.commit();
 
-		alert("�Rifa creada con �xito!");
+		alert("¡Rifa creada con éxito!");
 		window.location.hash = `#/raffle/${raffleRef.id}`;
 	} catch (error) {
 		console.error("Error al crear la rifa:", error.code, error.message);
@@ -1877,7 +1933,7 @@ async function handleCreateRaffle(e) {
 }
 
 async function handleDeleteRaffle(raffleId, cardElement) {
-    if (!confirm('?? �Seguro que quieres eliminar esta rifa completa? Esta acci�n no se puede deshacer.')) return;
+    if (!confirm('¿Seguro que quieres eliminar esta rifa completa? Esta acción no se puede deshacer.')) return;
 
     try {
         // ?? Referencia al documento principal de la rifa
@@ -2088,7 +2144,7 @@ async function generateFinalStatusImage(raffleData, settings) {
 
                 <div style="flex-grow:1;display:flex;flex-direction:column;justify-content:center;padding:40px 0;">
                     <h3 style="text-align:center;margin:0 0 40px 0;font-weight:600;font-size:2.5rem;color:white;">
-                        N�meros disponibles!
+                        Números disponibles!
                     </h3>
                     <div style="display:grid;grid-template-columns:repeat(10,1fr);gap:15px;">
                         ${ticketsHTML}
@@ -2097,7 +2153,7 @@ async function generateFinalStatusImage(raffleData, settings) {
 
                 <div style="padding:25px;background:rgba(255,255,255,0.15);border-radius:20px;text-align:left;color:white;">
                     <p style="margin:0 0 20px 0;font-size:1.8rem;text-align:center;color:white;">
-                        <strong>Juega:</strong> ${new Date(raffleData.drawDate).toLocaleDateString('es-CO')} con Loter�a de ${raffleData.lottery}
+                        <strong>Juega:</strong> ${new Date(raffleData.drawDate).toLocaleDateString('es-CO')} con Lotería de ${raffleData.lottery}
                     </p>
                     <div style="
                         display:grid;
@@ -2212,7 +2268,7 @@ async function handleCollaboratorInvite(e, raffleId) {
     const currentUser = auth.currentUser;
 
     if (!email) {
-        alert('Por favor, ingresa un correo electr�nico.');
+        alert('Por favor, ingresa un correo electrónico.');
         return;
     }
 
@@ -2223,7 +2279,7 @@ async function handleCollaboratorInvite(e, raffleId) {
         const snapshot = await getDocs(q);
 
         if (snapshot.empty) {
-            alert('Error: No se encontr� ning�n usuario con ese correo en RifaPro.');
+            alert('Error: No se encontró ningún usuario con ese correo en RifaPro.');
             return;
         }
 
@@ -2233,7 +2289,7 @@ async function handleCollaboratorInvite(e, raffleId) {
 
         // 2?? Evita que el due�o se a�ada a s� mismo
         if (collaboratorId === currentUser.uid) {
-            alert('No puedes a�adirte a ti mismo como colaborador.');
+            alert('No puedes añadirte a ti mismo como colaborador.');
             return;
         }
 
@@ -2253,12 +2309,12 @@ async function handleCollaboratorInvite(e, raffleId) {
             viewableBy: arrayUnion(collaboratorId)
         });
 
-        alert(`✅ ¡${collaboratorInfo.name || email} ha sido a�adido como colaborador!`);
+        alert(`✅ ¡${collaboratorInfo.name || email} ha sido añadido como colaborador!`);
         document.getElementById('collaborator-modal').style.display = 'none';
 
     } catch (error) {
-        console.error("Error al a�adir colaborador:", error);
-        alert('Hubo un error al intentar a�adir al colaborador.');
+        console.error("Error al añadir colaborador:", error);
+        alert('Hubo un error al intentar añadir al colaborador.');
     }
 }
 
@@ -2389,7 +2445,7 @@ function renderParticipantsList(tickets, container, status) {
                 <tr>
                     <th>Boleto</th>
                     <th>Nombre</th>
-                    <th>Tel�fono</th>
+                    <th>Teléfono</th>
                     <th>Estado</th>
                 </tr>
             </thead>
