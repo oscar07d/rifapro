@@ -775,13 +775,13 @@ export const getEditProfileView = (user) => {
 };
 
 export const getAvatarCropperModal = () => `
-    <div id="cropper-modal" class="modal-overlay" style="display: none;">
-        <div class="modal-content">
-            <h4>Ajusta tu foto de perfil</h4>
-            <div id="cropper-container"></div>
-            <div class="modal-buttons">
-                <button id="cancel-crop-btn" class="btn btn-secondary">Cancelar</button>
-                <button id="save-crop-btn" class="btn btn-primary">Guardar Foto</button>
+    <div id="cropper-modal" class="avatar-modal-overlay" style="display: none;">
+        <div class="avatar-modal-content">
+            <h4 class="avatar-modal-title">Ajusta tu foto de perfil</h4>
+            <div id="cropper-container" class="avatar-cropper-container"></div>
+            <div class="avatar-modal-buttons">
+                <button id="cancel-crop-btn" class="avatar-btn avatar-btn-secondary">Cancelar</button>
+                <button id="save-crop-btn" class="avatar-btn avatar-btn-primary">Guardar Foto</button>
             </div>
         </div>
     </div>
