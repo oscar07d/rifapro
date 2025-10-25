@@ -2119,6 +2119,10 @@ body.dark-mode .avatar-cropper-container .cr-slider {
   background: #333 !important;
 }
 
+body.dark-mode .avatar-modal-title {
+  color: #f4f4f5;
+}
+
 /* =========================
    📱 Responsive
    ========================= */
@@ -2585,3 +2589,4 @@ body.dark-mode .ticket:hover {
         height: 30px;
     }
 }
+
