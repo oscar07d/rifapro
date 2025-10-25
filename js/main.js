@@ -1152,69 +1152,86 @@ function attachEventListeners(path) {
 		let croppieInstance = null;
 
 		if (editAvatarBtn && avatarUploadInput) {
-			editAvatarBtn.addEventListener('click', () => avatarUploadInput.click());
+            editAvatarBtn.addEventListener('click', () => avatarUploadInput.click());
 
-			avatarUploadInput.addEventListener('change', (e) => {
-				const file = e.target.files[0];
-				if (!file) return;
+            avatarUploadInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
 
-				const reader = new FileReader();
-				reader.onload = (event) => {
-					if (croppieInstance) croppieInstance.destroy();
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    if (croppieInstance) croppieInstance.destroy();
 
-					cropperModal.style.display = 'flex';
-					croppieInstance = new Croppie(cropperContainer, {
-						viewport: { width: 200, height: 200, type: 'circle' },
-						boundary: { width: 250, height: 250 },
-						enableExif: true
-					});
+                    cropperModal.style.display = 'flex';
 
-					croppieInstance.bind({ url: event.target.result });
-				};
-				reader.readAsDataURL(file);
-			});
+                    // ✅ Ajustes de viewport y boundary equilibrados
+                    croppieInstance = new Croppie(cropperContainer, {
+                        viewport: { width: 240, height: 240, type: 'circle' },
+                        boundary: { width: 320, height: 320 },
+                        enableExif: true,
+                        enableZoom: true,
+                        showZoomer: true,
+                        mouseWheelZoom: 'ctrl', // zoom con ctrl para evitar zoom accidental
+                        enforceBoundary: true    // 🔹 evita recorte fuera del cuadro
+                    });
 
-			cancelCropBtn.addEventListener('click', () => {
-				cropperModal.style.display = 'none';
-				if (croppieInstance) {
-					croppieInstance.destroy();
-					croppieInstance = null;
-				}
-			});
+                    croppieInstance.bind({
+                        url: event.target.result,
+                        orientation: true
+                    });
+                };
+                reader.readAsDataURL(file);
+            });
 
-			saveCropBtn.addEventListener('click', async () => {
-				if (!croppieInstance) return;
-				const blob = await croppieInstance.result({ type: 'blob', size: 'viewport', format: 'png' });
+            cancelCropBtn.addEventListener('click', () => {
+                cropperModal.style.display = 'none';
+                if (croppieInstance) {
+                    croppieInstance.destroy();
+                    croppieInstance = null;
+                }
+            });
 
-				const user = auth.currentUser;
-				if (!user) return;
+            saveCropBtn.addEventListener('click', async () => {
+                if (!croppieInstance) return;
 
-				saveCropBtn.textContent = 'Subiendo...';
-				saveCropBtn.disabled = true;
+                // ✅ Exportar imagen sin recortes parciales ni bordes perdidos
+                const blob = await croppieInstance.result({
+                    type: 'blob',
+                    size: { width: 600, height: 600 }, // más resolución = mejor recorte
+                    format: 'png',
+                    circle: false,
+                    quality: 1,
+                    background: '#fff' // previene transparencia si es PNG
+                });
 
-				try {
-					const fileRef = ref(storage, `avatars/${user.uid}/profile.png`);
-					await uploadBytes(fileRef, blob);
-					const photoURL = await getDownloadURL(fileRef);
+                const user = auth.currentUser;
+                if (!user) return;
 
-					await updateProfile(user, { photoURL });
-					await updateDoc(doc(db, 'users', user.uid), { photoURL });
+                saveCropBtn.textContent = 'Subiendo...';
+                saveCropBtn.disabled = true;
 
-					avatarImg.src = photoURL;
-					cropperModal.style.display = 'none';
-					if (croppieInstance) croppieInstance.destroy();
+                try {
+                    const fileRef = ref(storage, `avatars/${user.uid}/profile.png`);
+                    await uploadBytes(fileRef, blob);
+                    const photoURL = await getDownloadURL(fileRef);
 
-					alert('¡Foto de perfil actualizada!');
-				} catch (error) {
-					console.error("Error al subir la foto:", error);
-					alert("Hubo un error al actualizar la foto.");
-				} finally {
-					saveCropBtn.textContent = 'Guardar Foto';
-					saveCropBtn.disabled = false;
-				}
-			});
-		}
-	}
+                    await updateProfile(user, { photoURL });
+                    await updateDoc(doc(db, 'users', user.uid), { photoURL });
+
+                    avatarImg.src = photoURL;
+                    cropperModal.style.display = 'none';
+                    if (croppieInstance) croppieInstance.destroy();
+
+                    alert('¡Foto de perfil actualizada!');
+                } catch (error) {
+                    console.error("Error al subir la foto:", error);
+                    alert("Hubo un error al actualizar la foto.");
+                } finally {
+                    saveCropBtn.textContent = 'Guardar Foto';
+                    saveCropBtn.disabled = false;
+                }
+            });
+        }}
 
 		if (path === '/login') {
 		const authForm = document.getElementById('auth-form');
