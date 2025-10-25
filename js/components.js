@@ -449,12 +449,12 @@ export const getTicketModal = () => `
                     </div>
                 </div>
                 <div style="width: 45%; background: linear-gradient(45deg, #6a11cb, #2575fc); color: white; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                    <p style="margin: 0; font-size: 1.5rem; font-weight: 500;">TU NíšMERO</p>
+                    <p style="margin: 0; font-size: 1.5rem; font-weight: 500;">TU NÚMERO</p>
                     <p id="template-number" style="margin: 0; font-size: 8rem; font-weight: 700; line-height: 1;"></p>
                 </div>
             </div>
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 20px; padding-top: 15px; border-top: 2px solid #f0f2f5;">
-                 <p style="margin: 0 0 5px 0; font-size: 0.9rem; color: #777; font-weight: 600;">Â¡Mucha Suerte!</p>
+                 <p style="margin: 0 0 5px 0; font-size: 0.9rem; color: #777; font-weight: 600;">¡Mucha Suerte!</p>
                  <div style="display: flex; align-items: center; gap: 5px;">
                     <p style="margin: 0; font-size: 0.75rem; color: #999;">Desarrollado por</p>
                     <svg id="Capa_2" data-name="Capa 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 879.14 85.62" style="height: 16px; opacity: 0.6;">
