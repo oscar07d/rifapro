@@ -923,7 +923,7 @@ async function handleShare(type, raffleId, ticketNumber) {
             }
         }
     } catch (error) {
-        console.error("? Error al generar/compartir imagen:", error);
+        console.error("🤷🏻‍♂️ Error al generar/compartir imagen:", error);
         alert("Hubo un error al procesar la imagen.");
     }
 }
@@ -1166,8 +1166,8 @@ function attachEventListeners(path) {
 
                     // ✅ Ajustes de viewport y boundary equilibrados
                     croppieInstance = new Croppie(cropperContainer, {
-                        viewport: { width: 240, height: 240, type: 'circle' },
-                        boundary: { width: 320, height: 320 },
+                        viewport: { width: 200, height: 200, type: 'circle' },
+                        boundary: { width: 250, height: 250 },
                         enableExif: true,
                         enableZoom: true,
                         showZoomer: true,
@@ -1840,7 +1840,7 @@ async function openTicketModal(raffleId, ticketNumber) {
 
                     await updateDoc(ticketRef, { buyerName, buyerPhone, status });
 
-                    alert('? Boleto actualizado correctamente.');
+                    alert('✅ Boleto actualizado correctamente.');
 
                     // Refrescar vista
                     formView.style.display = 'none';
