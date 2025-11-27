@@ -484,7 +484,7 @@ export const getStatusModal = () => `
                 <div id="prize-options-wrapper" class="form-group" style="display: none;">
                     <label for="status-prize-prefix">Estilo del Tí­tulo del Premio</label>
                     <select id="status-prize-prefix">
-                        <option value="Â¡Gana {premio}">Â¡Gana {premio}!</option>
+                        <option value="¡Gana {premio}">¡Gana {premio}!</option>
                         <option value="Gran Rifa de {premio}">Gran Rifa de {premio}</option>
                         </select>
                 </div>
