@@ -103,6 +103,7 @@ const mainNav = document.getElementById('nav-main');
 // Variable global para cancelar la escucha de tickets en tiempo real
 let currentUser = null;
 let unsubscribeFromTickets = null;
+let currentTicketRef = null;
 
 // --- MANEJO DE RUTAS (ROUTING) ---
 const routes = {
@@ -784,9 +785,12 @@ async function handleTicketFormSubmit(e) {
     const buyerPhone = document.getElementById('buyer-phone').value;
     const status = document.getElementById('payment-status').value;
 
-    const ticketNumber = document.getElementById('modal-ticket-number-form').textContent.replace('Boleto #', '');
+    const ticketNumber = document
+        .getElementById('modal-ticket-number-form')
+        .textContent.replace('Boleto #', '');
+
     const raffleId = window.location.hash.slice(1).split('/')[2];
-    
+
     if (!buyerName || !buyerPhone) {
         alert('El nombre y el celular son obligatorios.');
         return;
@@ -795,11 +799,13 @@ async function handleTicketFormSubmit(e) {
     const dataToUpdate = { buyerName, buyerPhone, status };
 
     try {
-        const ticketRef = db.collection('raffles').doc(raffleId).collection('tickets').doc(ticketNumber);
-        await ticketRef.update(dataToUpdate);
-        
+        // ✅ CORREGIDO AQUÍ
+        const currentTicketRef = doc(db, "raffles", raffleId, "tickets", ticketNumber);
+
+        await updateDoc(currentTicketRef, dataToUpdate);
+
         console.log(`Boleto #${ticketNumber} actualizado correctamente.`);
-        
+
         closeAndResetModal();
 
     } catch (error) {
@@ -808,9 +814,14 @@ async function handleTicketFormSubmit(e) {
     }
 }
 
+document.addEventListener('submit', function (e) {
+    if (e.target && e.target.id === 'ticket-form') {
+        handleTicketFormSubmit(e);
+    }
+});
 
-async function handleClearTicket(ticketRef) {
-    const ticketSnap = await getDoc(ticketRef);
+async function handleClearTicket(currentTicketRef) {
+    const ticketSnap = await getDoc(currentTicketRef);
     if (!ticketSnap.exists()) {
         alert("Error: No se encontró el boleto.");
         return;
@@ -820,7 +831,7 @@ async function handleClearTicket(ticketRef) {
     if (!isConfirmed) return;
 
     try {
-        await updateDoc(ticketRef, {
+        await updateDoc(currentTicketRef, {
             buyerName: '',
             buyerPhone: '',
             status: 'available'
@@ -838,9 +849,9 @@ async function handleShare(type, raffleId, ticketNumber) {
     try {
         // ?? Obtener datos de Firestore (modular)
         const raffleRef = doc(db, "raffles", raffleId);
-        const ticketRef = doc(db, "raffles", raffleId, "tickets", ticketNumber);
+        const currentTicketRef = doc(db, "raffles", raffleId, "tickets", ticketNumber);
 
-        const [raffleSnap, ticketSnap] = await Promise.all([getDoc(raffleRef), getDoc(ticketRef)]);
+        const [raffleSnap, ticketSnap] = await Promise.all([getDoc(raffleRef), getDoc(currentTicketRef)]);
         if (!raffleSnap.exists() || !ticketSnap.exists()) throw new Error("Datos no encontrados");
 
         const raffleData = raffleSnap.data();
@@ -1740,8 +1751,8 @@ async function openTicketModal(raffleId, ticketNumber) {
 
     try {
         // --- Intentar obtener el ticket directamente por ID ---
-        const ticketRef = doc(db, "raffles", raffleId, "tickets", ticketNumber.toString());
-        let ticketSnap = await getDoc(ticketRef);
+        currentTicketRef = doc(db, "raffles", raffleId, "tickets", ticketNumber.toString());
+        let ticketSnap = await getDoc(currentTicketRef);
 
         // --- Si no existe, buscar por campo "number" ---
         if (!ticketSnap.exists()) {
@@ -1813,8 +1824,8 @@ async function openTicketModal(raffleId, ticketNumber) {
         // --- Botones de limpiar boleto ---
         const clearInfoBtn = document.getElementById('clear-ticket-btn-info');
         const clearFormBtn = document.getElementById('clear-ticket-btn-form');
-        if (clearInfoBtn) clearInfoBtn.onclick = () => handleClearTicket(ticketRef);
-        if (clearFormBtn) clearFormBtn.onclick = () => handleClearTicket(ticketRef);
+        if (clearInfoBtn) clearInfoBtn.onclick = () => handleClearTicket(currentTicketRef);
+        if (clearFormBtn) clearFormBtn.onclick = () => handleClearTicket(currentTicketRef);
 
         // --- Botones de compartir ---
         const whatsappInfo = document.getElementById('whatsapp-share-btn-info');
@@ -1827,39 +1838,50 @@ async function openTicketModal(raffleId, ticketNumber) {
         if (genericInfo) genericInfo.onclick = () => handleShare("generic", raffleId, data.number);
         if (genericForm) genericForm.onclick = () => handleShare("generic", raffleId, data.number);
 		
-		// --- GUARDAR CAMBIOS DEL FORMULARIO ---
-        const form = document.getElementById('ticket-form');
-        if (form) {
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault(); // ?? evita recargar la p�gina
-
-                try {
-                    const buyerName = form.querySelector('#buyer-name').value.trim();
-                    const buyerPhone = form.querySelector('#buyer-phone').value.trim();
-                    const status = form.querySelector('#payment-status').value;
-
-                    await updateDoc(ticketRef, { buyerName, buyerPhone, status });
-
-                    alert('✅ Boleto actualizado correctamente.');
-
-                    // Refrescar vista
-                    formView.style.display = 'none';
-                    infoView.style.display = 'block';
-                    infoView.querySelector('#info-buyer-name').textContent = buyerName;
-                    infoView.querySelector('#info-buyer-phone').textContent = buyerPhone;
-                    infoView.querySelector('#info-payment-status').textContent = statusMap[status] || status;
-                } catch (error) {
-                    console.error("? Error al guardar los cambios del boleto:", error);
-                    alert("Hubo un error al guardar los cambios del boleto.");
-                }
-            }, { once: true }); // evita m�ltiples registros
-        }
     } catch (error) {
         console.error("? Error al obtener datos del boleto:", error);
         alert("Hubo un error al obtener los datos del boleto.\n\n" + error.message);
     }
 }
 
+const form = document.getElementById('ticket-form');
+
+if (form) {
+    // 💥 CLAVE: eliminar eventos anteriores
+    const newForm = form.cloneNode(true);
+    form.parentNode.replaceChild(newForm, form);
+
+    newForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        if (!currentTicketRef) {
+            alert("Error: no hay boleto seleccionado.");
+            return;
+        }
+
+        try {
+            const buyerName = newForm.querySelector('#buyer-name').value.trim();
+            const buyerPhone = newForm.querySelector('#buyer-phone').value.trim();
+            const status = newForm.querySelector('#payment-status').value;
+
+            await updateDoc(currentTicketRef, { buyerName, buyerPhone, status });
+
+            alert('✅ Boleto actualizado correctamente.');
+
+            // actualizar vista
+            formView.style.display = 'none';
+            infoView.style.display = 'block';
+
+            infoView.querySelector('#info-buyer-name').textContent = buyerName;
+            infoView.querySelector('#info-buyer-phone').textContent = buyerPhone;
+            infoView.querySelector('#info-payment-status').textContent = statusMap[status] || status;
+
+        } catch (error) {
+            console.error("Error al guardar:", error);
+            alert("Hubo un error al guardar.");
+        }
+    });
+}
 
 async function handleCreateRaffle(e) {
     e.preventDefault();
@@ -1929,8 +1951,8 @@ async function handleCreateRaffle(e) {
 
 		for (let i = 0; i < 100; i++) {
 			const ticketNumber = i.toString().padStart(2, '0');
-			const ticketRef = doc(db, "raffles", raffleRef.id, "tickets", ticketNumber);
-			batch.set(ticketRef, {
+			const currentTicketRef = doc(db, "raffles", raffleRef.id, "tickets", ticketNumber);
+			batch.set(currentTicketRef, {
 				number: ticketNumber,
 				status: "available",
 				buyerName: null,
