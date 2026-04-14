@@ -781,13 +781,14 @@ async function router() {
 async function handleTicketFormSubmit(e) {
     e.preventDefault();
 
-    const buyerName = document.getElementById('buyer-name').value;
-    const buyerPhone = document.getElementById('buyer-phone').value;
+    const buyerName = document.getElementById('buyer-name').value.trim();
+    const buyerPhone = document.getElementById('buyer-phone').value.trim();
     const status = document.getElementById('payment-status').value;
 
     const ticketNumber = document
         .getElementById('modal-ticket-number-form')
-        .textContent.replace('Boleto #', '');
+        .textContent.replace('Boleto #', '')
+        .trim();
 
     const raffleId = window.location.hash.slice(1).split('/')[2];
 
@@ -796,20 +797,63 @@ async function handleTicketFormSubmit(e) {
         return;
     }
 
-    const dataToUpdate = { buyerName, buyerPhone, status };
-
     try {
-        // ✅ CORREGIDO AQUÍ
-        const currentTicketRef = doc(db, "raffles", raffleId, "tickets", ticketNumber);
+        // 🔹 Referencias
+        const ticketRef = doc(db, "raffles", raffleId, "tickets", ticketNumber);
+        const raffleRef = doc(db, "raffles", raffleId);
 
-        await updateDoc(currentTicketRef, dataToUpdate);
+        // 🔥 1. Obtener datos anteriores del ticket
+        const oldSnap = await getDoc(ticketRef);
+        const oldData = oldSnap.exists() ? oldSnap.data() : null;
 
-        console.log(`Boleto #${ticketNumber} actualizado correctamente.`);
+        // 🔥 2. Obtener datos de la rifa (AQUÍ ESTÁ LA CLAVE)
+        const raffleSnap = await getDoc(raffleRef);
+        const raffleData = raffleSnap.exists() ? raffleSnap.data() : {};
+
+        const raffleName = raffleData.name || "Sin nombre";
+        const ownerId = raffleData.ownerId || "desconocido";
+
+        // 🔥 3. Actualizar ticket
+        await updateDoc(ticketRef, {
+            buyerName,
+            buyerPhone,
+            status
+        });
+
+        // 🔥 4. Guardar historial COMPLETO
+        const backupRef = doc(collection(db, "BackUp", raffleId, "historial"));
+
+        await setDoc(backupRef, {
+            raffleId,
+            raffleName, // ✅ ahora sí
+            ownerId,    // ✅ ahora sí
+
+            ticketNumber,
+
+            before: oldData,
+            after: { buyerName, buyerPhone, status },
+
+            editedAt: serverTimestamp(),
+            editedBy: auth.currentUser?.uid || "anonimo" // si tienes auth
+        });
+
+        // 🔥 5. Guardar info de la rifa (backup base)
+        const infoRef = doc(db, "BackUp", raffleId, "info", "data");
+
+        await setDoc(infoRef, {
+            raffleId,
+            raffleName,
+            ownerId,
+            createdAt: raffleData.createdAt || serverTimestamp(),
+            lastUpdated: serverTimestamp()
+        }, { merge: true });
+
+        console.log(`✅ Boleto #${ticketNumber} guardado con backup completo`);
 
         closeAndResetModal();
 
     } catch (error) {
-        console.error("Error al actualizar el boleto:", error);
+        console.error("❌ Error al actualizar el boleto:", error);
         alert("Hubo un error al guardar los cambios.");
     }
 }
